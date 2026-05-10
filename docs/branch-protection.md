@@ -1,8 +1,9 @@
-# Branch Protection Requirements
+# Branch Governance Ruleset Requirements
 
-This document records the branch protection rule that is active on the `main` branch.
-The rule is applied programmatically by `.github/scripts/apply-branch-protection.ps1`
-and verified by `gh api -X GET repos/drmoisan/TMW/branches/main/protection`.
+This document records the repository ruleset and repository merge settings that must
+govern the `main` branch. The configuration is applied programmatically by
+`.github/scripts/apply-branch-protection.ps1`, which now manages a repository ruleset
+plus the repository-level PR merge-method setting.
 
 ## Required status checks
 
@@ -18,38 +19,50 @@ before a pull request can merge to `main`:
 - `stage-6-contract`
 - `stage-7-integration`
 
-Additional protection rule settings:
+Additional governance settings:
 
-- Require pull request reviews before merging: 1 approving review.
-- Dismiss stale reviews on new commits.
-- Require linear history.
-- Require branches to be up to date before merging.
-- Restrict who can push to matching branches: empty allowlist (no direct pushes).
+- Pull request reviews are **not** required by the repository ruleset.
+- Merge commits are explicitly allowed for pull requests via the repository setting
+  `allow_merge_commit=true`.
+- Linear-history enforcement is **not** enabled, so merge commits are permitted.
+- Branches must be up to date before merging because the ruleset requires strict
+  status checks.
+- The legacy branch-based protection rule for `main` is deleted after the ruleset is
+  applied.
 
-## Manual application command (gh CLI)
+## Manual application commands (gh CLI)
 
-The following command applies the rule once `gh auth login` is complete:
+The following commands apply the desired state once `gh auth login` is complete:
 
 ```bash
-gh api -X PUT repos/{owner}/{repo}/branches/main/protection \
-  -F required_status_checks.strict=true \
-  -F 'required_status_checks.contexts[]=tier-classification' \
-  -F 'required_status_checks.contexts[]=stage-1-format' \
-  -F 'required_status_checks.contexts[]=stage-2-lint' \
-  -F 'required_status_checks.contexts[]=stage-3-typecheck' \
-  -F 'required_status_checks.contexts[]=stage-4-architecture' \
-  -F 'required_status_checks.contexts[]=stage-5-test' \
-  -F 'required_status_checks.contexts[]=stage-6-contract' \
-  -F 'required_status_checks.contexts[]=stage-7-integration' \
-  -F enforce_admins=true \
-  -F required_pull_request_reviews.required_approving_review_count=1 \
-  -F required_pull_request_reviews.dismiss_stale_reviews=true \
-  -F required_linear_history=true \
-  -F restrictions=null
+gh api -X PATCH repos/{owner}/{repo} \
+  -F allow_merge_commit=true
+
+gh api -X DELETE repos/{owner}/{repo}/branches/main/protection
+
+gh api -X POST repos/{owner}/{repo}/rulesets \
+  -f name='Main branch PR governance' \
+  -f target='branch' \
+  -f enforcement='active' \
+  -f 'conditions[ref_name][include][]=refs/heads/main' \
+  -f 'rules[][type]=required_status_checks' \
+  -f 'rules[][parameters][strict_required_status_checks_policy]=true' \
+  -f 'rules[][parameters][required_status_checks][][context]=tier-classification' \
+  -f 'rules[][parameters][required_status_checks][][context]=stage-1-format' \
+  -f 'rules[][parameters][required_status_checks][][context]=stage-2-lint' \
+  -f 'rules[][parameters][required_status_checks][][context]=stage-3-typecheck' \
+  -f 'rules[][parameters][required_status_checks][][context]=stage-4-architecture' \
+  -f 'rules[][parameters][required_status_checks][][context]=stage-5-test' \
+  -f 'rules[][parameters][required_status_checks][][context]=stage-6-contract' \
+  -f 'rules[][parameters][required_status_checks][][context]=stage-7-integration'
 ```
 
 ## Application record
 
 Status: AUTOMATED. Apply: `pwsh -NoProfile -File .github/scripts/apply-branch-protection.ps1`.
-Verify: `gh api -X GET repos/drmoisan/TMW/branches/main/protection` and confirm each of
-the eight contexts is present in `required_status_checks.contexts`.
+Verify:
+
+- `gh api -X GET repos/drmoisan/TMW` and confirm `allow_merge_commit` is `true`
+- `gh api -X GET repos/drmoisan/TMW/branches/main/protection` returns `404`
+- `gh api -X GET repos/drmoisan/TMW/rulesets` includes the active `Main branch PR governance` ruleset
+- `gh api -X GET repos/drmoisan/TMW/rules/branches/main` shows the eight required status checks

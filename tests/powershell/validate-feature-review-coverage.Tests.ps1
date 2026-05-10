@@ -189,7 +189,7 @@ end_of_record
         BeforeAll {
             # Build canonical artifact text fixtures once for reuse. Use here-strings
             # so no temp files outside $TestDrive are created.
-            $script:Folder    = '2026-05-09-establish-repository-foundation-1'
+            $script:Folder = '2026-05-09-establish-repository-foundation-1'
             $script:Timestamp = '2026-05-09T18-00'
             $script:PolicyDir = "docs/features/active/$script:Folder"
 
@@ -305,13 +305,29 @@ feature-audit-path: $script:PolicyDir/feature-audit.$script:Timestamp.md
         }
 
         It 'rejects a remediation-inputs path outside docs/features/active' {
-            $output = @"
-policy-audit-path: $script:PolicyDir/policy-audit.$script:Timestamp.md
-code-review-path: $script:PolicyDir/code-review.$script:Timestamp.md
-feature-audit-path: $script:PolicyDir/feature-audit.$script:Timestamp.md
-remediation-inputs-path: artifacts/remediation-inputs.$script:Timestamp.md
+            $fixRoot = Join-Path $TestDrive 'repo-remediation-outside-scope'
+            $fixFolder = Join-Path $fixRoot 'docs/features/active/fixture-feature-issue1'
+            New-Item -ItemType Directory -Path $fixFolder -Force | Out-Null
+
+            $fixTs = '2026-05-09T18-00'
+            Set-Content -Path (Join-Path $fixFolder "policy-audit.$fixTs.md") -Value '# Policy Audit'
+            Set-Content -Path (Join-Path $fixFolder "code-review.$fixTs.md") -Value '# Code Review'
+            Set-Content -Path (Join-Path $fixFolder "feature-audit.$fixTs.md") -Value '# Feature Audit'
+
+            Push-Location -LiteralPath $fixRoot
+            try {
+                $output = @"
+policy-audit-path: docs/features/active/fixture-feature-issue1/policy-audit.$fixTs.md
+code-review-path: docs/features/active/fixture-feature-issue1/code-review.$fixTs.md
+feature-audit-path: docs/features/active/fixture-feature-issue1/feature-audit.$fixTs.md
+remediation-inputs-path: artifacts/remediation-inputs.$fixTs.md
 "@
-            $r = Invoke-FeatureReviewCoverageValidation -RawPayload (New-Payload -Output $output)
+                $r = Invoke-FeatureReviewCoverageValidation -RawPayload (New-Payload -Output $output)
+            }
+            finally {
+                Pop-Location
+            }
+
             $r.Ok | Should -BeFalse
             $r.Message | Should -Match 'remediation-inputs-path .* is outside the required docs/features/active'
         }
@@ -343,7 +359,7 @@ feature-audit-path: $ghostFolder/feature-audit.$ghostTs.md
                 New-Item -ItemType Directory -Path $script:FixFolder -Force | Out-Null
                 $script:FixTs = '2026-05-09T18-00'
                 $script:PolicyAuditFix = "$script:FixFolder/policy-audit.$script:FixTs.md"
-                $script:CodeReviewFix  = "$script:FixFolder/code-review.$script:FixTs.md"
+                $script:CodeReviewFix = "$script:FixFolder/code-review.$script:FixTs.md"
                 $script:FeatureAuditFix = "$script:FixFolder/feature-audit.$script:FixTs.md"
 
                 $policyText = @"

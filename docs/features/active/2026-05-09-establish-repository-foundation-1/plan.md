@@ -1087,18 +1087,17 @@ The trio: `.claude/rules/typescript.md`, `.github/instructions/typescript-code-c
 
 ---
 
-### Phase 2g — Branch protection documentation (AC #23)
+### Phase 2g — Main-branch governance documentation (AC #23)
 
 - [x] [P2g-T1] Create `docs/branch-protection.md` with the body shown below. Maps AC #23. Gate: no toolchain gate (markdown only).
 
   Full file body:
 
   ```markdown
-  # Branch Protection Requirements
+  # Branch Governance Ruleset Requirements
 
-  This document records the branch protection rule that must be active on the `main` branch.
-  Application of the rule via the GitHub API is recorded as a manual follow-up because the
-  executor session does not have authenticated `gh` CLI access.
+  This document records the repository ruleset and repository merge settings that must govern
+  the `main` branch. Application is handled by `.github/scripts/apply-branch-protection.ps1`.
 
   ## Required status checks
 
@@ -1114,41 +1113,48 @@ The trio: `.claude/rules/typescript.md`, `.github/instructions/typescript-code-c
   - `stage-6-contract`
   - `stage-7-integration`
 
-  Additional protection rule settings:
+  Additional governance settings:
 
-  - Require pull request reviews before merging: 1 approving review.
-  - Dismiss stale reviews on new commits.
-  - Require linear history.
-  - Require branches to be up to date before merging.
-  - Restrict who can push to matching branches: empty allowlist (no direct pushes).
+  - Pull request reviews are not required.
+  - Merge commits are allowed for pull requests.
+  - Linear history is not required.
+  - Branches must be up to date before merging because strict status checks are required.
+  - The legacy branch-based protection rule for `main` is deleted after the ruleset is applied.
 
-  ## Manual application command (gh CLI)
+  ## Manual application commands (gh CLI)
 
-  The following command applies the rule once `gh auth login` is complete:
+  The following commands apply the ruleset once `gh auth login` is complete:
 
   ```bash
-  gh api -X PUT repos/{owner}/{repo}/branches/main/protection \
-    -F required_status_checks.strict=true \
-    -F 'required_status_checks.contexts[]=tier-classification' \
-    -F 'required_status_checks.contexts[]=stage-1-format' \
-    -F 'required_status_checks.contexts[]=stage-2-lint' \
-    -F 'required_status_checks.contexts[]=stage-3-typecheck' \
-    -F 'required_status_checks.contexts[]=stage-4-architecture' \
-    -F 'required_status_checks.contexts[]=stage-5-test' \
-    -F 'required_status_checks.contexts[]=stage-6-contract' \
-    -F 'required_status_checks.contexts[]=stage-7-integration' \
-    -F enforce_admins=true \
-    -F required_pull_request_reviews.required_approving_review_count=1 \
-    -F required_pull_request_reviews.dismiss_stale_reviews=true \
-    -F required_linear_history=true \
-    -F restrictions=null
+  gh api -X PATCH repos/{owner}/{repo} \
+    -F allow_merge_commit=true
+
+  gh api -X DELETE repos/{owner}/{repo}/branches/main/protection
+
+  gh api -X POST repos/{owner}/{repo}/rulesets \
+    -f name='Main branch PR governance' \
+    -f target='branch' \
+    -f enforcement='active' \
+    -f 'conditions[ref_name][include][]=refs/heads/main' \
+    -f 'rules[][type]=required_status_checks' \
+    -f 'rules[][parameters][strict_required_status_checks_policy]=true' \
+    -f 'rules[][parameters][required_status_checks][][context]=tier-classification' \
+    -f 'rules[][parameters][required_status_checks][][context]=stage-1-format' \
+    -f 'rules[][parameters][required_status_checks][][context]=stage-2-lint' \
+    -f 'rules[][parameters][required_status_checks][][context]=stage-3-typecheck' \
+    -f 'rules[][parameters][required_status_checks][][context]=stage-4-architecture' \
+    -f 'rules[][parameters][required_status_checks][][context]=stage-5-test' \
+    -f 'rules[][parameters][required_status_checks][][context]=stage-6-contract' \
+    -f 'rules[][parameters][required_status_checks][][context]=stage-7-integration'
   ```
 
-  ## Manual follow-up record
+  ## Verification record
 
-  Status: PENDING (manual). Owner: repo administrator. Apply once authenticated `gh` CLI
-  access is available. Verification: re-run the command with `-X GET` and confirm each
-  context appears in the response payload.
+  Verify with:
+
+  - `gh api -X GET repos/{owner}/{repo}` and confirm `allow_merge_commit=true`
+  - `gh api -X GET repos/{owner}/{repo}/branches/main/protection` and confirm a `404`
+  - `gh api -X GET repos/{owner}/{repo}/rulesets` and confirm the active `Main branch PR governance` ruleset exists
   ```
 
 - [x] [P2g-T2] Append a `Manual follow-ups` section to `docs/features/active/2026-05-09-establish-repository-foundation-1/issue.md` listing branch-protection application as PENDING with reference to `docs/branch-protection.md`. Mirror the same note to `evidence/issue-updates/issue-1.<timestamp>.md` per the issue-update mirroring convention with fields `Timestamp:`, body text, `PostedAs: body`. Maps AC #23. Gate: no toolchain gate (markdown only).
