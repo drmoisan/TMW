@@ -218,18 +218,27 @@ Rules for functions:
 
 ---
 
+## Module Rigor Tiers
+
+Module rigor tiers (T1–T4) and the uniform-versus-tier-dependent gate matrix are defined in `.github/instructions/quality-tiers.instructions.md`. Every project must be classified in `quality-tiers.yml` at repo root.
+
+Coverage thresholds are uniform across all tiers per `.github/instructions/quality-tiers.instructions.md`: line coverage >= 85% and branch coverage >= 75%. Tier-specific lower coverage thresholds are not used in this repository.
+
 ## 8. After Making Changes
 
 ### 1. Run the full toolchain (no shortcuts)
 
-You **must** run the full toolchain in this exact order and repeat it until everything passes:
+You **must** run the full seven-stage toolchain in this exact order and repeat it until everything passes:
 
 1. **Formatting**
 2. **Linting**
 3. **Type checking**
-4. **Testing**
+4. **Architecture-boundary tests** (e.g., dependency-cruiser, NetArchTest.Rules)
+5. **Unit tests** (including property-based tests where applicable per quality-tiers)
+6. **Contract / schema compatibility checks**
+7. **Integration tests**
 
-Treat these four steps as one **toolchain pass**.
+Treat these seven steps as one **toolchain pass**. Mutation testing, golden tests, and benchmark regression run in pre-merge or nightly pipelines, not the per-commit loop.
 
 1. Run the formatter on the relevant files (e.g. Black).
 

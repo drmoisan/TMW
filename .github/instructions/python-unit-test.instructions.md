@@ -21,7 +21,7 @@ If there is any conflict between these documents, halt and notify the user.
 - **Testing framework**
   - All Python unit tests must use **Pytest** as the test runner and framework.
 - **Coverage expectation**
-  - All new Python logic must be covered by Pytest tests that follow the general unit test policy.
+  - All new Python logic must be covered by Pytest tests with line coverage >= 85% and branch coverage >= 75%, uniform across all tiers per `.github/instructions/quality-tiers.instructions.md`. Coverage regression on changed lines is a blocking finding.
 
 ---
 

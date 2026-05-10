@@ -1,0 +1,14 @@
+name: Test
+description: Unit + property test stage. Vitest wiring added in Prompt B1.
+runs:
+  using: composite
+  steps:
+    - name: Vitest (when wired)
+      shell: pwsh
+      run: |
+        if ((Test-Path package.json) -and ((Get-Content package.json -Raw) -match '"test"\s*:')) {
+          npm ci --no-audit --no-fund
+          npm test
+        } else {
+          Write-Host "Test stage: no test script wired yet; skipping (no-op)."
+        }

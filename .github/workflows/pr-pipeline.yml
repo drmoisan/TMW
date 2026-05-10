@@ -1,0 +1,57 @@
+name: PR Pipeline
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tier-classification:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: pwsh -NoProfile -File .github/scripts/validate-quality-tiers.ps1
+  stage-1-format:
+    runs-on: windows-latest
+    needs: [tier-classification]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/format
+  stage-2-lint:
+    runs-on: windows-latest
+    needs: [stage-1-format]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/lint
+  stage-3-typecheck:
+    runs-on: windows-latest
+    needs: [stage-2-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/typecheck
+  stage-4-architecture:
+    runs-on: windows-latest
+    needs: [stage-3-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/architecture
+  stage-5-test:
+    runs-on: windows-latest
+    needs: [stage-4-architecture]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/test
+  stage-6-contract:
+    runs-on: windows-latest
+    needs: [stage-5-test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/contract
+  stage-7-integration:
+    runs-on: windows-latest
+    needs: [stage-6-contract]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/integration

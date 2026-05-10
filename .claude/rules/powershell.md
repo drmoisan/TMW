@@ -60,8 +60,8 @@ Introduce the smallest seam that enables reliable mocking. Apply these options i
 - Write focused tests exercising a single function or behavior.
 - Mock sparingly; prefer real code paths.
 - No external dependencies in unit tests.
-- Repository-wide line coverage must remain >= 80%.
-- Any new module, class, or method must reach >= 90% coverage.
+- Line coverage must remain >= 85% across all tiers (T1–T4) per `.claude/rules/quality-tiers.md`.
+- Branch coverage must remain >= 75% across all tiers (T1–T4).
 - Coverage regression on changed lines is a blocking finding.
 
 ### Deterministic Test Requirements

@@ -13,7 +13,7 @@ This rule file summarizes the Python-specific policies for this repository.
 1. **Formatting — Black**: All Python code must be formatted with Black (default settings). Command: `poetry run black .`
 2. **Linting — Ruff**: Python code must pass Ruff using the project configuration. Command: `poetry run ruff check .` Suppressions require pre-authorization per `python-suppressions.instructions.md` or explicit user approval.
 3. **Type Checking — Pyright**: All Python code must be fully type-annotated and pass Pyright. Avoid `Any` unless unavoidable and commented. Command: `poetry run pyright`
-4. **Testing — Pytest**: All tests use Pytest. New logic must have test coverage >= 90%. Command: `poetry run pytest --cov --cov-report=term-missing`
+4. **Testing — Pytest**: All tests use Pytest. Coverage thresholds are uniform across tiers per `.claude/rules/quality-tiers.md` (>= 85% line, >= 75% branch). Command: `poetry run pytest --cov --cov-branch --cov-report=term-missing`
 
 Run the toolchain in order: format → lint → type-check → test. Restart from step 1 if any step fails or changes files. Do not stop the loop until all four steps complete without errors in a single pass.
 
@@ -85,8 +85,8 @@ Do not introduce generic service-locator patterns or heavy dependency-injection 
 - No sleeps, retries, or timing hacks.
 - Organize tests to mirror code structure (for example, `tests/test_module_name.py` for `module_name.py`).
 - No external dependencies (network, databases, external processes, runtime filesystem temp files) in unit tests.
-- Repository-wide line coverage must remain >= 80%.
-- Any new module, class, or method must reach >= 90% coverage.
+- Line coverage must remain >= 85% across all tiers (T1–T4) per `.claude/rules/quality-tiers.md`.
+- Branch coverage must remain >= 75% across all tiers (T1–T4).
 - Coverage regression on changed lines is a blocking finding.
 
 ## Prohibited Behaviors

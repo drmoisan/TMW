@@ -1,0 +1,18 @@
+name: Typecheck
+description: TypeScript type-check stage. Scoped to existing tsconfig; .NET nullable analysis added when backend exists.
+runs:
+  using: composite
+  steps:
+    - name: tsc --noEmit
+      shell: pwsh
+      run: |
+        if (Test-Path tsconfig.json) {
+          npm ci --no-audit --no-fund
+          if ((Get-Content package.json -Raw) -match '"typecheck"\s*:') {
+            npm run typecheck
+          } else {
+            npx tsc --noEmit
+          }
+        } else {
+          Write-Host "Typecheck stage: no tsconfig.json; skipping (no-op)."
+        }

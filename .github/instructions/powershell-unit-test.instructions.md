@@ -67,3 +67,7 @@ If there is any conflict between these documents, halt and notify the user.
 - Do **not** substitute other test runners for PowerShell work without explicit approval.
 
 This file defines **how** PowerShell tests are written and executed; the general code change policy defines **when** to run the toolchain and how strictly to enforce it.
+
+## Coverage Expectation
+
+All new PowerShell logic must be covered by Pester tests with line coverage >= 85% and branch coverage >= 75%, uniform across all tiers per `.github/instructions/quality-tiers.instructions.md`. Coverage regression on changed lines is a blocking finding.

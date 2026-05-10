@@ -79,3 +79,7 @@ The MCP server functions above are the approved toolchain contract for agents.
 Rerun the loop from step 1 if any step changes code or fails.
 
 > Install prerequisites once with `pwsh -NoProfile -ExecutionPolicy Bypass -Command "Import-Module ./scripts/powershell/PoshQC; Install-PoshQCTools"` (installs PSScriptAnalyzer + Pester to CurrentUser).
+
+## Coverage Thresholds
+
+Coverage thresholds follow the uniform tier rule defined in `.github/instructions/quality-tiers.instructions.md`: line coverage >= 85% and branch coverage >= 75% across all tiers (T1–T4). Tool references (Invoke-Formatter, PSScriptAnalyzer, Pester) are unchanged by this clause.

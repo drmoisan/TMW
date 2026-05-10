@@ -158,6 +158,66 @@ function Get-LcovRepoCoverage {
     return [math]::Round(($totalHit * 100.0) / $totalFound, 2)
 }
 
+function Get-LcovBranchCoverage {
+    # Parses LCOV branch counters (BRF: branches found, BRH: branches hit) and returns a percent.
+    # LCOV emits one BRF/BRH line per source file in the report; we sum across the file to compute
+    # repo-wide branch coverage. Returns $null when the artifact is absent or when no branch
+    # information is recorded (BRF total = 0).
+    [OutputType([Nullable[double]])]
+    param([string]$Path)
+
+    $file = Get-ArtifactFileContent -Path $Path
+    if (-not $file.Exists) { return $null }
+
+    $totalFound = 0
+    $totalHit = 0
+    foreach ($line in $file.Lines) {
+        if ($line.StartsWith('BRF:')) {
+            $totalFound += [int]($line.Substring(4))
+        }
+        elseif ($line.StartsWith('BRH:')) {
+            $totalHit += [int]($line.Substring(4))
+        }
+    }
+    if ($totalFound -le 0) { return $null }
+    return [math]::Round(($totalHit * 100.0) / $totalFound, 2)
+}
+
+function Get-JacocoBranchCoverage {
+    [OutputType([Nullable[double]])]
+    param([string]$Path)
+
+    $file = Get-ArtifactFileContent -Path $Path
+    if (-not $file.Exists) { return $null }
+
+    [xml]$doc = $file.Text
+    $counters = $doc.SelectNodes('//counter[@type="BRANCH"]')
+    if (-not $counters -or $counters.Count -eq 0) { return $null }
+
+    $missed = 0
+    $covered = 0
+    foreach ($counter in $counters) {
+        $missed += [int]$counter.missed
+        $covered += [int]$counter.covered
+    }
+    $total = $missed + $covered
+    if ($total -le 0) { return $null }
+    return [math]::Round(($covered * 100.0) / $total, 2)
+}
+
+function Get-LanguageBranchCoverage {
+    [OutputType([Nullable[double]])]
+    param([string]$Language)
+
+    switch ($Language) {
+        'TypeScript' { return Get-LcovBranchCoverage -Path 'coverage/lcov.info' }
+        'Python' { return Get-LcovBranchCoverage -Path 'artifacts/python/lcov.info' }
+        'PowerShell' { return Get-JacocoBranchCoverage -Path 'artifacts/pester/powershell-coverage.xml' }
+        'CSharp' { return Get-JacocoBranchCoverage -Path 'artifacts/csharp/coverage.xml' }
+    }
+    return $null
+}
+
 function Get-JacocoRepoCoverage {
     [OutputType([Nullable[double]])]
     param([string]$Path)
@@ -200,7 +260,8 @@ function Test-LanguageCoverageRow {
     param(
         [string]$AuditText,
         [string]$Language,
-        [Nullable[double]]$RepoWidePct
+        [Nullable[double]]$RepoWidePct,
+        [Nullable[double]]$BranchPct
     )
 
     $languageLabelMap = @{
@@ -249,13 +310,21 @@ function Test-LanguageCoverageRow {
         }
     }
 
-    if ($null -ne $RepoWidePct -and $RepoWidePct -lt 80.0) {
+    if ($null -ne $RepoWidePct -and $RepoWidePct -lt 85.0) {
         $failLines = $coverageLines | Where-Object { $_ -match '\bFAIL\b' }
         if (-not $failLines -or $failLines.Count -eq 0) {
             return @{
                 Ok     = $false
-                Reason = ("{0} repo-wide coverage is {1}% (below the 80% floor) but the policy-audit contains no FAIL verdict on a coverage row for {0}." -f $Language, $RepoWidePct)
+                Reason = ("{0} repo-wide coverage is {1}% (below the 85% line coverage floor) but the policy-audit contains no FAIL verdict on a coverage row for {0}." -f $Language, $RepoWidePct)
             }
+        }
+    }
+
+    $BranchFloor = 75.0
+    if ($null -ne $BranchPct -and $BranchPct -lt $BranchFloor) {
+        return @{
+            Ok     = $false
+            Reason = ("{0} branch coverage is {1}% (below the 75% branch coverage floor); policy-audit must record FAIL on the corresponding coverage row." -f $Language, $BranchPct)
         }
     }
 
@@ -362,7 +431,8 @@ function Invoke-FeatureReviewCoverageValidation {
     $coverageFailures = [System.Collections.Generic.List[string]]::new()
     foreach ($lang in $changedLanguages.Keys) {
         $repoPct = Get-LanguageRepoCoverage -Language $lang
-        $result = Test-LanguageCoverageRow -AuditText $policyAuditText -Language $lang -RepoWidePct $repoPct
+        $branchPct = Get-LanguageBranchCoverage -Language $lang
+        $result = Test-LanguageCoverageRow -AuditText $policyAuditText -Language $lang -RepoWidePct $repoPct -BranchPct $branchPct
         if (-not $result.Ok) {
             $coverageFailures.Add($result.Reason)
         }

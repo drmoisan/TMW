@@ -1,0 +1,14 @@
+name: Format
+description: Repository format check stage. Currently scoped to existing TS scaffold (Prettier).
+runs:
+  using: composite
+  steps:
+    - name: Prettier check (existing TS files only)
+      shell: pwsh
+      run: |
+        if (Test-Path package.json) {
+          npm ci --no-audit --no-fund
+          npx prettier --check "**/*.ts" "**/*.json" "**/*.md" --ignore-path .gitignore
+        } else {
+          Write-Host "Format stage: no package.json present; skipping (no-op)."
+        }

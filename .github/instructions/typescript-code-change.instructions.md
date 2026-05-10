@@ -42,10 +42,10 @@ These are the required tools for TypeScript code in this repo:
    - Avoid `any` (implicit or explicit). Prefer `unknown` plus narrowing.
    - Approved command: `npm run typecheck`
 
-4. **Testing — Jest**
+4. **Testing — Vitest**
 
-   - TypeScript unit tests must pass Jest.
-   - Approved command: `npm run test:unit`
+   - TypeScript unit tests must pass Vitest.
+   - Approved command: `npm run test`
 
 > **Important:** The general code change policy requires the full toolchain loop: formatting → linting → type checking → testing.
 
@@ -73,10 +73,10 @@ These refine the general design principles for TypeScript code.
 4. **Separation of concerns**
 
    - Keep pure logic separate from:
-     - VS Code extension APIs
+     - Office.js, Microsoft Graph SDK, and other host-bound APIs
      - filesystem/network I/O
      - UI/presentation wiring
-   - Write core logic so it can be unit tested without VS Code host processes.
+   - Write core logic so it can be unit tested without the Outlook host runtime.
 
 ---
 
@@ -141,7 +141,7 @@ All rules for ESLint and TypeScript suppressions are defined in:
 1. **Project organization**
 
    - Follow the repository’s established folder and responsibility layout when adding new code.
-   - Keep VS Code extension API wiring and other I/O boundaries thin; push complex logic into pure, testable helpers/services.
+   - Keep Outlook add-in API wiring and other I/O boundaries thin; push complex logic into pure, testable helpers/services.
 
 2. **File naming**
 
@@ -181,7 +181,7 @@ All rules for ESLint and TypeScript suppressions are defined in:
 
 ---
 
-## 9. UI/UX and Lifecycle Hygiene (VS Code Extension Context)
+## 9. UI/UX and Lifecycle Hygiene (Outlook Add-in Lifecycle)
 
 1. **UI layering**
 
@@ -201,3 +201,27 @@ All rules for ESLint and TypeScript suppressions are defined in:
 - Prefer lazy-loading heavy dependencies when it materially reduces startup/activation cost.
 - Debounce or batch high-frequency events (for example, configuration changes) to avoid thrash.
 - Track resource lifetimes to prevent leaks (timers, listeners, file watchers, disposables).
+
+---
+
+## 11. ESLint Stack
+
+- Require `typescript-eslint` strict-type-checked + stylistic-type-checked rule sets.
+- Enable type-aware parsing (`parserOptions.project = true`).
+- Required plugins: `eslint-plugin-office-addins`, `eslint-plugin-promise`, `eslint-plugin-security`, `eslint-plugin-import`.
+- Error-level rules: `no-floating-promises`, `no-misused-promises`, all `no-unsafe-*`.
+- Add a `no-restricted-syntax` rule banning `Date.now`, `setTimeout`, `setInterval`, and `Math.random` outside an explicit infrastructure allowlist.
+
+## 12. Architecture Boundaries
+
+Layer rules and the No-COM architecture assertions are defined in `.github/instructions/architecture-boundaries.instructions.md`. The TypeScript enforcement tool is `dependency-cruiser` with configuration file `.dependency-cruiser.cjs`.
+
+## 13. Runtime Determinism
+
+- `Date`, `Math.random`, and `setTimeout` access must flow through an injected `Clock` / `Random` interface.
+- Tests use Vitest fake timers (`vi.useFakeTimers()`).
+- Prefer `await flushPromises()` over `setTimeout(0)` for awaiting micro-tasks.
+
+## 14. Coverage Thresholds
+
+Coverage thresholds follow the uniform tier rule defined in `.github/instructions/quality-tiers.instructions.md`: line coverage >= 85% and branch coverage >= 75% across all tiers (T1–T4). Tier-specific lower thresholds are not used. Coverage regression on changed lines is a blocking finding.
