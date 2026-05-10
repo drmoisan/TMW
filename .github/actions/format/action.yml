@@ -1,14 +1,9 @@
 name: Format
-description: Repository format check stage. Currently scoped to existing TS scaffold (Prettier).
+description: Repository format check stage. No-op until later prompts wire prettier into the TS scaffold (per Prompt A0 Phase 2 contract).
 runs:
   using: composite
   steps:
-    - name: Prettier check (existing TS scaffold only)
+    - name: Format stage (no-op)
       shell: pwsh
       run: |
-        if (Test-Path package.json) {
-          npm ci --no-audit --no-fund
-          npx prettier --check "src/**/*.ts" --ignore-path .gitignore
-        } else {
-          Write-Host "Format stage: no package.json present; skipping (no-op)."
-        }
+        Write-Host "Format stage: no-op. Per Prompt A0, format-stage tooling will be activated in a later prompt that owns Vitest + prettier integration."

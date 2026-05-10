@@ -50,7 +50,11 @@ if ($existing) {
 if ($IsWindows) {
     $winget = Get-Command -Name winget -ErrorAction SilentlyContinue
     if ($winget) {
-        & winget install --id gitleaks.gitleaks --silent --accept-package-agreements --accept-source-agreements
+        # Redirect winget's noisy progress spinner away from stdout so the only
+        # value emitted by this script is the final binary path. Failures are
+        # tolerated here; the gh-release fallback below will run if winget did
+        # not produce a usable binary.
+        & winget install --id gitleaks.gitleaks --silent --accept-package-agreements --accept-source-agreements *>&1 | Out-Null
         $resolved = Resolve-GitleaksOnPath
         if ($resolved) {
             Write-Output $resolved
