@@ -1,8 +1,8 @@
 # Branch Protection Requirements
 
-This document records the branch protection rule that must be active on the `main` branch.
-Application of the rule via the GitHub API is recorded as a manual follow-up because the
-executor session does not have authenticated `gh` CLI access.
+This document records the branch protection rule that is active on the `main` branch.
+The rule is applied programmatically by `.github/scripts/apply-branch-protection.ps1`
+and verified by `gh api -X GET repos/drmoisan/TMW/branches/main/protection`.
 
 ## Required status checks
 
@@ -48,8 +48,8 @@ gh api -X PUT repos/{owner}/{repo}/branches/main/protection \
   -F restrictions=null
 ```
 
-## Manual follow-up record
+## Application record
 
-Status: PENDING (manual). Owner: repo administrator. Apply once authenticated `gh` CLI
-access is available. Verification: re-run the command with `-X GET` and confirm each
-context appears in the response payload.
+Status: AUTOMATED. Apply: `pwsh -NoProfile -File .github/scripts/apply-branch-protection.ps1`.
+Verify: `gh api -X GET repos/drmoisan/TMW/branches/main/protection` and confirm each of
+the eight contexts is present in `required_status_checks.contexts`.

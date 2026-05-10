@@ -268,7 +268,7 @@ function Test-LanguageCoverageRow {
         'TypeScript' = @('TypeScript', 'typescript')
         'Python'     = @('Python', 'python', 'pytest')
         'PowerShell' = @('PowerShell', 'powershell', 'pester')
-        'CSharp'     = @('C#', 'CSharp', 'csharp', '\.NET', 'dotnet')
+        'CSharp'     = @('C#', 'CSharp', 'csharp', '.NET', 'dotnet')
     }
 
     $labels = $languageLabelMap[$Language]

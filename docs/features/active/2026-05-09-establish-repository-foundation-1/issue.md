@@ -47,11 +47,11 @@ Establish the repository-wide rule baseline, hygiene controls, and tier infrastr
 
 17. `quality-tiers.yml` exists at repo root with tier mappings for every project that exists today (the TS scaffold), and the CI/validation pipeline fails when an unclassified project is added.
 18. A pre-commit framework (lefthook or equivalent single-binary multi-language runner) is installed, configured at repo root, and required for local development.
-19. Secret scanning (gitleaks or equivalent) runs on every commit and blocks commits containing credentials. A test commit containing a fake secret is rejected (verifiable in evidence).
+19. Secret scanning (gitleaks) runs on every commit and blocks commits containing credentials. Verification is automated: `.github/scripts/install-gitleaks.ps1` provisions the gitleaks binary deterministically; a synthetic-secret fixture matching the `graph-client-secret` rule is staged; `gitleaks protect --staged --no-banner --redact --config=.gitleaks.toml` is invoked against it; the run exits non-zero and emits a redacted match. Exit code, redacted finding, and the install script invocation are captured in `evidence/qa-gates/p3-gitleaks-fake-secret.md`. The CI workflow runs the same install script and a `gitleaks detect` step on PR diffs.
 20. Conventional Commits is enforced via a commit-msg hook. A non-conformant commit message is rejected (verifiable in evidence).
 21. A Renovate configuration exists covering npm, NuGet, GitHub Actions, and Docker in a single config.
 22. A baseline GitHub Actions workflow exists at `.github/workflows/` with reusable composite actions for stages that will be filled in by later prompts (format, lint, typecheck, architecture, test, contract, integration). Stages are no-ops or scoped to existing files until the matching tooling lights up. The workflow runs and reports per-stage status.
-23. Branch protection requirements that the PR pipeline must pass are documented (configuration of the actual protection rule via `gh` CLI is recorded as a manual follow-up step in the feature folder if it cannot be applied programmatically).
+23. Branch protection requirements that the PR pipeline must pass are documented in `docs/branch-protection.md` and applied programmatically via `.github/scripts/apply-branch-protection.ps1`, which calls `gh api -X PUT repos/drmoisan/TMW/branches/main/protection` with the eight required contexts (`tier-classification`, `stage-1-format`, `stage-2-lint`, `stage-3-typecheck`, `stage-4-architecture`, `stage-5-test`, `stage-6-contract`, `stage-7-integration`), `enforce_admins=true`, `required_pull_request_reviews.required_approving_review_count=1`, `required_pull_request_reviews.dismiss_stale_reviews=true`, `required_linear_history=true`, and `restrictions=null`. Verification: `gh api -X GET repos/drmoisan/TMW/branches/main/protection` returns each of the eight contexts and the live JSON is captured in `evidence/qa-gates/p23-branch-protection-live.md`.
 
 ### Out of scope
 
@@ -86,8 +86,4 @@ Establish the repository-wide rule baseline, hygiene controls, and tier infrastr
 - `docs/TaskMaster-Modern-Architecture-Migrationresearch-NoCOM.md` (lines 595-707 = source prompt)
 - `docs/ci.research.md` (T1-T4 tier system source of truth)
 - `artifacts/research/2026-05-09-prompt-a0-foundation-baseline.md` (research findings, file-by-file inventory, exact quotes for replacement)
-
-## Manual follow-ups
-
-- **Branch protection rule application** — Status: PENDING. Owner: repository administrator. The GitHub API call to apply the branch-protection rule could not be issued from the executor session (no authenticated `gh` CLI). The rule definition and the exact `gh api` command are recorded in `docs/branch-protection.md`. AC #23 is satisfied here by documentation; the manual application step must be executed by a repository administrator before the rule is active on `main`.
 

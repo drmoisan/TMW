@@ -9,7 +9,7 @@ pre-commit:
   parallel: true
   commands:
     gitleaks-staged:
-      run: gitleaks protect --staged --no-banner --redact --config=.gitleaks.toml
+      run: pwsh -NoProfile -Command "$bin = & .github/scripts/install-gitleaks.ps1; & $bin protect --staged --no-banner --redact --config=.gitleaks.toml"
 
 commit-msg:
   commands:

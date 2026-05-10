@@ -55,3 +55,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/integration
+  secret-scan:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        shell: pwsh
+        run: |
+          $bin = & .github/scripts/install-gitleaks.ps1
+          "GITLEAKS_BIN=$bin" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Scan PR diff
+        shell: pwsh
+        run: |
+          & $env:GITLEAKS_BIN detect --no-banner --redact --config=.gitleaks.toml --log-opts="origin/${{ github.base_ref }}..HEAD"

@@ -16,34 +16,47 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-if (-not (Test-Path $MessageFile)) {
-    [Console]::Error.WriteLine("Commit message file not found: $MessageFile")
-    exit 2
-}
+function Invoke-ConventionalCommitCheck {
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$MessageFile
+    )
 
-$raw = Get-Content -Raw -Path $MessageFile
-$lines = $raw -split "`r?`n" | Where-Object { $_ -notmatch '^\s*#' }
-$firstLine = ($lines | Where-Object { $_ -ne '' } | Select-Object -First 1)
+    if (-not (Test-Path $MessageFile)) {
+        [Console]::Error.WriteLine("Commit message file not found: $MessageFile")
+        return 2
+    }
 
-if ([string]::IsNullOrWhiteSpace($firstLine)) {
-    [Console]::Error.WriteLine("Commit message is empty.")
-    exit 3
-}
+    $raw = Get-Content -Raw -Path $MessageFile
+    $lines = $raw -split "`r?`n" | Where-Object { $_ -notmatch '^\s*#' }
+    $firstLine = ($lines | Where-Object { $_ -ne '' } | Select-Object -First 1)
 
-# Conventional Commits subject pattern:
-# <type>(<scope>)?!?: <subject>
-# type in {feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert}
-$pattern = '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([\w\-/. ]+\))?!?:\s.+'
-if ($firstLine -notmatch $pattern) {
-    $message = @"
+    if ([string]::IsNullOrWhiteSpace($firstLine)) {
+        [Console]::Error.WriteLine("Commit message is empty.")
+        return 3
+    }
+
+    # Conventional Commits subject pattern:
+    # <type>(<scope>)?!?: <subject>
+    # type in {feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert}
+    $pattern = '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([\w\-/. ]+\))?!?:\s.+'
+    if ($firstLine -notmatch $pattern) {
+        $message = @"
 Commit message does not match Conventional Commits format.
 First line: $firstLine
 Expected:   <type>(<optional scope>)?!?: <subject>
 Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 Example:    feat(taskpane): add classifier seam
 "@
-    [Console]::Error.WriteLine($message)
-    exit 4
+        [Console]::Error.WriteLine($message)
+        return 4
+    }
+
+    return 0
 }
 
-exit 0
+if ($MyInvocation.InvocationName -ne '.') {
+    exit (Invoke-ConventionalCommitCheck -MessageFile $MessageFile)
+}

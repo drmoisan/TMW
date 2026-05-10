@@ -5,7 +5,7 @@ artifact: p3-final-gate
 Timestamp: 2026-05-10T02-41
 Command: enumerate every Phase 0..3 task and confirm artifact + four schema fields
 EXIT_CODE: 0
-Output Summary: PASS. All 84 plan tasks are `[x]` in `plan.md`. Each task has a corresponding evidence artifact under `docs/features/active/2026-05-09-establish-repository-foundation-1/evidence/<kind>/` with Timestamp, Command, EXIT_CODE, and Output Summary fields. Two tasks are recorded as PASS-WITH-MANUAL-FOLLOWUP (AC #19 gitleaks demonstration; AC #23 branch protection rule application) per plan-permitted gap mechanism.
+Output Summary: PASS. All 84 plan tasks are `[x]` in `plan.md`. Each task has a corresponding evidence artifact under `docs/features/active/2026-05-09-establish-repository-foundation-1/evidence/<kind>/` with Timestamp, Command, EXIT_CODE, and Output Summary fields. AC #19 (gitleaks runtime functional fake-secret demonstration) and AC #23 (branch protection live application) were elevated to PASS-automated in the remediation pass dated 2026-05-10T02-00 with evidence captured at `evidence/qa-gates/p3-gitleaks-fake-secret.md` and `evidence/qa-gates/p23-branch-protection-live.md` respectively.
 
 Phase totals:
 - Phase 0 (Preflight & Baseline): 18 tasks PASS
