@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm install --save-dev typescript-eslint@^8.8.1
+EXIT_CODE: 0
+Output Summary: typescript-eslint pinned as direct devDependency at ^8.8.1.

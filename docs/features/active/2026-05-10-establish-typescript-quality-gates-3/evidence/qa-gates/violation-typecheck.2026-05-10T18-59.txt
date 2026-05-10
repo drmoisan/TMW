@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm run typecheck (with tests/violations/typecheck-violation.ts.disabled copied to src/typecheck-violation.ts)
+EXIT_CODE: 2
+Output Summary: Typecheck gate detected the violation. tsc reported `src/typecheck-violation.ts(1,7): error TS2322: Type 'string' is not assignable to type 'number'.` Exit code 2. After Remove-Item src/typecheck-violation.ts, npm run typecheck exits 0 (green restored).

@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm run lint
+EXIT_CODE: 0
+Output Summary: office-addin-lint check exited 0 against unmodified scaffold using bundled flat-config. No project-level eslint.config.mjs in place yet; bundled config governs.

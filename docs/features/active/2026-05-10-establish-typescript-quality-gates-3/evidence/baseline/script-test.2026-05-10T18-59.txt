@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: (script edit) "test": "vitest run" added to package.json
+EXIT_CODE: 0
+Output Summary: package.json scripts updated. Added: depcruise, format, format:check, test, test:coverage, typecheck. Existing lint and prettier scripts preserved. Validated format/format:check/typecheck exit 0 against unmodified scaffold.

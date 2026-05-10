@@ -1,18 +1,16 @@
 name: Lint
-description: Repository lint stage. Scoped to existing scaffold; full ESLint config lights up in Prompt B1.
+description: ESLint v9 flat-config with typescript-eslint strict-type-checked.
 runs:
   using: composite
   steps:
-    - name: ESLint (scaffold only)
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+    - name: Install dependencies
       shell: pwsh
-      run: |
-        if (Test-Path package.json) {
-          npm ci --no-audit --no-fund
-          if ((Get-Content package.json -Raw) -match '"lint"\s*:') {
-            npm run lint
-          } else {
-            Write-Host "Lint stage: no lint script defined yet; skipping (no-op)."
-          }
-        } else {
-          Write-Host "Lint stage: no package.json present; skipping (no-op)."
-        }
+      run: npm ci --no-audit --no-fund
+    - name: ESLint
+      shell: pwsh
+      run: npm run lint

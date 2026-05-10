@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm test (with tests/violations/test-violation.test.ts.disabled copied to src/test-violation.test.ts)
+EXIT_CODE: 1
+Output Summary: Test gate detected the violation. Vitest reported `FAIL src/test-violation.test.ts > always fails` with `AssertionError: expected 1 to be 2 // Object.is equality`. 1 failed | 1 passed. Exit code 1. After Remove-Item src/test-violation.test.ts, npm test exits 0 (green restored).

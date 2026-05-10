@@ -1,14 +1,16 @@
 name: Test
-description: Unit + property test stage. Vitest wiring added in Prompt B1.
+description: Vitest unit tests with V8 coverage enforcement (line >= 85%, branch >= 75%).
 runs:
   using: composite
   steps:
-    - name: Vitest (when wired)
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+    - name: Install dependencies
       shell: pwsh
-      run: |
-        if ((Test-Path package.json) -and ((Get-Content package.json -Raw) -match '"test"\s*:')) {
-          npm ci --no-audit --no-fund
-          npm test
-        } else {
-          Write-Host "Test stage: no test script wired yet; skipping (no-op)."
-        }
+      run: npm ci --no-audit --no-fund
+    - name: Vitest with coverage
+      shell: pwsh
+      run: npm run test:coverage
