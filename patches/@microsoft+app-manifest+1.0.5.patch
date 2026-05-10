@@ -1,0 +1,16 @@
+diff --git a/node_modules/@microsoft/app-manifest/build/generated-types/teams/TeamsManifestV1D17.js b/node_modules/@microsoft/app-manifest/build/generated-types/teams/TeamsManifestV1D17.js
+index fdc316b..a819f09 100644
+--- a/node_modules/@microsoft/app-manifest/build/generated-types/teams/TeamsManifestV1D17.js
++++ b/node_modules/@microsoft/app-manifest/build/generated-types/teams/TeamsManifestV1D17.js
+@@ -105,7 +105,10 @@ function transform(val, typ, getProps, key = '', parent = '') {
+         Object.getOwnPropertyNames(props).forEach(key => {
+             const prop = props[key];
+             const v = Object.prototype.hasOwnProperty.call(val, key) ? val[key] : undefined;
+-            result[prop.key] = transform(v, prop.typ, getProps, key, ref);
++            const transformed = transform(v, prop.typ, getProps, key, ref);
++            if (transformed !== undefined) {
++                result[prop.key] = transformed;
++            }
+         });
+         Object.getOwnPropertyNames(val).forEach(key => {
+             if (!Object.prototype.hasOwnProperty.call(props, key)) {

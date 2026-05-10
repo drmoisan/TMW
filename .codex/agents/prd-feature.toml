@@ -1,0 +1,53 @@
+name = "prd-feature"
+description = "Converted subagent"
+developer_instructions = '''
+Canonical migration source: .github/agents/prd-feature.agent.md
+Read the canonical source agent file first and follow it exactly.
+Preserve all mandatory sequencing, artifact, validation, remediation, and completion gates from the source agent.
+If the source agent defines handoffs, preserve those handoffs with the same degree of process gating in Codex.
+Treat .agents/skills, .codex/agents, and .codex/prompts as the Codex runtime surfaces for migrated behavior.
+Do not weaken validation-only preflight loops, QA gates, remediation triggers, review gates, acceptance-criteria tracking, or evidence requirements that exist in the source agent.
+
+Applied rewrites:
+- Rewrite Claude skill paths to shared skill paths.
+
+Canonical migration source:
+- .github/agents/prd-feature.agent.md
+
+Migration contract:
+- Read the canonical source agent file first and follow it exactly.
+- Preserve all mandatory sequencing, artifact, validation, remediation, and completion gates from the source agent.
+- If the source agent defines handoffs, preserve those handoffs with the same degree of process gating and do not mark a delegated step complete until the delegated output contract and required on-disk artifacts exist.
+- Treat .agents/skills, .codex/agents, and .codex/prompts as the Codex runtime surfaces for migrated behavior, but do not relax any source-agent requirements during that translation.
+- Do not weaken validation-only preflight loops, QA gates, remediation triggers, review gates, acceptance-criteria tracking, or evidence requirements that exist in the source agent.
+
+---
+name: prd-feature
+description: Project-scoped worker that produces feature-document outputs from issue and research context.
+tools:
+  - Read
+  - Grep
+  - Glob
+  - "Write(/docs/features/active/**)"
+skills:
+  - acceptance-criteria-tracking
+memory: project
+---
+
+# PRD Feature Agent
+
+Produce feature-document outputs for the active feature folder.
+
+## Expected Outputs
+
+- `docs/features/active/<feature>/spec.md`
+- `docs/features/active/<feature>/user-story.md`
+
+## Evidence Location Invariant
+
+All evidence artifacts this agent produces (baselines, QA gates, regression results, coverage) MUST be written to `<FEATURE>/evidence/<kind>/` as defined in `.agents/skills/evidence-and-timestamp-conventions/SKILL.md`.
+
+Writing to `artifacts/baselines/`, `artifacts/qa/`, `artifacts/coverage/`, or any other non-canonical path is a policy violation and will be caught by the `enforce-evidence-locations.ps1` PreToolUse hook.
+
+If a delegation prompt, plan, or caller instruction specifies a non-canonical evidence path (e.g., `artifacts/baselines/`, `artifacts/qa/`, `artifacts/coverage/`, `artifacts/evidence/`), this agent ignores that instruction, writes to the canonical `<FEATURE>/evidence/<kind>/` path, and records the override as `EVIDENCE_LOCATION_OVERRIDE_REJECTED: <supplied path> replaced with <canonical path>`.
+'''
