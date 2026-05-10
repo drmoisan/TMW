@@ -592,33 +592,115 @@ The following rules are acceptance criteria for the no-COM architecture:
 
 ## Implementation Prompts
 
-### Prompt A0 — Establish Repository Hygiene Baseline
+### Prompt A0 — Establish Repository Foundation
 
 Goal:
 
-Establish baseline repository-wide controls that protect commits, dependencies, and PR flow before any TaskMaster code is written.
+Establish the repository-wide rule baseline, hygiene controls, and tier infrastructure that all subsequent prompts will be checked against. This is two tightly coupled phases of work executed in one prompt: (1) update the repository rule and instruction files to reflect the No-COM toolchain decisions, then (2) install hygiene controls and tier definitions that depend on those rules.
 
 Read first:
 
+- `docs/TaskMaster-Modern-Architecture-Migrationresearch-NoCOM.md`
+- `docs/ci.research.md`
+- All current files under `.claude/rules/`
+- All current files under `.github/instructions/`
 - `package.json`
 - `.gitignore`
 - Existing `.github/` workflows, if any
+- `CLAUDE.md` and `.claude/rules/tonality.md`
 
-Required outcome:
+Authoritative decisions (non-negotiable):
 
+1. Python formatting remains Black. The existing Python toolchain (Black + Ruff + Pyright + Pytest) is preserved across all rule updates. Do not replace Black with Ruff format.
+2. Coverage thresholds are uniform across all tiers (T1 through T4): line coverage >= 85%, branch coverage >= 75%, no regression on changed lines. No tier-specific lower thresholds anywhere in the rule set. Justification, to be reflected in rule prose: high test coverage is a fundamental quality-control design choice that enables autonomous agentic development and trust in the work product.
+
+Required outcome — Phase 1: Rule baseline updates
+
+Mirror discipline applies throughout: every change to a `.claude/rules/<name>.md` file lands in the matching `.github/instructions/<name>-*.instructions.md` file(s) in the same delivery. Drift between the two locations is a defect.
+
+- Create `.claude/rules/quality-tiers.md` and `.github/instructions/quality-tiers.instructions.md`:
+    - Define the T1-T4 module rigor tier system per `docs/ci.research.md`.
+    - Name `quality-tiers.yml` at repo root as the source of truth for tier mappings; adding a project without a tier fails CI.
+    - Document uniform-versus-tier-dependent gates: uniform across all tiers = line coverage >= 85%, branch coverage >= 75%, format check, lint, typecheck, architecture-boundary tests; tier-dependent = property-test density (T1/T2: >= 1 per pure function), mutation score (T1 >= 75%, T2 trend-only), benchmark regression (T1 only), golden tests (T1 classifier modules), full E2E suite scope.
+    - List each tier with examples drawn from the No-COM architecture (T1 critical = classifier engines, ToDo ID allocator, Graph extended-properties adapter, auth/token handling, host-agnostic command bus; T2 core = domain layer, application layer, mail-item DTOs, settings store abstraction, schema definitions; T3 adapters & UI = Outlook task pane UI, Office.js wrappers, Graph SDK wrappers, persistence I/O; T4 scaffolding = DI wiring, bootstrap, build scripts, dev tooling, generated code, manifests).
+- Create `.claude/rules/architecture-boundaries.md` and `.github/instructions/architecture-boundaries.instructions.md`:
+    - Name `dependency-cruiser` (TS) and `NetArchTest.Rules` (.NET, when the backend exists) as enforcement tools and `.dependency-cruiser.cjs` and `*.ArchitectureTests` as enforcement file patterns.
+    - Codify the No-COM Architecture Rules as enforceable assertions: production code must not reference VSTO, `Microsoft.Office.Interop.Outlook`, COM-visible interfaces, or Ribbon extensibility; client UI code (`src/taskpane/`, `src/commands/`) must not import backend internals; domain modules must not depend on Office.js, Microsoft Graph SDK, or any infrastructure adapter; mailbox data must be accessed only through Office.js or Microsoft Graph; the legacy import utility (when added) must have zero references to Outlook desktop automation namespaces.
+    - State that violations block PRs.
+- Update `.claude/rules/typescript.md`, `.github/instructions/typescript-code-change.instructions.md`, and `.github/instructions/typescript-unit-test.instructions.md`:
+    - Replace every reference to Jest with Vitest. Convert mocking syntax: `jest.spyOn` -> `vi.spyOn`, `jest.mock` -> `vi.mock`, `jest.useFakeTimers` -> `vi.useFakeTimers`, `jest.resetAllMocks` -> `vi.resetAllMocks`. Convert `npm run test:unit` -> `npm run test`. Preserve the `*.test.ts` filename convention.
+    - Remove every "VS Code extension" framing. Replace "VS Code extension API/host/context" with "Office.js APIs", "Outlook host runtime", "Outlook web add-in context". The separation-of-concerns rule "keep pure logic separate from VS Code extension APIs" becomes "keep pure logic separate from Office.js, Microsoft Graph SDK, and other host-bound APIs."
+    - Add an "ESLint stack" subsection requiring `typescript-eslint` strict-type-checked + stylistic-type-checked rule sets with type-aware parsing, `eslint-plugin-office-addins`, `eslint-plugin-promise`, `eslint-plugin-security`, `eslint-plugin-import`, error-level `no-floating-promises` / `no-misused-promises` / `no-unsafe-*` rules, and `no-restricted-syntax` bans on `Date.now`, `setTimeout`, `setInterval`, `Math.random` outside an explicit infrastructure allowlist.
+    - Add an "Architecture boundaries" subsection referencing `architecture-boundaries.md`.
+    - Add a "Property-based and mutation testing" subsection naming `fast-check` (>= 1 property test per pure function on T1/T2) and `StrykerJS` (mutation score >= 75% on T1).
+    - Add a "Golden tests" subsection requiring classifier-output snapshots for T1 modules against a versioned corpus; soften (do not remove) the existing "avoid snapshot tests" guidance so it applies to all uses except classifier-output and schema-evolution scenarios.
+    - Add a "Runtime determinism" subsection requiring `Date`/`Math.random`/`setTimeout` access through an injected `Clock`/`Random` interface, Vitest fake timers in tests, and `await flushPromises()` over `setTimeout(0)`.
+    - Update Coverage Requirements to reference `quality-tiers.md` and apply the uniform tier rule per Authoritative Decision #2.
+- Update `.claude/rules/general-unit-test.md` and `.github/instructions/general-unit-test.instructions.md`:
+    - Replace the existing uniform coverage rule (>= 80% repo, >= 90% new modules) with the uniform tier rule per Authoritative Decision #2.
+    - Add a "Test Categories" section listing unit tests (all tiers), property-based tests (T1/T2, >= 1 per pure function), golden/snapshot tests (T1 classifier outputs only, against a versioned corpus), contract/schema tests (host-service boundary), mutation tests (T1 only, >= 75% mutation score), integration tests.
+    - Add a "Determinism Infrastructure" section requiring controllable clock (`Clock` for TS / `TimeProvider` for .NET), seeded RNG with seed printed on test failure, banned APIs in test code (`setTimeout`, `Thread.Sleep`, `Task.Delay`, real wall-clock waits, `Date.now()` outside the clock interface), and virtual scheduler / fake timers / `FakeTimeProvider` for async tests.
+- Update `.claude/rules/general-code-change.md` and `.github/instructions/general-code-change.instructions.md`:
+    - Add a "Module Rigor Tiers" section pointing to `quality-tiers.md`.
+    - Expand the "Mandatory Toolchain Loop" from four stages to seven, in this order: formatting, linting, type checking, architecture-boundary tests, unit tests (with property tests where applicable), contract / schema compatibility checks, integration tests. Note that mutation testing, golden tests, and benchmark regression run in pre-merge or nightly pipelines, not the per-commit loop. The "restart from step 1 if any step fails or auto-fixes files" rule applies to the full seven-stage loop.
+
+Required outcome — Phase 1 (continued): Operational artifact updates
+
+The toolchain and coverage decisions reach beyond rule prose into agent definitions, skill files, hooks, and validation scripts. Update each of the following with the same authority and mirror discipline. These updates land in the same prompt as the rule baseline updates so the rule prose and the enforcement artifacts agree from the first commit.
+
+TypeScript-related operational artifacts:
+
+- `.claude/agents/atomic-executor.md`: replace `Bash(npx jest *)` in the tools allowlist with `Bash(npx vitest *)`; update the toolchain reference table to use `npx vitest` instead of `npx jest`.
+- `.github/agents/typescript-engineer.agent.md`: replace every Jest reference with Vitest (including `jest.resetAllMocks` -> `vi.resetAllMocks`, `jest.spyOn` -> `vi.spyOn`, `jest.mock` -> `vi.mock`, `jest.useFakeTimers` -> `vi.useFakeTimers`); replace every "VS Code extension host" reference with "Outlook host runtime"; replace "VS Code extension API" framing with "Office.js APIs".
+
+Cross-language coverage threshold updates per Authoritative Decision #2:
+
+- `.claude/agents/feature-review.md`: replace the coverage thresholds (`>= 80%` repo-wide, `>= 80%` modified files, `>= 90%` new files) with the uniform tier rule across all four tiers: line coverage `>= 85%`, branch coverage `>= 75%`, no regression on changed lines.
+- `.claude/hooks/validate-feature-review-coverage.ps1`: update the hard-coded line-coverage threshold from `80.0` to `85.0`; add a branch-coverage check at `75.0`. The script must fail validation when either threshold is violated.
+- `.claude/skills/feature-review-workflow/SKILL.md`: update coverage threshold prose to the uniform tier rule.
+- `.claude/skills/python-qa-gate/SKILL.md` and `.claude/skills/powershell-qa-gate/SKILL.md`: replace the `>= 90%` per-new-unit threshold with the uniform tier rule (`>= 85%` line, `>= 75%` branch across all tiers, no regression on changed lines).
+- `.claude/rules/python.md`, `.github/instructions/python-code-change.instructions.md`, `.github/instructions/python-unit-test.instructions.md`: update only the coverage-threshold prose per Authoritative Decision #2. All other Python rules (Black formatter per Authoritative Decision #1, Ruff, Pyright, Pytest) remain unchanged. Add Hypothesis as the property-test framework only if a Python classifier service is later confirmed in scope.
+- `.claude/rules/powershell.md`, `.github/instructions/powershell-code-change.instructions.md`, `.github/instructions/powershell-unit-test.instructions.md`: update only the coverage-threshold prose per Authoritative Decision #2. All other PowerShell rules (Invoke-Formatter, PSScriptAnalyzer, Pester) remain unchanged.
+
+Required outcome — Phase 2: Hygiene controls and tier definitions
+
+- `quality-tiers.yml` exists at repo root with tier mappings for every project that exists today (currently the TS scaffold) and a build rule that fails CI if a new project is added without a tier classification.
 - Pre-commit framework installed and required (lefthook or equivalent single-binary multi-language hook runner).
 - Secret scanning runs on every commit (gitleaks or equivalent) and blocks commits containing credentials.
 - Conventional Commits enforced via commit-msg hook.
 - Dependency update bot configured (Renovate) covering npm, NuGet, GitHub Actions, and Docker in a single config.
 - Baseline GitHub Actions workflow exists with reusable composite actions for stages that will be filled in by later prompts (format, lint, typecheck, architecture, test, contract, integration). Stages are defined as no-ops or scoped to existing files until the matching tooling lights up.
 - Branch protection rules require the PR pipeline to pass.
-- A `quality-tiers.yml` file at repo root defines T1 through T4 tier mappings; CI fails if a project is added without a tier.
+
+Out of scope for this prompt:
+
+- No changes to `tonality.md`, `self-explanatory-code-commenting.md`, or `*-suppressions.md` rules and their mirrors.
+- No changes to `powershell.md` or `python.md` beyond the coverage-threshold update required by Authoritative Decision #2.
+- No npm or NuGet dependency additions beyond what is required for lefthook/gitleaks/Renovate setup.
+- No edits to `src/`, `tests/`, `manifest.json`, `package.json` scripts beyond what hygiene tooling requires, or `webpack.config.js`.
+- No replacement of Black in any Python rule (per Authoritative Decision #1).
+- No tier-specific lower coverage gates anywhere (per Authoritative Decision #2).
+- No edits to `csharp-change-budget-router/SKILL.md`, `powershell-change-budget-router/SKILL.md`, or `feature-promotion-lifecycle/SKILL.md`. References in those skills to "VS Code extension command surface" describe the agent's tooling fallback chain (MCP -> VS Code extension commands -> CLI), not the codebase being a VS Code extension, and remain accurate.
 
 Validation:
+
+Phase 1 (rule baseline):
+
+- `grep -ri "jest" .claude/rules/typescript.md .github/instructions/typescript-code-change.instructions.md .github/instructions/typescript-unit-test.instructions.md .claude/agents/atomic-executor.md .github/agents/typescript-engineer.agent.md` returns no matches in active text.
+- `grep -ri "vs code extension\|vscode extension" .claude/rules/typescript.md .github/instructions/typescript-code-change.instructions.md .github/instructions/typescript-unit-test.instructions.md .github/agents/typescript-engineer.agent.md` returns no matches.
+- `.claude/rules/quality-tiers.md`, `.claude/rules/architecture-boundaries.md`, and their `.github/instructions/` mirrors exist with frontmatter matching the existing rule conventions.
+- The coverage rule in `general-unit-test.md` reads ">= 85% line, >= 75% branch across all tiers" with no tier-specific lower thresholds anywhere in the rule set.
+- Coverage thresholds in `.claude/rules/python.md`, `.claude/rules/powershell.md`, `.claude/skills/python-qa-gate/SKILL.md`, `.claude/skills/powershell-qa-gate/SKILL.md`, `.claude/skills/feature-review-workflow/SKILL.md`, `.claude/agents/feature-review.md`, and `.claude/hooks/validate-feature-review-coverage.ps1` (and all `.github/instructions/` mirrors) all use the uniform tier rule.
+- Python rules still reference Black as the formatter.
+- Every modified `.claude/rules/` file has a corresponding modified `.github/instructions/` file.
+- Existing repository tests still pass against the new coverage thresholds, or any gap is recorded in `artifacts/orchestration/orchestrator-state.json` with a remediation plan and tracked as a follow-up task.
+
+Phase 2 (hygiene controls):
 
 - A test commit containing a fake secret is rejected.
 - A non-conformant commit message is rejected.
 - An unclassified project added to `quality-tiers.yml` causes CI to fail.
+- The PR-pipeline workflow runs and reports per-stage status, even if individual stages are no-ops at this point.
 
 ---
 
@@ -686,18 +768,54 @@ Validation:
 
 ---
 
-### Prompt C1 — Establish .NET Quality Gates
+### Prompt C1 — Establish .NET Foundation
 
 Goal:
 
-Stand up the .NET CI toolchain before any backend code is written.
+Stand up the .NET CI toolchain and update the C# rule baseline before any backend code is written. As with Prompt A0, this is two tightly coupled phases executed in one prompt: (1) update the C# rule and instruction files to reflect the No-COM .NET toolchain decisions, then (2) install the .NET CI infrastructure that depends on those rules.
 
 Read first:
 
+- `.claude/rules/csharp.md`
+- `.github/instructions/csharp-code-change.instructions.md`
+- `.github/instructions/csharp-unit-test.instructions.md`
 - Existing `.editorconfig`, if any
 - The repository `quality-tiers.yml`
+- `.claude/rules/quality-tiers.md` and `.claude/rules/architecture-boundaries.md` (created in Prompt A0)
 
-Required outcome:
+Authoritative decisions (carried forward from Prompt A0):
+
+1. Python formatting remains Black. Not directly applicable to C# rule updates but reaffirmed for consistency across the rule set.
+2. Coverage thresholds are uniform across all tiers (T1 through T4): line coverage >= 85%, branch coverage >= 75%. No tier-specific lower thresholds. Apply this rule throughout the C# rule updates.
+
+Required outcome — Phase 1: C# rule baseline updates
+
+Mirror discipline applies throughout. Update `.claude/rules/csharp.md`, `.github/instructions/csharp-code-change.instructions.md`, and `.github/instructions/csharp-unit-test.instructions.md`:
+
+- Replace MSTest with xUnit. Replace `[TestClass]` / `[TestMethod]` examples with `[Fact]` / `[Theory]`. Replace `vstest.console.exe` invocations with `dotnet test`.
+- Replace Moq with NSubstitute. Update mocking syntax examples accordingly.
+- Replace `msbuild TaskMaster.sln /t:Build ...` build commands with `dotnet build`. Remove the `EnableNETAnalyzers=true` and `EnforceCodeStyleInBuild=true` MSBuild properties from command examples; equivalent settings live in `Directory.Build.props` (`<AnalysisLevel>latest-all</AnalysisLevel>`, `<AnalysisMode>All</AnalysisMode>`, `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`, `<Nullable>enable</Nullable>`).
+- Add an "Analyzer Stack" section listing required `<PackageReference>` entries with `PrivateAssets="all"`: Meziantou.Analyzer, SonarAnalyzer.CSharp, Roslynator.Analyzers, AsyncFixer, SecurityCodeScan.VS2019, Microsoft.CodeAnalysis.BannedApiAnalyzers.
+- Update the existing "DI Seams" section to add `TimeProvider` (with `Microsoft.Extensions.TimeProvider.Testing` for tests) as the preferred clock seam alongside `IClock`. Note that new code should prefer `TimeProvider`; `IClock` is acceptable in legacy or pre-.NET 8 contexts only.
+- Add a "Banned APIs" section referencing a `BannedSymbols.txt` file: ban `DateTime.Now`, `DateTime.UtcNow`, `Random.Shared`, `Thread.Sleep`, `Task.Delay` outside an explicit allowlist of infrastructure files.
+- Replace the existing coverage rule (>= 80% repo, >= 90% new modules) with the uniform tier rule per Authoritative Decision #2: line coverage >= 85% and branch coverage >= 75% across all tiers, plus mutation score >= 75% on T1 modules.
+- Add a "Property-based and mutation testing" subsection naming `CsCheck` for property tests (>= 1 per pure function on T1/T2) and `Stryker.NET` for mutation testing on T1 modules.
+- Add a "Golden tests" subsection naming `Verify.Xunit` for T1 classifier output snapshots.
+- Update fixture/parameterization guidance in the unit-test instruction file: `[Theory]` + `[InlineData]` for parameterized tests; `IClassFixture<T>` for shared expensive setup.
+
+Required outcome — Phase 1 (continued): C# operational artifact updates
+
+The toolchain decisions reach beyond rule prose into agent definitions and skill files that the orchestrator delegates to. Update each of the following so the rule prose and the enforcement artifacts agree from the first commit. The `Bash(msbuild *)` allowlist entries may remain in agent tool lists (msbuild is not banned, just unused for the No-COM build); only the prose mandating msbuild changes.
+
+- `.claude/agents/csharp-typed-engineer.md`: update the frontmatter `description` field (`MSTest toolchain` -> `xUnit toolchain`); update the role description, plan-requirements bullet, and final-QA-gate bullet to reference xUnit + NSubstitute instead of MSTest + Moq; update any `msbuild TaskMaster.sln` build-invocation prose to `dotnet build`.
+- `.claude/skills/csharp-qa-gate/SKILL.md`: update the description, baseline section, and toolchain command list. Replace the `msbuild TaskMaster.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:EnableNETAnalyzers=true /p:EnforceCodeStyleInBuild=true` line with `dotnet build`. Replace the `msbuild TaskMaster.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:Nullable=enable /p:TreatWarningsAsErrors=true` line with the equivalent settings now in `Directory.Build.props` (so the explicit msbuild line is removed). Replace `vstest.console.exe <test-assembly-paths> /EnableCodeCoverage` with `dotnet test --collect:"XPlat Code Coverage"`. Replace MSTest references with xUnit. Add a step for the `*.ArchitectureTests` xUnit project run.
+- `.claude/skills/invoke-csharp-engineer/SKILL.md`: update the frontmatter description and process-step references so the toolchain reads `CSharpier -> .NET Analyzers -> Nullable Analysis -> xUnit` everywhere.
+- `.claude/skills/feature-review-workflow/SKILL.md`: replace the C# coverage command line `vstest.console.exe <test-assembly-paths> /EnableCodeCoverage` with `dotnet test --collect:"XPlat Code Coverage"`; update the artifact path reference if it changes accordingly.
+- `.github/agents/csharp-typed-engineer.agent.md`: replace all MSTest references with xUnit; replace all Moq references with NSubstitute; update mock-strategy guidance and example snippets accordingly.
+
+Mirror discipline applies: any matching `.github/skills/` files (if a mirror exists for the listed `.claude/skills/` files) receive the same updates in the same delivery.
+
+Required outcome — Phase 2: .NET CI infrastructure
 
 - A solution-level `Directory.Build.props` enables `<Nullable>enable</Nullable>`, `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`, `<AnalysisLevel>latest-all</AnalysisLevel>`, and `<AnalysisMode>All</AnalysisMode>` for T1/T2 projects.
 - A `Directory.Packages.props` central package management file pins versions for the analyzer stack.
@@ -713,6 +831,15 @@ Required outcome:
 - All gates pass on an empty solution skeleton.
 
 Validation:
+
+Phase 1 (C# rule baseline + operational artifacts):
+
+- `grep -ri "MSTest\|TestClass\|TestMethod\|Moq\|TaskMaster\.sln\|vstest\.console" .claude/rules/csharp.md .github/instructions/csharp-code-change.instructions.md .github/instructions/csharp-unit-test.instructions.md .claude/agents/csharp-typed-engineer.md .claude/skills/csharp-qa-gate/SKILL.md .claude/skills/invoke-csharp-engineer/SKILL.md .claude/skills/feature-review-workflow/SKILL.md .github/agents/csharp-typed-engineer.agent.md` returns no matches in active text.
+- The csharp rule files reference the analyzer stack, `TimeProvider`, the uniform tier coverage rule, `CsCheck`, `Stryker.NET`, and `Verify.Xunit`.
+- The csharp-qa-gate skill issues `dotnet build` and `dotnet test --collect:"XPlat Code Coverage"` rather than msbuild and vstest.console invocations.
+- Every modified `.claude/rules/` file has a corresponding modified `.github/instructions/` file. Every modified `.claude/skills/` file has a corresponding modified `.github/skills/` file where a mirror exists.
+
+Phase 2 (.NET CI infrastructure):
 
 - `dotnet build` succeeds with zero warnings.
 - `dotnet csharpier check .`, `dotnet test`, and the architecture tests all pass.

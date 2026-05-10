@@ -1,0 +1,14 @@
+name: Architecture
+description: Architecture-boundary tests stage. Wires dependency-cruiser (TS) and NetArchTest.Rules (.NET) when configs exist.
+runs:
+  using: composite
+  steps:
+    - name: dependency-cruiser (when configured)
+      shell: pwsh
+      run: |
+        if (Test-Path .dependency-cruiser.cjs) {
+          npm ci --no-audit --no-fund
+          npx depcruise --config .dependency-cruiser.cjs src
+        } else {
+          Write-Host "Architecture stage: no .dependency-cruiser.cjs yet; skipping (no-op)."
+        }

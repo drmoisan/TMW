@@ -1,0 +1,27 @@
+# .gitleaks.toml
+# Repository-specific overlay on top of the gitleaks default rules. The default rules are
+# implicitly extended unless [extend].useDefault = false. We extend them to add Office.js
+# and Microsoft Graph specific patterns that are not in the default rule set.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "graph-client-secret"
+description = "Microsoft Graph application client secret pattern"
+regex = '''(?i)(graph[_-]?client[_-]?secret|graph[_-]?app[_-]?secret)\s*[=:]\s*['"]?[A-Za-z0-9~._\-]{20,}['"]?'''
+tags = ["secret", "graph"]
+
+[[rules]]
+id = "office-addin-shared-key"
+description = "Office add-in shared key or token literal"
+regex = '''(?i)(office[_-]?addin[_-]?(?:shared[_-]?)?(?:key|token))\s*[=:]\s*['"]?[A-Za-z0-9._\-]{16,}['"]?'''
+tags = ["secret", "office-addin"]
+
+[allowlist]
+description = "Allowlist for documentation and test fixtures"
+paths = [
+  '''(?i)docs/.*\.md''',
+  '''(?i)\.gitleaks\.toml''',
+  '''(?i)docs/features/.*'''
+]

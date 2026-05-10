@@ -97,10 +97,10 @@ Always apply:
         - Python: `poetry run pytest --cov` → artifact: `artifacts/python/lcov.info`
         - PowerShell: `mcp__drm-copilot__run_poshqc_test` → artifact: `artifacts/pester/powershell-coverage.xml`
         - C#: `vstest.console.exe <test-assembly-paths> /EnableCodeCoverage` → artifact: `artifacts/csharp/coverage.xml`
-        - Coverage thresholds:
-          - New code files (added in this feature): line coverage must be >= 90%. Flag as FAIL otherwise.
-          - Modified files (changed but previously existing): line coverage must show no regression relative to baseline and must remain >= 80%. Flag as FAIL otherwise.
-          - Repo-wide line coverage must remain >= 80% per language. Flag as FAIL otherwise.
+        - Coverage thresholds (uniform tier rule per quality-tiers.md):
+          - New code files (added in this feature): line coverage >= 85% and branch coverage >= 75%. Flag as FAIL otherwise.
+          - Modified files (changed but previously existing): line coverage >= 85%, branch coverage >= 75%, and no regression on changed lines relative to baseline. Flag as FAIL otherwise.
+          - Repo-wide per language: line coverage >= 85% and branch coverage >= 75%. Flag as FAIL otherwise.
         - If coverage artifacts already exist from the executor run, inspect them instead of re-running.
         - If no coverage artifact exists for a language that has changed files, flag as FAIL — coverage verification is mandatory for all languages with changed files.
    - Run the smallest relevant subset first when the repo policy permits it.

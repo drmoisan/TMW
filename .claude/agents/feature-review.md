@@ -106,9 +106,13 @@ Coverage metrics are mandatory for every language that has changed files in the 
 
 ### Coverage Thresholds
 
-- **New code files** (files added in this feature, not previously existing): line coverage must be >= 90%.
-- **Modified files** (files that existed before and were changed): line coverage must show no regression relative to the baseline and must remain >= 80%.
-- **Repo-wide**: line coverage must remain >= 80% for each language.
+Coverage thresholds follow the uniform tier rule (Authoritative Decision #2) defined in `.claude/rules/quality-tiers.md`:
+
+- **New code files** (files added in this feature, not previously existing): line coverage >= 85%, branch coverage >= 75%.
+- **Modified files** (files that existed before and were changed): line coverage >= 85%, branch coverage >= 75%, and no regression on changed lines relative to baseline.
+- **Repo-wide per language**: line coverage >= 85%, branch coverage >= 75%.
+
+Tier-specific lower thresholds are not used.
 
 ### Verification Procedure
 

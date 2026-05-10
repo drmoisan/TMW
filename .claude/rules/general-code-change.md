@@ -24,16 +24,25 @@ Apply these priorities in order when designing or changing code:
 - Keep methods small and focused. Avoid god objects.
 - Use interfaces/abstract types/protocols when multiple implementations are likely.
 
+## Module Rigor Tiers
+
+Module rigor tiers (T1–T4) and the uniform-versus-tier-dependent gate matrix are defined in `.claude/rules/quality-tiers.md`. Every project must be classified in `quality-tiers.yml` at repo root.
+
 ## Mandatory Toolchain Loop
 
-Run the full toolchain in this exact order and repeat until all steps pass in a single pass:
+Run the full seven-stage toolchain in this exact order and repeat until all stages pass in a single pass:
 
 1. **Formatting** (e.g., Black, Prettier, CSharpier, Invoke-Formatter)
 2. **Linting** (e.g., Ruff, ESLint, PSScriptAnalyzer, .NET analyzers)
 3. **Type checking** (e.g., Pyright, TSC, nullable analysis; skip for PowerShell)
-4. **Testing** (e.g., Pytest, Jest, MSTest, Pester)
+4. **Architecture-boundary tests** (e.g., dependency-cruiser, NetArchTest.Rules)
+5. **Unit tests** (e.g., Pytest, Vitest, MSTest, Pester) including property-based tests where applicable per `quality-tiers.md`
+6. **Contract / schema compatibility checks** (e.g., oasdiff, schema-snapshot diff)
+7. **Integration tests**
 
-**Restart from step 1** if any step fails or auto-fixes any files. Do not stop the loop until all four steps complete without errors in a single pass.
+**Restart from step 1** if any stage fails or auto-fixes any files. Do not stop the loop until all seven stages complete without errors in a single pass.
+
+Mutation testing, golden tests, and benchmark regression run in pre-merge or nightly pipelines, not the per-commit loop.
 
 ## File Size Limit
 

@@ -43,7 +43,7 @@ Compare the final results to the Phase A baseline. All of the following must hol
 - **Pytest delta**: 0 new failing tests.
 - **Per-file coverage delta**: coverage for every touched file is greater than or equal to the baseline for that file.
 - **Overall coverage delta** (when the repo enforces it): overall coverage is greater than or equal to the baseline.
-- **New modules, classes, or methods**: coverage >= 90% for each new unit introduced in the batch.
+- **New modules, classes, or methods**: line coverage >= 85% and branch coverage >= 75% per the uniform tier rule (`.claude/rules/quality-tiers.md`). No tier-specific lower thresholds. No regression on changed lines.
 
 If any delta check fails, the agent must revert or fix immediately and rerun the full toolchain. Do not proceed to reporting until all deltas are clean.
 

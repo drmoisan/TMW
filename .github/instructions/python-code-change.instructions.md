@@ -71,6 +71,8 @@ These are the required tools for Python code in this repo:
 
 > **Testing tools and behavior are defined in the unit test policies.** Do not define test behavior here; instead, obey `general-unit-test.instructions.md` and `python-unit-test.instructions.md`.
 
+> **Coverage thresholds:** Coverage thresholds defer to the unit test policy and the uniform tier rule defined in `.github/instructions/quality-tiers.instructions.md`: line coverage >= 85% and branch coverage >= 75% across all tiers (T1–T4). Tool references (Black, Ruff, Pyright, Pytest) are unchanged by this clause.
+
 ---
 
 ## 2. Python Design & Typing Principles

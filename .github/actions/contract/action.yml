@@ -1,0 +1,9 @@
+name: Contract
+description: Contract / schema compatibility stage. Wires oasdiff or schema-snapshot diff when API specs exist.
+runs:
+  using: composite
+  steps:
+    - name: Contract checks (placeholder)
+      shell: pwsh
+      run: |
+        Write-Host "Contract stage: no API specs in repo yet; skipping (no-op)."

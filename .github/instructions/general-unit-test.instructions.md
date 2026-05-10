@@ -36,9 +36,10 @@ Every new or modified unit test must adhere to these guidelines.
   - These coverage expectations apply across all languages in the repo.
   - Aim to exercise critical paths and important edge conditions.
   - Configure coverage tooling to exclude test files (e.g., `tests/`), so metrics reflect the application code, not the tests themselves.
-  - Repository-wide line coverage must remain `>= 80%`.
-  - Any new modules, classes, or methods added must target `>= 90%` coverage.
+  - Line coverage must remain `>= 85%` across all tiers (T1–T4).
+  - Branch coverage must remain `>= 75%` across all tiers (T1–T4).
   - Code changes or refactors must not reduce coverage for the lines that were changed.
+  - Tier-specific lower coverage thresholds are not used. See `.github/instructions/quality-tiers.instructions.md`.
   - Coverage is a supporting metric, not the sole quality gate; untested critical behavior is not acceptable even if the overall percentage looks good.
 
 - **Scenario Completeness**  
@@ -97,6 +98,28 @@ Before submitting any change that includes unit tests:
   - It does not rely on external dependencies without proper mocking/stubbing.
 
 If any test cannot comply with these rules for a good reason, **call out the exception explicitly** in the change description.
+
+---
+
+## Test Categories
+
+The following test categories apply across the repository, with tier-dependent obligations per `.github/instructions/quality-tiers.instructions.md`:
+
+- **Unit tests** — required for all tiers (T1–T4). Cover single units of behavior in isolation.
+- **Property-based tests** — required for T1 and T2 modules: at least one property test per pure function. Use `fast-check` (TypeScript) or `hypothesis` (Python) where applicable.
+- **Golden / snapshot tests** — required only for T1 classifier-output modules, tested against a versioned corpus. Snapshot tests are otherwise discouraged unless stable and intentional.
+- **Contract / schema tests** — required at every host-service boundary (e.g., Office.js, Microsoft Graph, internal API contracts).
+- **Mutation tests** — required for T1 modules: mutation score >= 75%. Run in pre-merge or nightly pipelines.
+- **Integration tests** — required where adapters interact with external systems; scoped per tier in the gate matrix.
+
+## Determinism Infrastructure
+
+All test code must be deterministic. The following infrastructure requirements apply uniformly:
+
+- **Controllable clock** — use a `Clock` interface (TypeScript) or `TimeProvider` (.NET) injected into code under test. Do not read wall-clock time directly in production code under test.
+- **Seeded RNG** — randomness must be supplied via a seedable interface; on test failure the seed must be printed so the failure is reproducible.
+- **Banned APIs in test code** — `setTimeout`, `Thread.Sleep`, `Task.Delay`, real wall-clock waits, and `Date.now()` outside the clock interface are prohibited in tests.
+- **Virtual scheduler / fake timers / `FakeTimeProvider`** — async tests must use the framework's fake-timer facility (`vi.useFakeTimers()` for Vitest, `FakeTimeProvider` for .NET) to advance simulated time deterministically.
 
 
 

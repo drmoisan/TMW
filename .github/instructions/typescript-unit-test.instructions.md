@@ -21,14 +21,14 @@ If there is any conflict between these documents, **halt and notify the user.**
 ## 1. Framework and Scope
 
 - **Testing framework**
-  - All TypeScript unit tests must use **Jest**.
+  - All TypeScript unit tests must use **Vitest**.
 
 - **Unit test definition**
   - Unit tests validate small, isolated behaviors (functions, helpers, small classes).
-  - Unit tests must not require launching the VS Code extension host or depending on a live VS Code environment.
+  - Unit tests must not require launching the Outlook host runtime or depending on a live Outlook web add-in context.
 
 - **Coverage expectation**
-  - All new TypeScript logic must be covered by Jest unit tests that follow the general unit test policy.
+  - All new TypeScript logic must be covered by Vitest unit tests that follow the general unit test policy.
 
 ---
 
@@ -79,19 +79,19 @@ Organize each test into:
 
 - Mock external APIs or platform dependencies to keep tests deterministic.
 - Prefer targeted mocks:
-  - `jest.spyOn(obj, 'method')` for specific functions
-  - `jest.mock('module')` for module-level dependencies
+  - `vi.spyOn(obj, 'method')` for specific functions
+  - `vi.mock('module')` for module-level dependencies
 
 ### **Resetting mocks**
 
 - Reset mocks between tests to ensure independence.
 - Preferred pattern:
-  - `afterEach(() => { jest.resetAllMocks(); });`
+  - `afterEach(() => { vi.resetAllMocks(); });`
 
 ### **Time and timers**
 
 - Avoid brittle timing assertions.
-- Prefer fake timers (`jest.useFakeTimers()`) or injected clocks when time is part of behavior.
+- Prefer fake timers (`vi.useFakeTimers()`) or injected clocks when time is part of behavior.
 
 ---
 
@@ -107,6 +107,29 @@ Organize each test into:
 
 When verifying TypeScript unit tests locally, use the repo-standard scripts:
 
-- Approved command: `npm run test:unit`
+- Approved command: `npm run test`
 
 > Formatting/lint/type-check commands for the full toolchain loop are defined in the TypeScript code change policy.
+
+---
+
+## 7. Property-Based and Mutation Testing
+
+- `fast-check` provides property-based tests; T1 and T2 modules require >= 1 property test per pure function.
+- `StrykerJS` provides mutation testing; T1 modules require mutation score >= 75%.
+- Both run in pre-merge or nightly pipelines per `.github/instructions/general-code-change.instructions.md`.
+
+## 8. Golden Tests
+
+- T1 classifier modules require golden-output snapshots tested against a versioned corpus.
+- General guidance to avoid snapshots unless stable and intentional remains in force for all other scenarios; classifier-output and schema-evolution snapshots are explicitly permitted when versioned.
+
+## 9. Runtime Determinism
+
+- `Date`, `Math.random`, and `setTimeout` access must flow through an injected `Clock` / `Random` interface.
+- Tests use Vitest fake timers (`vi.useFakeTimers()`).
+- Prefer `await flushPromises()` over `setTimeout(0)` for awaiting micro-tasks.
+
+## 10. Coverage Thresholds
+
+Coverage thresholds follow the uniform tier rule defined in `.github/instructions/quality-tiers.instructions.md`: line coverage >= 85% and branch coverage >= 75% across all tiers (T1–T4). Tier-specific lower thresholds are not used. Coverage regression on changed lines is a blocking finding.

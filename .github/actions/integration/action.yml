@@ -1,0 +1,9 @@
+name: Integration
+description: Integration tests stage. Lights up in later prompts when adapter and backend code exists.
+runs:
+  using: composite
+  steps:
+    - name: Integration (placeholder)
+      shell: pwsh
+      run: |
+        Write-Host "Integration stage: no integration tests in repo yet; skipping (no-op)."

@@ -1,0 +1,22 @@
+# lefthook.yml
+# Pre-commit framework configuration. Install lefthook locally via:
+#   npm install --save-dev @evilmartians/lefthook
+#   npx lefthook install
+# On Windows the runner shell is pwsh; commands below are pwsh-compatible.
+# Set LEFTHOOK=0 in CI to skip these hooks (CI runs the equivalent stages directly).
+
+pre-commit:
+  parallel: true
+  commands:
+    gitleaks-staged:
+      run: pwsh -NoProfile -Command "$bin = & .github/scripts/install-gitleaks.ps1; & $bin protect --staged --no-banner --redact --config=.gitleaks.toml"
+
+commit-msg:
+  commands:
+    conventional-commits:
+      run: pwsh -NoProfile -File .githooks/check-conventional-commit.ps1 -MessageFile {1}
+
+pre-push:
+  commands:
+    placeholder:
+      run: pwsh -NoProfile -Command "Write-Host 'pre-push placeholder: stage-specific gates wired in later prompts.'"
