@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm run depcruise
+EXIT_CODE: 0
+Output Summary: 9 modules, 8 dependencies cruised. 0 errors, 1 warning (`no-orphans` on `src/commands/commands.ts` — expected webpack entry point). Exit 0.

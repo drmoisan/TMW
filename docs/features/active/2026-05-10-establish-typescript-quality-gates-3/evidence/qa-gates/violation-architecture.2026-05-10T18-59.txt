@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm run depcruise (with tests/violations/arch-violation.ts.disabled copied to src/commands/arch-violation.ts)
+EXIT_CODE: 1
+Output Summary: Architecture gate detected the violation. dependency-cruiser reported `error taskpane-not-from-commands: src/commands/arch-violation.ts -> src/taskpane/taskpane.ts`. 2 dependency violations (1 error, 1 warning). Exit code 1. After Remove-Item src/commands/arch-violation.ts, npm run depcruise exits 0 (green restored).

@@ -1,0 +1,2 @@
+import { run } from "../taskpane/taskpane"; // commands-not-from-taskpane violation
+export { run };

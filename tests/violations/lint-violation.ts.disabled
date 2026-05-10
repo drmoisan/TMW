@@ -1,0 +1,6 @@
+// eslint-disable line intentionally absent — this file is a violation demo
+async function fetchData() {
+  return Promise.resolve(1);
+}
+fetchData(); // no-floating-promises violation
+export {};

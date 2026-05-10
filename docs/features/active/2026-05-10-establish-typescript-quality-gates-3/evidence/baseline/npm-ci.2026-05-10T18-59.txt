@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm ci --no-audit --no-fund
+EXIT_CODE: 0
+Output Summary: 1324 packages installed cleanly. patch-package applied @microsoft/app-manifest@1.0.5. Deprecation warnings present (transitive only). Baseline node_modules established.

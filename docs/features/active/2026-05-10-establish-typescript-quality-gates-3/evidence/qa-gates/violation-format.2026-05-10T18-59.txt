@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm run format:check (with tests/violations/format-violation.ts.disabled copied to src/format-violation.ts)
+EXIT_CODE: 1
+Output Summary: Format gate detected the violation. Prettier reported `[warn] src/format-violation.ts` and "Code style issues found in the above file. Run Prettier with --write to fix." Exit code 1. After Remove-Item src/format-violation.ts, npm run format:check exits 0 (green restored).

@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm test
+EXIT_CODE: 0
+Output Summary: 1 test file (src/taskpane/taskpane.test.ts), 1 test passing in 666ms. Vitest runs with jsdom environment; MSW server lifecycle and Office global injection both active per vitest-setup.ts.

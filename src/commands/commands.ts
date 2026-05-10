@@ -5,7 +5,7 @@
 
 /* global Office */
 
-Office.onReady(() => {
+void Office.onReady(() => {
   // If needed, Office.js is ready to be called.
 });
 
@@ -14,6 +14,11 @@ Office.onReady(() => {
  * @param event
  */
 function action(event: Office.AddinCommands.Event) {
+  const item = Office.context.mailbox.item as Office.MessageRead | null | undefined;
+  if (item === null || item === undefined) {
+    event.completed();
+    return;
+  }
   const message: Office.NotificationMessageDetails = {
     type: Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
     message: "Performed action.",
@@ -22,10 +27,7 @@ function action(event: Office.AddinCommands.Event) {
   };
 
   // Show a notification message.
-  Office.context.mailbox.item.notificationMessages.replaceAsync(
-    "ActionPerformanceNotification",
-    message
-  );
+  item.notificationMessages.replaceAsync("ActionPerformanceNotification", message);
 
   // Be sure to indicate when the add-in command function is complete.
   event.completed();
@@ -33,3 +35,5 @@ function action(event: Office.AddinCommands.Event) {
 
 // Register the function with Office.
 Office.actions.associate("action", action);
+
+export {};

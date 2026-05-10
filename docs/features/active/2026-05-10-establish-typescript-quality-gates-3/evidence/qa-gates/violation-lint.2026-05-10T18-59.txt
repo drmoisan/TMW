@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm run lint (with tests/violations/lint-violation.ts.disabled copied to src/lint-violation.ts)
+EXIT_CODE: 1
+Output Summary: Lint gate detected the violation. ESLint reported `@typescript-eslint/no-floating-promises` error at src/lint-violation.ts:5:1 with the canonical "Promises must be awaited..." message. 1 problem (1 error, 0 warnings). Exit code 1. After Remove-Item src/lint-violation.ts, npm run lint exits 0 (green restored).

@@ -1,0 +1,4 @@
+Timestamp: 2026-05-10T18-59
+Command: npm install --save-dev @vitest/coverage-v8@^2.1.8
+EXIT_CODE: 0
+Output Summary: @vitest/coverage-v8 pinned to ^2.1.8 (matches vitest version).
