@@ -1,39 +1,14 @@
 /*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
+ * TaskMaster commands runtime entry point.
+ *
+ * Reserved for future Office.actions registrations required by the manifest's
+ * CommandsRuntime. Currently the runtime only needs to call Office.onReady.
  */
 
 /* global Office */
 
 void Office.onReady(() => {
-  // If needed, Office.js is ready to be called.
+  /* noop */
 });
-
-/**
- * Shows a notification when the add-in command is executed.
- * @param event
- */
-function action(event: Office.AddinCommands.Event) {
-  const item = Office.context.mailbox.item as Office.MessageRead | null | undefined;
-  if (item === null || item === undefined) {
-    event.completed();
-    return;
-  }
-  const message: Office.NotificationMessageDetails = {
-    type: Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
-    message: "Performed action.",
-    icon: "Icon.80x80",
-    persistent: true,
-  };
-
-  // Show a notification message.
-  item.notificationMessages.replaceAsync("ActionPerformanceNotification", message);
-
-  // Be sure to indicate when the add-in command function is complete.
-  event.completed();
-}
-
-// Register the function with Office.
-Office.actions.associate("action", action);
 
 export {};
