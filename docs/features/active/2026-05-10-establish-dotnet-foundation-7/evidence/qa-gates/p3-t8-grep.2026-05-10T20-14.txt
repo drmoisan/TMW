@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P3-T8
+Command: Select-String -Path '.github/agents/csharp-typed-engineer.agent.md' -Pattern 'xUnit','NSubstitute','\[Fact\]'; -Pattern 'MSTest','\bMoq\b','TestClass','TestMethod','Mock<'
+EXIT_CODE: 0
+Output Summary: required xUnit, NSubstitute, [Fact] (via [Theory] + [InlineData] reference and Substitute.For<IService>() snippet) all present. Forbidden MSTest, Moq, TestClass, TestMethod, Mock< all absent after rewrite. AC14 satisfied.

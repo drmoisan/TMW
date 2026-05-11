@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T20-14
+Task: P9-T2
+Command: Select-String -Path 'Directory.Packages.props','src/TaskMaster.Api/TaskMaster.Api.csproj' -Pattern 'NSwag\.MSBuild'
+EXIT_CODE: 0
+Output Summary:
+  Directory.Packages.props line: `<PackageVersion Include="NSwag.MSBuild" Version="14.7.0" />`
+  src/TaskMaster.Api/TaskMaster.Api.csproj line: `<PackageReference Include="NSwag.MSBuild"> <PrivateAssets>all</PrivateAssets> ...`
+Two matches present. AC24 (precondition) satisfied.

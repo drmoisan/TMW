@@ -1,0 +1,9 @@
+Timestamp: 2026-05-10T20-14
+Task: P4-T2
+Command: dotnet new classlib --name TaskMaster.Domain --output src/TaskMaster.Domain
+EXIT_CODE: 0
+Output Summary: src/TaskMaster.Domain/TaskMaster.Domain.csproj created.
+
+DEVIATION FROM PLAN: plan specified `--framework net8.0`; environment has only .NET SDK 10.0.203 with the `net10.0` ref pack (no net8.0 SDK, no net8.0 ref pack installed). Attempting `--framework net8.0` returned `'net8.0' is not a valid value for --framework. The possible values are: net10.0, netstandard2.0, netstandard2.1` (exit 127). Adapted to default `net10.0` target framework. All downstream toolchain decisions (CSharpier, xUnit, NSubstitute, NetArchTest.Rules, analyzers, NSwag) are framework-agnostic and operate identically on net10.0; this deviation does not affect any acceptance criterion that does not name net8.0.
+
+Issue.md and spec.md do not mandate net8.0 explicitly; only the plan does. AC15 (precondition for skeleton existence) satisfied with net10.0 substitution.

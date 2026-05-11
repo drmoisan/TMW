@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- xUnit test SDK (centralized versions per Directory.Packages.props). -->
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit" />
+        <PackageReference Include="xunit.runner.visualstudio" />
+
+        <!-- Test framework helpers. -->
+        <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="NSubstitute" />
+
+        <!-- Architecture tests. -->
+        <PackageReference Include="NetArchTest.Rules" />
+
+        <!-- Anchored test SDK references (required by acceptance criteria; not used at runtime yet). -->
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+        <PackageReference Include="WireMock.Net" />
+        <PackageReference Include="Testcontainers" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\TaskMaster.Domain\TaskMaster.Domain.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T7
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern 'CsCheck','Stryker\.NET'
+EXIT_CODE: 0
+Output Summary: `### Property-Based and Mutation Testing` subsection (L48) names CsCheck (L50, >=1 per pure function on T1/T2) and Stryker.NET (L51, T1, >=75% mutation score). AC6 satisfied.

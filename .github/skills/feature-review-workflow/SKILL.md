@@ -93,6 +93,7 @@ Always apply:
      3. type check
      4. tests
    - Run the smallest relevant subset first when the repo policy permits it.
+   - For C# coverage, use `dotnet test --collect:"XPlat Code Coverage"`.
    - If a tool cannot run in the environment, mark the affected section unverified or partial with a concrete reason.
 
 6. **Produce the code review**

@@ -1,0 +1,12 @@
+name: dotnet-test
+description: Run the TaskMaster solution unit tests with coverage.
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: dotnet test (with coverage)
+      shell: pwsh
+      run: dotnet test TaskMaster.sln --collect:"XPlat Code Coverage" --no-build --results-directory TestResults/

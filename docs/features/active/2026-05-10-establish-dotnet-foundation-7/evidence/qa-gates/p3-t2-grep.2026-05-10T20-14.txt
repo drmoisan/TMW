@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P3-T2
+Command: Select-String -Path '.claude/skills/csharp-qa-gate/SKILL.md' -Pattern 'dotnet build','dotnet test --collect:"XPlat Code Coverage"','xUnit','ArchitectureTests'; -Pattern 'msbuild','vstest\.console','MSTest','EnableNETAnalyzers','EnforceCodeStyleInBuild'
+EXIT_CODE: 0
+Output Summary: 9 hits across required patterns (dotnet build, dotnet test --collect:"XPlat Code Coverage", xUnit, ArchitectureTests appear in updated toolchain sequence steps 3-5 and Delta Requirements/Reporting block). Five forbidden patterns absent. AC11 satisfied.

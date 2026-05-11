@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P5-T1
+Command: Select-String -Path 'Directory.Build.props' -Pattern '<Nullable>enable</Nullable>','<TreatWarningsAsErrors>true</TreatWarningsAsErrors>','<AnalysisLevel>latest-all</AnalysisLevel>','<AnalysisMode>All</AnalysisMode>'
+EXIT_CODE: 0
+Output Summary: all four required properties present in Directory.Build.props (lines 3-6, single shared PropertyGroup). LangVersion=latest also present (line 7). AC15 satisfied.

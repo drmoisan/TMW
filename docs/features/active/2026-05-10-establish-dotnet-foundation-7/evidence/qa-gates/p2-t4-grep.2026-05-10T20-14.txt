@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P2-T4
+Command: Select-String -Path '.github/instructions/csharp-unit-test.instructions.md' -Pattern 'line >= 85%','branch >= 75%','uniform','mutation >= 75%','TimeProvider','FakeTimeProvider'
+EXIT_CODE: 0
+Output Summary: Coverage section (§4) names `line >= 85%`, `branch >= 75%`, `uniform across all tiers`, `mutation >= 75%` on T1, plus `TimeProvider` and `FakeTimeProvider` for the deterministic clock seam. All six patterns matched. AC9 satisfied for coverage and clock seam.

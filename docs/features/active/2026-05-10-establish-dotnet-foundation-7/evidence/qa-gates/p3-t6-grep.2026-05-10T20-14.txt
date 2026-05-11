@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P3-T6
+Command: Select-String -Path '.claude/skills/feature-review-workflow/SKILL.md' -Pattern 'dotnet test --collect:"XPlat Code Coverage"'; -Pattern 'vstest\.console'
+EXIT_CODE: 0
+Output Summary: required `dotnet test --collect:"XPlat Code Coverage"` present (line 99); forbidden `vstest.console` absent. AC13 satisfied.

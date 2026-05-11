@@ -16,6 +16,31 @@ projects:
       Scaffold-tier (T4): build wiring, manifest, and bootstrap only. Will be re-tiered
       when domain modules and classifier engines are introduced (Prompt B1+).
 
+  # .NET foundation projects added by Issue #7 (Prompt C1).
+  - name: TaskMaster.Domain
+    path: src/TaskMaster.Domain
+    language: csharp
+    tier: t2
+    rationale: |
+      Core domain library (T2). Currently an empty placeholder (only AssemblyMarker is
+      present); domain types arrive in later prompts. Tier reflects intended role per
+      quality-tiers.md (core domain bugs cause feature regression but not data loss).
+  - name: TaskMaster.Api
+    path: src/TaskMaster.Api
+    language: csharp
+    tier: t3
+    rationale: |
+      Web API adapter (T3). Hosts the minimal API surface and NSwag-driven OpenAPI
+      emission. T3 tier reflects adapter-glue role around ASP.NET Core; the team does
+      not own the ASP.NET Core/OpenAPI surface.
+  - name: TaskMaster.ArchitectureTests
+    path: tests/TaskMaster.ArchitectureTests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): NetArchTest.Rules facts enforcing No-COM architecture and
+      domain/infrastructure layering. Tier reflects test-infrastructure role.
+
 # Validator behavior (read by .github/workflows/pr-pipeline.yml stage tier-classification):
 # - Every entry under projects MUST have name, path, language, tier.
 # - tier value MUST be one of: t1, t2, t3, t4.

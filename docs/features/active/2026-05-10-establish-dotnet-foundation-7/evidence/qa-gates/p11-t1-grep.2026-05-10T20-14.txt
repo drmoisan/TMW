@@ -1,0 +1,9 @@
+Timestamp: 2026-05-10T20-14
+Task: P11-T1
+Command: Select-String -Path 'quality-tiers.yml' -Pattern 'TaskMaster\.Domain','TaskMaster\.Api','TaskMaster\.ArchitectureTests','language: csharp'
+EXIT_CODE: 0
+Output Summary: quality-tiers.yml now lists:
+  - TaskMaster.Domain (path src/TaskMaster.Domain, language csharp, tier t2, rationale: core domain library)
+  - TaskMaster.Api (path src/TaskMaster.Api, language csharp, tier t3, rationale: web API adapter)
+  - TaskMaster.ArchitectureTests (path tests/TaskMaster.ArchitectureTests, language csharp, tier t4, rationale: test scaffolding)
+Three new entries plus three `language: csharp` markers (matching pattern returns 4+ hits). AC30 satisfied.

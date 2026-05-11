@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P10-T2
+Command: Select-String -Path '.github/actions/dotnet-build/action.yml' -Pattern 'dotnet build','--warnaserror'
+EXIT_CODE: 0
+Output Summary: .github/actions/dotnet-build/action.yml exists. Composite action runs `dotnet restore TaskMaster.sln` then `dotnet build TaskMaster.sln --no-restore --warnaserror`. AC25 (build stage) satisfied.

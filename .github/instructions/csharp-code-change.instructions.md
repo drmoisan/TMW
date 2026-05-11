@@ -25,30 +25,64 @@ These are the required tools for C# code in this repo:
 1. **Formatting — `csharpier`**
 
    - All C# source files (`*.cs`) must be formatted with `csharpier`.
-   - Do **not** use `dotnet format` — it loads the solution/project model and can mis-handle legacy VSTO / .NET Framework projects by rewriting `.csproj` files.
+   - Do **not** use `dotnet format`.
    - `csharpier` is file-based and formats only `*.cs` without touching project files.
    - Do not hand-format; if a diff disagrees with `csharpier`, formatter output wins.
    - Approved commands:
-     - `dotnet tool run csharpier .`
-     - or `csharpier .` (if installed globally)
+     - `dotnet tool restore`
+     - `dotnet csharpier check .` (CI) or `dotnet csharpier .` (auto-format)
 
 2. **Linting / Static Analysis — .NET analyzers**
 
-   - C# code must pass Roslyn/.NET analyzer diagnostics configured by `.editorconfig`, `.globalconfig`, and project properties.
-   - Enforce analyzer diagnostics in build using `EnableNETAnalyzers` and `EnforceCodeStyleInBuild`.
+   - C# code must pass Roslyn/.NET analyzer diagnostics configured by `.editorconfig`, `.globalconfig`, `Directory.Build.props`, and project properties.
+   - Analyzer enforcement is centralized in `Directory.Build.props` (`AnalysisLevel=latest-all`, `AnalysisMode=All`, `TreatWarningsAsErrors=true`). Do not duplicate these settings per project.
    - Prefer fixing diagnostics over suppressing them.
-   - Approved commands (Windows; choose the variant for your shell):
-     - **CMD / Developer Command Prompt:** `msbuild TaskMaster.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:EnableNETAnalyzers=true /p:EnforceCodeStyleInBuild=true`
-     - **PowerShell:** `msbuild TaskMaster.sln /t:Build /p:Configuration=Debug /p:Platform='Any CPU' /p:EnableNETAnalyzers=true /p:EnforceCodeStyleInBuild=true`
+   - Approved command:
+     - `dotnet build` (analyzers run as part of the build; `TreatWarningsAsErrors=true` fails on any analyzer or compiler warning).
 
 3. **Type Checking — C# compiler + nullable analysis**
 
    - Treat C# compiler diagnostics and nullable-flow warnings as first-class type-safety checks.
-   - Enable nullable reference types and fail builds on warnings for touched code paths.
+   - Nullable reference types are enabled solution-wide via `Directory.Build.props` (`Nullable=enable`).
    - Avoid introducing nullable warnings; fix the root null-state issue instead.
-   - Approved commands (Windows; choose the variant for your shell):
-     - **CMD / Developer Command Prompt:** `msbuild TaskMaster.sln /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:Nullable=enable /p:TreatWarningsAsErrors=true`
-     - **PowerShell:** `msbuild TaskMaster.sln /t:Build /p:Configuration=Debug /p:Platform='Any CPU' /p:Nullable=enable /p:TreatWarningsAsErrors=true`
+   - Approved command:
+     - `dotnet build` (with `TreatWarningsAsErrors=true` set in `Directory.Build.props`, nullable warnings fail the build).
+
+### Analyzer Stack
+
+All projects reference the following analyzer packages via `<PackageReference>` with `PrivateAssets="all"`, with versions pinned centrally in `Directory.Packages.props` and the shared `<ItemGroup>` declared in `Directory.Build.props`:
+
+- `Meziantou.Analyzer`
+- `SonarAnalyzer.CSharp`
+- `Roslynator.Analyzers`
+- `AsyncFixer`
+- `SecurityCodeScan.VS2019`
+- `Microsoft.CodeAnalysis.BannedApiAnalyzers`
+
+### Banned APIs
+
+The following APIs are banned outside an explicit allowlist; enforcement uses `Microsoft.CodeAnalysis.BannedApiAnalyzers` against `BannedSymbols.txt` (at solution root, wired via `Directory.Build.props` `<AdditionalFiles>`):
+
+- `DateTime.Now`, `DateTime.UtcNow` (use `TimeProvider`)
+- `Random.Shared` (inject a seeded `Random`)
+- `Thread.Sleep`, `Task.Delay` (banned in production paths; tests use `FakeTimeProvider`)
+
+### DI Seams
+
+- **`TimeProvider`** is the preferred clock seam for new code (since .NET 8).
+- Test code injects `FakeTimeProvider` from **`Microsoft.Extensions.TimeProvider.Testing`**.
+- `IClock` is acceptable only in legacy or pre-.NET 8 code paths.
+
+### Coverage
+
+- Line coverage line >= 85% and branch coverage branch >= 75% uniform across all tiers (T1–T4).
+- Mutation score mutation >= 75% on T1 modules (via Stryker.NET).
+
+### Property-Based, Mutation, and Golden Tests
+
+- **CsCheck**: at least one property-based test per pure function on T1 and T2 modules.
+- **Stryker.NET**: mutation testing on T1 modules with mutation score mutation >= 75%.
+- **Verify.Xunit**: golden tests for T1 classifier-output modules.
 
 > **Testing tools and behavior are defined in the unit test policies.** Do not define test behavior here; instead, obey `general-unit-test.instructions.md` and `csharp-unit-test.instructions.md`.
 

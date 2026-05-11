@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P12-T4
+Command: dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj --no-build
+EXIT_CODE: 0
+Output Summary: Passed! - Failed: 0, Passed: 3, Skipped: 0, Total: 3, Duration: 48 ms - TaskMaster.ArchitectureTests.dll (net10.0). All three NetArchTest facts (NoProjectDependsOnOutlookInterop, NoProjectDependsOnForbiddenLegacyNamespaces, DomainProjectDoesNotDependOnInfrastructure) pass on the empty skeleton. AC21, AC26 (architecture gate) green.

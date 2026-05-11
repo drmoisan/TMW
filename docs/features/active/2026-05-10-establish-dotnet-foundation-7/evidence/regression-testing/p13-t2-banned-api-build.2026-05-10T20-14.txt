@@ -1,0 +1,11 @@
+Timestamp: 2026-05-10T20-14
+Task: P13-T2 [expect-fail]
+Command: dotnet build TaskMaster.sln --no-incremental
+EXIT_CODE: 1
+Output Summary:
+  src/TaskMaster.Domain/_violations/BannedApiProbe.cs(6,34): error RS0030: The symbol 'Random.Shared' is banned in this project (https://github.com/dotnet/roslyn-analyzers/blob/main/src/Microsoft.CodeAnalysis.BannedApiAnalyzers/BannedApiAnalyzers.Help.md)
+  Build FAILED.
+  3 Error(s)
+The build fails as expected. The failing diagnostic ID is RS0030 (from Microsoft.CodeAnalysis.BannedApiAnalyzers). The diagnostic message names `Random.Shared`, which corresponds to the BannedSymbols.txt entry `P:System.Random.Shared`. AC27 satisfied: representative banned-API violation blocks the build, evidence captured.
+
+Full build log (44 lines) shows additional errors from related analyzers (CA5394 / SCS0005 weak random number generator) which reinforce that the layered analyzer stack is active and effective.

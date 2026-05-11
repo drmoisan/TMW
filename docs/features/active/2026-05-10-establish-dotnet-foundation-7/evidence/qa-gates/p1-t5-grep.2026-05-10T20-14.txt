@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T5
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern 'BannedSymbols\.txt','DateTime\.Now','DateTime\.UtcNow','Random\.Shared','Thread\.Sleep','Task\.Delay'
+EXIT_CODE: 0
+Output Summary: `## Banned APIs` section at L70 references `BannedSymbols.txt` (L72) and bans all five APIs: DateTime.Now (L74), DateTime.UtcNow (L75), Random.Shared (L76), Thread.Sleep (L77), Task.Delay (L78). Six required matches, all present. AC4 satisfied.

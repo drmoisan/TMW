@@ -1,0 +1,13 @@
+Timestamp: 2026-05-10T20-14
+Task: P10-T6
+Command: pwsh -NoProfile -Command "Import-Module powershell-yaml; ConvertFrom-Yaml (Get-Content .github/workflows/pr-pipeline.yml -Raw); listed jobs."
+EXIT_CODE: 0
+Output Summary: Workflow YAML parses cleanly via powershell-yaml. Jobs enumerated:
+  stage-1-format, stage-1-dotnet-format
+  stage-2-lint, stage-2-dotnet-build
+  stage-3-typecheck, stage-3-dotnet-typecheck
+  stage-4-architecture, stage-4-dotnet-architecture
+  stage-5-test, stage-5-dotnet-test
+  stage-6-contract, stage-7-integration
+  tier-classification, secret-scan
+All 14 jobs valid YAML. AC25 satisfied.

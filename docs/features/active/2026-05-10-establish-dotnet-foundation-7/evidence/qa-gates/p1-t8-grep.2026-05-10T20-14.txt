@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T8
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern 'Verify\.Xunit'
+EXIT_CODE: 0
+Output Summary: `### Golden Tests` subsection (L53) names Verify.Xunit (L55) for T1 classifier-output modules. AC7 satisfied.

@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T2
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern '\bMoq\b','TaskMaster\.sln','msbuild'
+EXIT_CODE: 0
+Output Summary: zero matches across Moq, TaskMaster.sln, msbuild patterns in `.claude/rules/csharp.md`. AC1 toolchain rename satisfied for the rule file.

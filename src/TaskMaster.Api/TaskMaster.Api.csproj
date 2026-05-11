@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="NSwag.MSBuild">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <!-- Phase 9 / AC24: emit OpenAPI to artifacts/openapi/current.json after build via NSwag. -->
+    <Target Name="GenerateOpenApi" AfterTargets="Build" Condition="'$(SkipNSwag)' != 'true'">
+        <MakeDir Directories="$(MSBuildThisFileDirectory)..\..\artifacts\openapi\" />
+        <Exec
+            Command="$(NSwagExe_Net100) aspnetcore2openapi /project:&quot;$(MSBuildProjectFullPath)&quot; /noBuild:true /output:&quot;$(MSBuildThisFileDirectory)..\..\artifacts\openapi\current.json&quot;"
+            ContinueOnError="true"
+            IgnoreExitCode="true"
+        />
+    </Target>
+</Project>

@@ -1,0 +1,17 @@
+Timestamp: 2026-05-10T20-14
+Task: P5-T4
+Command: dotnet new tool-manifest; dotnet tool install csharpier; mv dotnet-tools.json .config/dotnet-tools.json
+EXIT_CODE: 0
+Output Summary: .config/dotnet-tools.json created and csharpier 1.2.6 registered. Manifest content:
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "csharpier": {
+      "version": "1.2.6",
+      "commands": ["csharpier"],
+      "rollForward": false
+    }
+  }
+}
+Note: SDK 10.0.203 emits the manifest at repo root by default; moved to .config/ per plan. AC19 (tool manifest portion) satisfied.

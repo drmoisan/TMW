@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P2-T5 (Phase 2 closure)
+Command: Select-String -Path '.github/instructions/csharp-code-change.instructions.md','.github/instructions/csharp-unit-test.instructions.md' -Pattern 'MSTest','TestClass','TestMethod','\bMoq\b','vstest\.console','TaskMaster\.sln','msbuild'
+EXIT_CODE: 0
+Output Summary: zero matches across all seven forbidden tokens in both instruction files. AC8 and AC9 mirror discipline satisfied.

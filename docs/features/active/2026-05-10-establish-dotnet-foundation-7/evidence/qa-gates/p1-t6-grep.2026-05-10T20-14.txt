@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T6
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern 'line >= 85%','branch >= 75%','uniform','mutation >= 75%'
+EXIT_CODE: 0
+Output Summary: Coverage subsection (L42) states `line >= 85%` and `branch >= 75%` uniform across tiers (L44), and `mutation >= 75%` on T1 modules (L45). Required phrasing matches plan acceptance text. AC5 satisfied.

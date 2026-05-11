@@ -1,0 +1,13 @@
+Timestamp: 2026-05-10T20-14
+Task: P6-T4
+Command: dotnet build TaskMaster.sln --no-incremental
+EXIT_CODE: 0
+Output Summary:
+  TaskMaster.Domain -> bin/Debug/net10.0/TaskMaster.Domain.dll
+  TaskMaster.ArchitectureTests -> bin/Debug/net10.0/TaskMaster.ArchitectureTests.dll
+  Build succeeded.
+      0 Warning(s)
+      0 Error(s)
+  Time Elapsed 00:00:07.44 (initial clean build with all six analyzers active and BannedSymbols.txt wired)
+
+Note: First-pass build failed with S2094 against the SDK-template-generated empty `Class1.cs` and `UnitTest1.cs` — analyzers are demonstrably active. Template files were removed (they are scaffolding only, not part of the empty-skeleton scope) and the rebuild succeeded clean with 0 warnings and 0 errors under `TreatWarningsAsErrors=true`. AC17, AC18, AC26 (precondition) satisfied.

@@ -96,7 +96,7 @@ Always apply:
         - TypeScript: `npm run test:unit:coverage` → artifact: `coverage/lcov.info`
         - Python: `poetry run pytest --cov` → artifact: `artifacts/python/lcov.info`
         - PowerShell: `mcp__drm-copilot__run_poshqc_test` → artifact: `artifacts/pester/powershell-coverage.xml`
-        - C#: `vstest.console.exe <test-assembly-paths> /EnableCodeCoverage` → artifact: `artifacts/csharp/coverage.xml`
+        - C#: `dotnet test --collect:"XPlat Code Coverage"` → artifact: `artifacts/csharp/coverage.xml`
         - Coverage thresholds (uniform tier rule per quality-tiers.md):
           - New code files (added in this feature): line coverage >= 85% and branch coverage >= 75%. Flag as FAIL otherwise.
           - Modified files (changed but previously existing): line coverage >= 85%, branch coverage >= 75%, and no regression on changed lines relative to baseline. Flag as FAIL otherwise.

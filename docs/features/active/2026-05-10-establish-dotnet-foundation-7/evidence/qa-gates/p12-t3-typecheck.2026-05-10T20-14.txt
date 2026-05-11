@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P12-T3
+Command: Select-String -Path 'evidence/qa-gates/p12-t2-build.2026-05-10T20-14.txt' -Pattern 'Nullable warnings'
+EXIT_CODE: 0
+Output Summary: nullable enforcement was active during P12-T2 via `<Nullable>enable</Nullable>` + `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` in Directory.Build.props. Grep of /tmp/p12-t2.out for 'nullable' returned 0 matches; build log shows `0 Warning(s)`. Zero nullable warnings recorded. AC26 (type-check gate) green.

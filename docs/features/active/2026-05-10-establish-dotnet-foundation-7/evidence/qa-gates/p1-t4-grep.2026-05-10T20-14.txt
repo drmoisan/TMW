@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T4
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern 'TimeProvider','Microsoft\.Extensions\.TimeProvider\.Testing','IClock.*legacy|legacy.*IClock'
+EXIT_CODE: 0
+Output Summary: `TimeProvider` present on L10, L74, L75, L80, L96, L97, L98; `Microsoft.Extensions.TimeProvider.Testing` present on L80, L97; `IClock legacy` phrase present on L98 (`IClock legacy: acceptable only in legacy or pre-.NET 8 contexts...`). DI Seams section (Clock Seam subsection at L94) names TimeProvider as preferred and FakeTimeProvider for tests. AC3 satisfied.

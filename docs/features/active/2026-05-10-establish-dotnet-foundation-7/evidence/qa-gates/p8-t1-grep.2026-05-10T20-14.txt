@@ -1,0 +1,11 @@
+Timestamp: 2026-05-10T20-14
+Task: P8-T1
+Command: Select-String -Path 'tests/TaskMaster.ArchitectureTests/NoComArchitectureTests.cs' -Pattern '\[Fact\]','Microsoft\.Office\.Interop\.Outlook','System\.Windows\.Forms','System\.Web','Microsoft\.VisualBasic','TaskMaster\.Infrastructure','NetArchTest'
+EXIT_CODE: 0
+Output Summary: NoComArchitectureTests.cs contains:
+  - 3 `[Fact]` declarations (NoProjectDependsOnOutlookInterop, NoProjectDependsOnForbiddenLegacyNamespaces, DomainProjectDoesNotDependOnInfrastructure)
+  - `NetArchTest.Rules` using directive present
+  - Microsoft.Office.Interop.Outlook string referenced in Fact (a)
+  - System.Windows.Forms, System.Web, Microsoft.VisualBasic strings referenced in Fact (b)
+  - TaskMaster.Infrastructure string referenced in Fact (c)
+File length: 93 lines (well under 500-line budget). AC21 satisfied.

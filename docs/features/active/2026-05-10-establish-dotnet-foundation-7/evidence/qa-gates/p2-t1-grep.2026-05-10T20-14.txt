@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P2-T1
+Command: Select-String -Path '.github/instructions/csharp-code-change.instructions.md' -Pattern 'MSTest','TestClass','TestMethod','\bMoq\b','vstest\.console','TaskMaster\.sln','msbuild'
+EXIT_CODE: 0
+Output Summary: zero matches across all seven forbidden tokens after rewrite. AC8 framework/toolchain rename mirrored.

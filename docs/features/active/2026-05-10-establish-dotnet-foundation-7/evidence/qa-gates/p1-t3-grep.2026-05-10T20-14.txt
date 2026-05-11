@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T3
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern 'Meziantou\.Analyzer','SonarAnalyzer\.CSharp','Roslynator\.Analyzers','AsyncFixer','SecurityCodeScan\.VS2019','Microsoft\.CodeAnalysis\.BannedApiAnalyzers'; -Pattern 'PrivateAssets="all"'
+EXIT_CODE: 0
+Output Summary: 6 analyzer packages each on their own bullet line (L61-L66) under the `## Analyzer Stack` section (L57); each annotated with `PrivateAssets="all"`. `PrivateAssets="all"` token appears 7 times (intro + each bullet). AC2 satisfied.
