@@ -8,7 +8,7 @@
 /* global Office */
 
 void Office.onReady(() => {
-  /* noop */
+    /* noop */
 });
 
 export {};

@@ -3,20 +3,20 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 type MailboxHandler = () => void;
 
 interface OfficeMailboxStub {
-  item: unknown;
-  addHandlerAsync: ReturnType<typeof vi.fn>;
-  removeHandlerAsync?: ReturnType<typeof vi.fn>;
+    item: unknown;
+    addHandlerAsync: ReturnType<typeof vi.fn>;
+    removeHandlerAsync?: ReturnType<typeof vi.fn>;
 }
 
 interface OfficeStub {
-  onReady: (cb: (info: { host: string | null }) => void) => void;
-  HostType: { Outlook: string };
-  EventType: { ItemChanged: string };
-  context: { mailbox: OfficeMailboxStub };
+    onReady: (cb: (info: { host: string | null }) => void) => void;
+    HostType: { Outlook: string };
+    EventType: { ItemChanged: string };
+    context: { mailbox: OfficeMailboxStub };
 }
 
 function installShellDom(): void {
-  document.body.innerHTML = `
+    document.body.innerHTML = `
     <div id="sideload-msg"></div>
     <div id="app-body">
       <p id="status"></p>
@@ -27,193 +27,199 @@ function installShellDom(): void {
 }
 
 function installOffice(
-  stub: Partial<OfficeStub> & { context: { mailbox: OfficeMailboxStub } }
+    stub: Partial<OfficeStub> & { context: { mailbox: OfficeMailboxStub } }
 ): void {
-  const defaults: OfficeStub = {
-    onReady: (cb) => {
-      cb({ host: "Outlook" });
-    },
-    HostType: { Outlook: "Outlook" },
-    EventType: { ItemChanged: "olkItemSelectedChanged" },
-    context: stub.context,
-  };
-  const merged: OfficeStub = { ...defaults, ...stub };
-  (globalThis as Record<string, unknown>)["Office"] = merged;
+    const defaults: OfficeStub = {
+        onReady: (cb) => {
+            cb({ host: "Outlook" });
+        },
+        HostType: { Outlook: "Outlook" },
+        EventType: { ItemChanged: "olkItemSelectedChanged" },
+        context: stub.context,
+    };
+    const merged: OfficeStub = { ...defaults, ...stub };
+    (globalThis as Record<string, unknown>)["Office"] = merged;
 }
 
 describe("renderItem / renderEmpty pure functions", () => {
-  beforeEach(() => {
-    vi.resetModules();
-    installShellDom();
-  });
+    beforeEach(() => {
+        vi.resetModules();
+        installShellDom();
+    });
 
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
 
-  it("renderItem writes subject and sender into supplied DOM elements", async () => {
-    // Arrange
-    installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-    const mod = await import("./taskpane");
-    const dom = {
-      status: document.getElementById("status") as HTMLElement,
-      subject: document.getElementById("selected-subject") as HTMLElement,
-      from: document.getElementById("selected-from") as HTMLElement,
-    };
+    it("renderItem writes subject and sender into supplied DOM elements", async () => {
+        // Arrange
+        installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
+        const mod = await import("./taskpane");
+        const dom = {
+            status: document.getElementById("status") as HTMLElement,
+            subject: document.getElementById("selected-subject") as HTMLElement,
+            from: document.getElementById("selected-from") as HTMLElement,
+        };
 
-    // Act
-    mod.renderItem(
-      {
-        subject: "Quarterly review",
-        from: { displayName: "Ana", emailAddress: "ana@example.com" },
-      },
-      dom
-    );
+        // Act
+        mod.renderItem(
+            {
+                subject: "Quarterly review",
+                from: { displayName: "Ana", emailAddress: "ana@example.com" },
+            },
+            dom
+        );
 
-    // Assert
-    expect(dom.subject.textContent).toBe("Quarterly review");
-    expect(dom.from.textContent).toBe("Ana <ana@example.com>");
-  });
+        // Assert
+        expect(dom.subject.textContent).toBe("Quarterly review");
+        expect(dom.from.textContent).toBe("Ana <ana@example.com>");
+    });
 
-  it("renderItem renders an empty string for a missing subject without throwing", async () => {
-    // Arrange
-    installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-    const mod = await import("./taskpane");
-    const dom = {
-      status: document.getElementById("status") as HTMLElement,
-      subject: document.getElementById("selected-subject") as HTMLElement,
-      from: document.getElementById("selected-from") as HTMLElement,
-    };
+    it("renderItem renders an empty string for a missing subject without throwing", async () => {
+        // Arrange
+        installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
+        const mod = await import("./taskpane");
+        const dom = {
+            status: document.getElementById("status") as HTMLElement,
+            subject: document.getElementById("selected-subject") as HTMLElement,
+            from: document.getElementById("selected-from") as HTMLElement,
+        };
 
-    // Act + Assert
-    expect(() => mod.renderItem({ from: { displayName: "Bo" } }, dom)).not.toThrow();
-    expect(dom.subject.textContent).toBe("");
-    expect(dom.from.textContent).toBe("Bo");
-  });
+        // Act + Assert
+        expect(() => mod.renderItem({ from: { displayName: "Bo" } }, dom)).not.toThrow();
+        expect(dom.subject.textContent).toBe("");
+        expect(dom.from.textContent).toBe("Bo");
+    });
 
-  it("renderEmpty clears subject/from and sets a placeholder status", async () => {
-    // Arrange
-    installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-    const mod = await import("./taskpane");
-    const dom = {
-      status: document.getElementById("status") as HTMLElement,
-      subject: document.getElementById("selected-subject") as HTMLElement,
-      from: document.getElementById("selected-from") as HTMLElement,
-    };
-    dom.subject.textContent = "stale";
-    dom.from.textContent = "stale";
+    it("renderEmpty clears subject/from and sets a placeholder status", async () => {
+        // Arrange
+        installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
+        const mod = await import("./taskpane");
+        const dom = {
+            status: document.getElementById("status") as HTMLElement,
+            subject: document.getElementById("selected-subject") as HTMLElement,
+            from: document.getElementById("selected-from") as HTMLElement,
+        };
+        dom.subject.textContent = "stale";
+        dom.from.textContent = "stale";
 
-    // Act
-    mod.renderEmpty(dom);
+        // Act
+        mod.renderEmpty(dom);
 
-    // Assert
-    expect(dom.subject.textContent).toBe("");
-    expect(dom.from.textContent).toBe("");
-    expect(dom.status.textContent).toBe("No message selected.");
-  });
+        // Assert
+        expect(dom.subject.textContent).toBe("");
+        expect(dom.from.textContent).toBe("");
+        expect(dom.status.textContent).toBe("No message selected.");
+    });
 });
 
 describe("onItemChanged dispatch", () => {
-  beforeEach(() => {
-    vi.resetModules();
-    installShellDom();
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
-
-  it("calls renderEmpty when Office.context.mailbox.item is null", async () => {
-    // Arrange
-    installOffice({
-      onReady: (cb) => {
-        cb({ host: "non-outlook" });
-      },
-      context: { mailbox: { item: null, addHandlerAsync: vi.fn() } },
+    beforeEach(() => {
+        vi.resetModules();
+        installShellDom();
     });
-    const mod = await import("./taskpane");
 
-    // Act
-    mod.onItemChanged();
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
 
-    // Assert
-    expect(document.getElementById("status")?.textContent).toBe("No message selected.");
-    expect(document.getElementById("selected-subject")?.textContent).toBe("");
-    expect(document.getElementById("selected-from")?.textContent).toBe("");
-  });
+    it("calls renderEmpty when Office.context.mailbox.item is null", async () => {
+        // Arrange
+        installOffice({
+            onReady: (cb) => {
+                cb({ host: "non-outlook" });
+            },
+            context: { mailbox: { item: null, addHandlerAsync: vi.fn() } },
+        });
+        const mod = await import("./taskpane");
+
+        // Act
+        mod.onItemChanged();
+
+        // Assert
+        expect(document.getElementById("status")?.textContent).toBe("No message selected.");
+        expect(document.getElementById("selected-subject")?.textContent).toBe("");
+        expect(document.getElementById("selected-from")?.textContent).toBe("");
+    });
 });
 
 describe("Office.onReady subscription wiring", () => {
-  beforeEach(() => {
-    vi.resetModules();
-    installShellDom();
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
-
-  it("subscribes to ItemChanged with a function from inside Office.onReady (called exactly once)", async () => {
-    // Arrange
-    const addHandlerAsync = vi.fn();
-    installOffice({
-      context: {
-        mailbox: { item: { subject: "Initial", from: { displayName: "Ana" } }, addHandlerAsync },
-      },
+    beforeEach(() => {
+        vi.resetModules();
+        installShellDom();
     });
 
-    // Act
-    await import("./taskpane");
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
 
-    // Assert
-    expect(addHandlerAsync).toHaveBeenCalledTimes(1);
-    expect(addHandlerAsync.mock.calls[0]?.[0]).toBe("olkItemSelectedChanged");
-    expect(addHandlerAsync.mock.calls[0]?.[1]).toBeTypeOf("function");
-  });
+    it("subscribes to ItemChanged with a function from inside Office.onReady (called exactly once)", async () => {
+        // Arrange
+        const addHandlerAsync = vi.fn();
+        installOffice({
+            context: {
+                mailbox: {
+                    item: { subject: "Initial", from: { displayName: "Ana" } },
+                    addHandlerAsync,
+                },
+            },
+        });
 
-  it("re-renders DOM when the captured handler runs against a new mailbox item", async () => {
-    // Arrange
-    const addHandlerAsync = vi.fn();
-    const mailbox: OfficeMailboxStub = {
-      item: { subject: "First", from: { displayName: "Ana", emailAddress: "ana@example.com" } },
-      addHandlerAsync,
-    };
-    installOffice({ context: { mailbox } });
+        // Act
+        await import("./taskpane");
 
-    await import("./taskpane");
-    expect(document.getElementById("selected-subject")?.textContent).toBe("First");
+        // Assert
+        expect(addHandlerAsync).toHaveBeenCalledTimes(1);
+        expect(addHandlerAsync.mock.calls[0]?.[0]).toBe("olkItemSelectedChanged");
+        expect(addHandlerAsync.mock.calls[0]?.[1]).toBeTypeOf("function");
+    });
 
-    // Act: capture the handler passed to addHandlerAsync, update the item, invoke handler
-    const handler = addHandlerAsync.mock.calls[0]?.[1] as MailboxHandler;
-    mailbox.item = {
-      subject: "Second",
-      from: { displayName: "Bo", emailAddress: "bo@example.com" },
-    };
-    handler();
+    it("re-renders DOM when the captured handler runs against a new mailbox item", async () => {
+        // Arrange
+        const addHandlerAsync = vi.fn();
+        const mailbox: OfficeMailboxStub = {
+            item: {
+                subject: "First",
+                from: { displayName: "Ana", emailAddress: "ana@example.com" },
+            },
+            addHandlerAsync,
+        };
+        installOffice({ context: { mailbox } });
 
-    // Assert
-    expect(document.getElementById("selected-subject")?.textContent).toBe("Second");
-    expect(document.getElementById("selected-from")?.textContent).toBe("Bo <bo@example.com>");
-  });
+        await import("./taskpane");
+        expect(document.getElementById("selected-subject")?.textContent).toBe("First");
+
+        // Act: capture the handler passed to addHandlerAsync, update the item, invoke handler
+        const handler = addHandlerAsync.mock.calls[0]?.[1] as MailboxHandler;
+        mailbox.item = {
+            subject: "Second",
+            from: { displayName: "Bo", emailAddress: "bo@example.com" },
+        };
+        handler();
+
+        // Assert
+        expect(document.getElementById("selected-subject")?.textContent).toBe("Second");
+        expect(document.getElementById("selected-from")?.textContent).toBe("Bo <bo@example.com>");
+    });
 });
 
 describe("requireElement helper", () => {
-  beforeEach(() => {
-    vi.resetModules();
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
-
-  it("module import throws when required DOM elements are missing and host is Outlook", async () => {
-    // Arrange: remove sideload-msg so requireElement throws
-    document.body.innerHTML = "";
-    installOffice({
-      context: { mailbox: { item: null, addHandlerAsync: vi.fn() } },
+    beforeEach(() => {
+        vi.resetModules();
     });
 
-    // Act + Assert
-    await expect(import("./taskpane")).rejects.toThrow(/Required element/);
-  });
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
+
+    it("module import throws when required DOM elements are missing and host is Outlook", async () => {
+        // Arrange: remove sideload-msg so requireElement throws
+        document.body.innerHTML = "";
+        installOffice({
+            context: { mailbox: { item: null, addHandlerAsync: vi.fn() } },
+        });
+
+        // Act + Assert
+        await expect(import("./taskpane")).rejects.toThrow(/Required element/);
+    });
 });
