@@ -34,6 +34,17 @@ Analyzer settings (`AnalysisLevel`, `AnalysisMode`, `TreatWarningsAsErrors`, `Nu
 3. `dotnet build` (analyzers and nullable analysis enforced via `Directory.Build.props`; `TreatWarningsAsErrors=true` fails the build on any warning)
 4. `dotnet test tests/*.ArchitectureTests/*.csproj --no-build` (architecture tests against the `*.ArchitectureTests` project)
 5. `dotnet test --collect:"XPlat Code Coverage"` (full unit-test pass with coverage)
+6. Emit canonical coverage artifact: after `dotnet test` completes, copy the newest `TestResults/*/coverage.cobertura.xml` to `artifacts/csharp/coverage.xml` so local runs produce the same canonical artifact as CI. PowerShell sketch:
+
+   ```pwsh
+   New-Item -ItemType Directory -Force -Path artifacts/csharp | Out-Null
+   $latest = Get-ChildItem TestResults -Recurse -Filter coverage.cobertura.xml |
+     Sort-Object LastWriteTime -Descending | Select-Object -First 1
+   if (-not $latest) { Write-Error 'No coverage.cobertura.xml found'; exit 1 }
+   Copy-Item $latest.FullName artifacts/csharp/coverage.xml -Force
+   ```
+
+   The step must fail non-zero when no `coverage.cobertura.xml` is present.
 
 If the environment prevents running any tool, stop and report the change as **unverified**. Do not declare completion.
 

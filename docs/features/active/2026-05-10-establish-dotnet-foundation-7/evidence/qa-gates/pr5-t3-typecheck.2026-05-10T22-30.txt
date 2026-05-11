@@ -1,0 +1,9 @@
+Timestamp: 2026-05-10T22-30
+Command: grep nullable warnings in pr5-t2 build log
+EXIT_CODE: 0
+
+Output Summary:
+- Source build log: evidence/qa-gates/pr5-t2-build.2026-05-10T22-30.txt
+- Nullable warnings found: 0.
+- TreatWarningsAsErrors=true means any CS86xx (nullable) diagnostic would have failed the build; build succeeded with 0 warnings, confirming nullable analysis is clean.
+- Pass criterion satisfied: zero nullable warnings recorded.

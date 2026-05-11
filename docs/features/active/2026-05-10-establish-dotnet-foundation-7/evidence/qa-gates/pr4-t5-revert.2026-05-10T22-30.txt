@@ -1,0 +1,12 @@
+Timestamp: 2026-05-10T22-30
+Command: Remove probe file, remove _violations folder, edit out ProjectReference, dotnet sln remove, delete probe project folder
+EXIT_CODE: 0
+
+Output Summary:
+- All four probe artifacts confirmed absent:
+  - Test-Path src/TaskMaster.Domain/_violations/InfraDependencyProbe.cs: False
+  - Test-Path src/TaskMaster.Domain/_violations: False
+  - Test-Path src/TaskMaster.Infrastructure.Probe: False
+  - ProjectReference to TaskMaster.Infrastructure.Probe in src/TaskMaster.Domain/TaskMaster.Domain.csproj: 0 matches
+- dotnet sln TaskMaster.sln remove confirmed: "Project ...TaskMaster.Infrastructure.Probe.csproj removed from the solution."
+- Clean revert; production tree returns to pre-PR4 state.

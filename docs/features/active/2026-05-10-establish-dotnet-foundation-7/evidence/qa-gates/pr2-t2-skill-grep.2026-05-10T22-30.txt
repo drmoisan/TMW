@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path '.claude/skills/csharp-qa-gate/SKILL.md' -Pattern 'artifacts/csharp/coverage\.xml','coverage\.cobertura\.xml'
+EXIT_CODE: 0
+
+Output Summary:
+- 5 matches (>= 2 required).
+- Added step 6 documenting local emission of canonical coverage artifact at artifacts/csharp/coverage.xml.
+- Mirror discipline: .github/skills/csharp-qa-gate/ does not exist per plan P0-T4; no mirror edit required (see PR2-T3).

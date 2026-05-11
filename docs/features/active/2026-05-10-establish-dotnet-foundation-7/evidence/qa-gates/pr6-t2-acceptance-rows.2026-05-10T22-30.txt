@@ -1,0 +1,12 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'p14-acceptance-criteria-checkoff.md' -Pattern '^\| AC([1-9]|[12][0-9]|30) '
+EXIT_CODE: 0
+
+Output Summary:
+- AC_ROWS=30 (>= 30 required)
+- PASS_ROWS=30 (every AC row's status is PASS)
+- NON_PASS=0 (no FAIL, PARTIAL, or UNVERIFIED rows)
+- AC24 row updated to reference Phase R3 evidence (NSwag loud-fail gating).
+- AC26 row updated to reference Phase R1 per-file coverage + Phase R5 final QA evidence.
+- AC28 row updated to reference Phase R4 executable Domain-vs-Infrastructure negative-test evidence (distinct from P13-T5).
+- "Post-Remediation Updates" section added noting deviations #4 and #6 are SUPERSEDED by Phase R3 and Phase R4 respectively.

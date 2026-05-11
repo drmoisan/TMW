@@ -1,0 +1,14 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet build TaskMaster.sln -p:EnableNSwagEmission=true --no-incremental
+EXIT_CODE: 1
+Expected: non-zero (this is an [expect-fail] task demonstrating loud-fail behavior)
+
+Output Summary:
+- Build FAILED with 1 Error(s), 0 Warning(s). EXIT_CODE=1.
+- Primary error (MSBuild MSB3073):
+  src/TaskMaster.Api/TaskMaster.Api.csproj(35,9): error MSB3073: The command "dotnet ".../dotnet-nswag.dll" aspnetcore2openapi /project:"TaskMaster.Api.csproj" /noBuild:true /output:"artifacts/openapi/current.json"" exited with code -1.
+- Underlying NSwag launcher exception (referenced in build log):
+  System.InvalidOperationException: No service for type 'NSwag.Generation.IOpenApiDocumentGenerator' has been registered.
+  at NSwag.Commands.Generation.AspNetCore.AspNetCoreToOpenApiCommand.GenerateDocumentWithDocumentProviderAsync(...)
+- Behavior confirms F3 is resolved: with ContinueOnError/IgnoreExitCode removed and the target gated on EnableNSwagEmission=true, the NSwag failure now propagates as a hard build error (loud-fail) rather than being silently swallowed.
+- The underlying upstream issue (NSwag launcher does not yet support net10) remains; the TODO comment in TaskMaster.Api.csproj documents this with a link to the NSwag issue tracker. Until upstream support lands, artifacts/openapi/current.json is hand-authored.

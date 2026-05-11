@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: write src/TaskMaster.Domain/_violations/InfraDependencyProbe.cs; add ProjectReference to TaskMaster.Infrastructure.Probe in src/TaskMaster.Domain/TaskMaster.Domain.csproj
+EXIT_CODE: 0
+
+Output Summary:
+- File created: src/TaskMaster.Domain/_violations/InfraDependencyProbe.cs (internal static class TaskMaster.Domain.InfraDependencyProbe.Use returns TaskMaster.Infrastructure.Probe.ProbeType.Marker()).
+- ProjectReference added: <ProjectReference Include="..\TaskMaster.Infrastructure.Probe\TaskMaster.Infrastructure.Probe.csproj" />.
+- Both artifacts present.

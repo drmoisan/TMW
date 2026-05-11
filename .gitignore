@@ -54,4 +54,4 @@ artifacts/
 **/bin/
 **/obj/
 **/TestResults/
-.vs/
+.vs/artifacts/csharp/

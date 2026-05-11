@@ -1,0 +1,10 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'quality-tiers.yml' -Pattern 'TaskMaster\.Api\.Tests','tests/TaskMaster\.Api\.Tests','t4'
+EXIT_CODE: 0
+
+Output Summary:
+- 10 matches (>= 3 required) across the three patterns, confirming the new entry:
+  - name: TaskMaster.Api.Tests
+  - path: tests/TaskMaster.Api.Tests
+  - tier: t4
+- Rationale field present and references xUnit + Microsoft.AspNetCore.Mvc.Testing role.

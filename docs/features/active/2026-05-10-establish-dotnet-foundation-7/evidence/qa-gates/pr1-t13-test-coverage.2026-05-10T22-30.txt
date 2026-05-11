@@ -1,0 +1,16 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test tests/TaskMaster.Api.Tests/TaskMaster.Api.Tests.csproj --no-build --collect:"XPlat Code Coverage" --results-directory TestResults/
+EXIT_CODE: 0
+
+Output Summary:
+- Test run results: Failed: 0, Passed: 8, Skipped: 0, Total: 8. Duration: 360 ms.
+- Tests executed (>= 6 required):
+  - HealthEndpointTests.GetHealth_ReturnsOkAndStatusOk
+  - HealthEndpointTests.GetHealth_ReturnsJsonContentType
+  - HealthResponseTests.Constructor_AssignsStatusProperty
+  - HealthResponseTests.RecordEquality_TwoInstancesWithSameStatus_AreEqual
+  - HealthResponseTests.RecordEquality_DifferentStatus_AreNotEqual
+  - HealthResponseTests.ToString_IncludesStatusValue
+  - AssemblyMarkerTests.AssemblyName_EqualsDomainAssemblyName
+  - AssemblyMarkerTests.AssemblyName_IsNonEmpty
+- Cobertura artifact emitted to TestResults/ed627363-3fd8-4612-9209-53c2a4719057/coverage.cobertura.xml.

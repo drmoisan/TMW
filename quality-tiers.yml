@@ -40,6 +40,15 @@ projects:
     rationale: |
       Test scaffolding (T4): NetArchTest.Rules facts enforcing No-COM architecture and
       domain/infrastructure layering. Tier reflects test-infrastructure role.
+  - name: TaskMaster.Api.Tests
+    path: tests/TaskMaster.Api.Tests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): xUnit + Microsoft.AspNetCore.Mvc.Testing unit/integration
+      tests for the API host and Domain marker. Tier reflects test-infrastructure role;
+      production files under test (Program.cs, HealthResponse.cs, AssemblyMarker.cs)
+      are tiered separately under their owning projects.
 
 # Validator behavior (read by .github/workflows/pr-pipeline.yml stage tier-classification):
 # - Every entry under projects MUST have name, path, language, tier.

@@ -1,0 +1,10 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj --no-build
+EXIT_CODE: 0
+
+Output Summary:
+- Test results: Failed 0, Passed 3, Skipped 0, Total 3. Duration: 65 ms.
+- All three architecture facts pass:
+  - NoProjectDependsOnOutlookInterop (PASS)
+  - NoProjectDependsOnForbiddenLegacyNamespaces (PASS)
+  - DomainProjectDoesNotDependOnInfrastructure (PASS) — same fact whose negative-test was demonstrated in PR4-T4.

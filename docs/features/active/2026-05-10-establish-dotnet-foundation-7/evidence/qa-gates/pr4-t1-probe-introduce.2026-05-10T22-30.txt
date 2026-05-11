@@ -1,0 +1,11 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet new classlib --name TaskMaster.Infrastructure.Probe --output src/TaskMaster.Infrastructure.Probe --framework net10.0; remove Class1.cs; create ProbeType.cs; dotnet sln add
+EXIT_CODE: 0
+
+Output Summary:
+- src/TaskMaster.Infrastructure.Probe/TaskMaster.Infrastructure.Probe.csproj created (net10.0 to match solution).
+- Template Class1.cs removed.
+- src/TaskMaster.Infrastructure.Probe/ProbeType.cs written with: namespace TaskMaster.Infrastructure.Probe; public class ProbeType { public static string Marker() => "probe"; }
+- Project added to TaskMaster.sln.
+- Deviation: framework adjusted from plan's net8.0 to net10.0 (consistent with solution; same rationale as [PR1-T1]).
+- Note: tier-classification validator may flag this transient project; the probe is reverted in [PR4-T5] before final QA.

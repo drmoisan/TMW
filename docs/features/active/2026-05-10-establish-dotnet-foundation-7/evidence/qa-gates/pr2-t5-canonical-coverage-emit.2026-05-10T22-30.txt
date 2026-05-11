@@ -1,0 +1,15 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test TaskMaster.sln --no-build --collect:"XPlat Code Coverage" --results-directory TestResults/; then copy newest TestResults/*/coverage.cobertura.xml to artifacts/csharp/coverage.xml
+EXIT_CODE: 0
+
+Output Summary:
+- Test run: TaskMaster.ArchitectureTests Passed 3/3; TaskMaster.Api.Tests Passed 8/8. Total: 11 passed, 0 failed.
+- Two cobertura files emitted (one per test project). Newest selected and copied.
+- COPIED TestResults/2278fd48-.../coverage.cobertura.xml -> artifacts/csharp/coverage.xml
+- Canonical coverage artifact parsed successfully as XML.
+- Overall headline values from canonical artifact (single-test-project subset):
+  - line-rate: 0.0379 (3.79% overall — dominated by ASP.NET Core OpenApi source-generated infrastructure registered as TaskMaster.Api package).
+  - branch-rate: 0.0096 (0.96% overall — same reason).
+  - Per-file values for the three audited production files: see pr1-t14-per-file-coverage. Program.cs and HealthResponse.cs at 100% line/branch; AssemblyMarker.cs has no instrumentable lines (const-only) and is vacuously compliant.
+- Test-Path artifacts/csharp/coverage.xml: True. Parse: successful.
+- F2 resolved at the path-contract level; F3 still produces NSwag stderr noise on build (to be addressed in Phase R3).

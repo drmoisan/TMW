@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'tests/TaskMaster.Api.Tests/AssemblyMarkerTests.cs' -Pattern '\[Fact\]','AssemblyMarker','AssemblyName'
+EXIT_CODE: 0
+
+Output Summary:
+- 10 matches across the required patterns (>= 4 required).
+- AssemblyMarkerTests.cs line count: 30 (under 500-line budget).
+- Two [Fact] tests authored: AssemblyName_EqualsDomainAssemblyName, AssemblyName_IsNonEmpty.

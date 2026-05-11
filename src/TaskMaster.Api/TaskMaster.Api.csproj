@@ -2,7 +2,19 @@
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
+        <!--
+        NSwag emission is opt-in. The upstream NSwag.AspNetCore.Launcher does not
+        yet support net10.0 (throws "No service for type 'NSwag.Generation.IOpenApiDocumentGenerator'"
+        when invoked against a net10.0 app). Until that lands, artifacts/openapi/current.json
+        is hand-authored and is the interim source of truth.
+        Enable with: dotnet build -p:EnableNSwagEmission=true
+        -->
+        <EnableNSwagEmission Condition="'$(EnableNSwagEmission)' == ''">false</EnableNSwagEmission>
     </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="TaskMaster.Api.Tests" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
@@ -12,13 +24,18 @@
         </PackageReference>
     </ItemGroup>
 
-    <!-- Phase 9 / AC24: emit OpenAPI to artifacts/openapi/current.json after build via NSwag. -->
-    <Target Name="GenerateOpenApi" AfterTargets="Build" Condition="'$(SkipNSwag)' != 'true'">
+    <!--
+    Phase 9 / AC24: emit OpenAPI to artifacts/openapi/current.json after build via NSwag.
+    TODO: Re-enable NSwag emission when net10 launcher support is available. Tracking:
+    https://github.com/RicoSuter/NSwag/issues (search "net10" / "IOpenApiDocumentGenerator").
+    Until then, artifacts/openapi/current.json is hand-authored.
+    -->
+    <Target
+        Name="GenerateOpenApi"
+        AfterTargets="Build"
+        Condition="'$(EnableNSwagEmission)' == 'true'"
+    >
         <MakeDir Directories="$(MSBuildThisFileDirectory)..\..\artifacts\openapi\" />
-        <Exec
-            Command="$(NSwagExe_Net100) aspnetcore2openapi /project:&quot;$(MSBuildProjectFullPath)&quot; /noBuild:true /output:&quot;$(MSBuildThisFileDirectory)..\..\artifacts\openapi\current.json&quot;"
-            ContinueOnError="true"
-            IgnoreExitCode="true"
-        />
+        <Exec Command="$(NSwagExe_Net100) aspnetcore2openapi /project:&quot;$(MSBuildProjectFullPath)&quot; /noBuild:true /output:&quot;$(MSBuildThisFileDirectory)..\..\artifacts\openapi\current.json&quot;" />
     </Target>
 </Project>

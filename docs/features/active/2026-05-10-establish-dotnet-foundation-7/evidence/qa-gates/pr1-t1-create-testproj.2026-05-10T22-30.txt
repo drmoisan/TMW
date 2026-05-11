@@ -1,0 +1,9 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet new xunit --name TaskMaster.Api.Tests --output tests/TaskMaster.Api.Tests --framework net10.0
+EXIT_CODE: 0
+
+Output Summary:
+- Template "xUnit Test Project" created successfully at tests/TaskMaster.Api.Tests/.
+- Post-create restore failed with NU1008 (Central Package Management requires versions on PackageVersion only). This is expected and will be resolved in [PR1-T2] when references are rewritten to use centralized versions.
+- Test-Path tests/TaskMaster.Api.Tests/TaskMaster.Api.Tests.csproj: True.
+- Framework adjusted from plan's net8.0 to net10.0 to match the solution's TargetFramework. Rationale: baseline [PR0-T5] established solution targets net10.0; mixing frameworks would break central package management.

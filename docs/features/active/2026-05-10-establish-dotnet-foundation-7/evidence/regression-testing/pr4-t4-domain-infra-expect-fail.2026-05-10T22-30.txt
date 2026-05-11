@@ -1,0 +1,16 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj --no-build
+EXIT_CODE: 1
+Expected: non-zero (this is an [expect-fail] task demonstrating the Domain-vs-Infrastructure architecture fact detects a real violation)
+
+Output Summary:
+- Test results: Failed 1, Passed 2, Skipped 0, Total 3.
+- Failing fact: TaskMaster.ArchitectureTests.NoComArchitectureTests.DomainProjectDoesNotDependOnInfrastructure.
+- Failure message:
+  Expected result.IsSuccessful to be True because types in TaskMaster.Domain.* may not depend on TaskMaster.Infrastructure*.
+  Failing types: TaskMaster.Domain.InfraDependencyProbe,
+  but found False.
+- Failing types list includes TaskMaster.Domain.InfraDependencyProbe (the probe leak introduced in PR4-T2), confirming the assertion detects domain types whose IL references TaskMaster.Infrastructure.* types.
+- Failure occurs at NoComArchitectureTests.cs:line 81 (the BeTrue assertion on result.IsSuccessful).
+- The other two facts (NoProjectDependsOnOutlookInterop, NoProjectDependsOnForbiddenLegacyNamespaces) continue to pass; the probe deliberately targets only the Domain->Infrastructure boundary, which is distinct from the Microsoft.VisualBasic / Outlook.Interop facts used in P13-T5.
+- F4 resolved: documented executable negative test exists for DomainProjectDoesNotDependOnInfrastructure, distinct from P13-T5.

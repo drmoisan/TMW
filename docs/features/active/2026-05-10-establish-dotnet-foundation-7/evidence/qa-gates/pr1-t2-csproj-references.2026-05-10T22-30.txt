@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'tests/TaskMaster.Api.Tests/TaskMaster.Api.Tests.csproj' -Pattern 'Microsoft\.AspNetCore\.Mvc\.Testing','FluentAssertions','NSubstitute','coverlet\.collector','TaskMaster\.Api\.csproj','TaskMaster\.Domain\.csproj' | Measure-Object -Line
+EXIT_CODE: 0
+
+Output Summary:
+- Six matches confirmed in tests/TaskMaster.Api.Tests/TaskMaster.Api.Tests.csproj.
+- Patterns matched: Microsoft.AspNetCore.Mvc.Testing, FluentAssertions, NSubstitute, coverlet.collector, TaskMaster.Api.csproj, TaskMaster.Domain.csproj.
+- xunit, xunit.runner.visualstudio, Microsoft.NET.Test.Sdk also present (centralized versions via Directory.Packages.props).

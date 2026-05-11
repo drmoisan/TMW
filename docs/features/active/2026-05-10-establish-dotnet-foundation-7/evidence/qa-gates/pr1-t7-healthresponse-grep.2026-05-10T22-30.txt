@@ -1,0 +1,9 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'tests/TaskMaster.Api.Tests/HealthResponseTests.cs' -Pattern '\[Fact\]','HealthResponse','Status'
+EXIT_CODE: 0
+
+Output Summary:
+- 19 matches across the required patterns (>= 4 required).
+- HealthResponseTests.cs line count: 61 (under 500-line budget).
+- Four [Fact] tests authored: Constructor_AssignsStatusProperty, RecordEquality_TwoInstancesWithSameStatus_AreEqual, RecordEquality_DifferentStatus_AreNotEqual, ToString_IncludesStatusValue.
+- Tests exercise positive instantiation, value-equality (and inequality), hash-code parity, and ToString shape.
