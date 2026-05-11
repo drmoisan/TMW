@@ -8,11 +8,17 @@
     variable, inspects the attempted command text, and blocks direct promotion
     script execution that would bypass the repository's MCP-only promotion path.
 
-    Forbidden command tokens:
+    Forbidden command tokens (legacy promotion-script bypass):
       - new-potential-entry.ps1
       - new_potential_bug_entry
       - potential_to_issue
       - new_active_feature_folder
+
+    Forbidden gh-CLI patterns (raw GitHub issue creation bypass):
+      - gh issue create (with any flag suffix)
+      - gh issue new
+      - gh api against repos/<owner>/<repo>/issues with explicit POST method
+        (-X POST or --method POST)
 
     The hook is read-only: it inspects the attempted command and emits a JSON
     allow-or-block decision without mutating the command text.
@@ -25,10 +31,12 @@ param()
 
 $script:PromotionMcpOnlyBlockedReason = 'PROMOTION_MCP_ONLY_BLOCKED: Direct Bash promotion-script execution is not allowed in agent sessions. Use the drm-copilot MCP promotion tools instead.'
 
+$script:PromotionMcpOnlyGhIssueBlockedReason = 'PROMOTION_MCP_ONLY_BLOCKED: Direct GitHub issue creation via `gh` bypasses the approved drm-copilot MCP promotion path (`mcp__drm-copilot__new_potential_entry` -> `mcp__drm-copilot__potential_to_issue` -> `mcp__drm-copilot__new_active_feature_folder`). Use those MCP tools instead.'
+
 function Get-PromotionMcpOnlyBlockedReason {
     <#
     .SYNOPSIS
-        Return the canonical deny message for promotion-script bypass attempts.
+        Return the canonical deny message for legacy promotion-script bypass attempts.
     .OUTPUTS
         System.String
     #>
@@ -39,10 +47,76 @@ function Get-PromotionMcpOnlyBlockedReason {
     return $script:PromotionMcpOnlyBlockedReason
 }
 
+function Get-PromotionMcpOnlyGhIssueBlockedReason {
+    <#
+    .SYNOPSIS
+        Return the deny message for raw gh-CLI issue creation bypass attempts.
+    .OUTPUTS
+        System.String
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    return $script:PromotionMcpOnlyGhIssueBlockedReason
+}
+
+function Get-PromotionBypassReason {
+    <#
+    .SYNOPSIS
+        Inspect the command text and return the specific deny reason, or $null when allowed.
+    .DESCRIPTION
+        Returns the legacy promotion-script reason when any forbidden token is present.
+        Returns the gh-CLI issue creation reason when a forbidden gh pattern is matched.
+        Returns $null when the command is allowed.
+    .PARAMETER CommandText
+        The Bash command text extracted from CLAUDE_TOOL_INPUT.
+    .OUTPUTS
+        System.String or $null.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string] $CommandText
+    )
+
+    $forbiddenTokens = @(
+        'new-potential-entry.ps1',
+        'new_potential_bug_entry',
+        'potential_to_issue',
+        'new_active_feature_folder'
+    )
+
+    foreach ($token in $forbiddenTokens) {
+        if ($CommandText.IndexOf($token, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            return (Get-PromotionMcpOnlyBlockedReason)
+        }
+    }
+
+    # `gh issue create` and `gh issue new` are direct bypasses of the MCP
+    # promotion path. Tolerate any flags after the subcommand.
+    if ($CommandText -match '(?i)\bgh\s+issue\s+(?:create|new)\b') {
+        return (Get-PromotionMcpOnlyGhIssueBlockedReason)
+    }
+
+    # `gh api repos/<owner>/<repo>/issues` is a write surface only when an
+    # explicit POST method is supplied. `gh api` defaults to GET, so we only
+    # block when -X POST or --method POST is present, to avoid false positives
+    # on issue read operations. Use a single regex with lookaheads against the
+    # whole command string.
+    $ghApiIssuesPostPattern = '(?i)(?=.*\bgh\s+api\b)(?=.*repos/[^/\s]+/[^/\s]+/issues(?:\b|/[^/\s]*$))(?=.*(?:-X\s+POST|--method\s+POST))'
+    if ($CommandText -match $ghApiIssuesPostPattern) {
+        return (Get-PromotionMcpOnlyGhIssueBlockedReason)
+    }
+
+    return $null
+}
+
 function Test-PromotionBypassToken {
     <#
     .SYNOPSIS
-        Return $true when a Bash command contains a forbidden promotion token.
+        Return $true when a Bash command contains a forbidden promotion bypass pattern.
     .PARAMETER CommandText
         The Bash command text extracted from CLAUDE_TOOL_INPUT.
     .OUTPUTS
@@ -55,38 +129,32 @@ function Test-PromotionBypassToken {
         [string] $CommandText
     )
 
-    # Inspect only the command text so the hook remains a narrow, non-mutating
-    # policy gate for direct promotion-script bypass attempts.
-    $forbiddenTokens = @(
-        'new-potential-entry.ps1',
-        'new_potential_bug_entry',
-        'potential_to_issue',
-        'new_active_feature_folder'
-    )
-
-    foreach ($token in $forbiddenTokens) {
-        if ($CommandText.IndexOf($token, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
-            return $true
-        }
-    }
-
-    return $false
+    return ($null -ne (Get-PromotionBypassReason -CommandText $CommandText))
 }
 
 function Get-PromotionMcpOnlyBlockDecision {
     <#
     .SYNOPSIS
         Construct the structured block decision for a forbidden Bash command.
+    .PARAMETER Reason
+        The specific deny reason to surface in the block decision. Defaults to the
+        legacy promotion-script reason for backward compatibility.
     .OUTPUTS
         System.Collections.Specialized.OrderedDictionary
     #>
     [CmdletBinding()]
     [OutputType([System.Collections.Specialized.OrderedDictionary])]
-    param()
+    param(
+        [string] $Reason
+    )
+
+    if (-not $Reason) {
+        $Reason = Get-PromotionMcpOnlyBlockedReason
+    }
 
     return [ordered]@{
         decision = 'block'
-        reason   = (Get-PromotionMcpOnlyBlockedReason)
+        reason   = $Reason
     }
 }
 
@@ -123,8 +191,9 @@ function Invoke-PromotionMcpOnlyDecision {
         return [ordered]@{ decision = 'allow' }
     }
 
-    if (Test-PromotionBypassToken -CommandText $commandText) {
-        return Get-PromotionMcpOnlyBlockDecision
+    $reason = Get-PromotionBypassReason -CommandText $commandText
+    if ($reason) {
+        return Get-PromotionMcpOnlyBlockDecision -Reason $reason
     }
 
     return [ordered]@{ decision = 'allow' }
