@@ -8,18 +8,18 @@
         "additionalLanguages": []
     },
     "developer": {
-        "name": "Contoso",
-        "websiteUrl": "https://www.contoso.com",
-        "privacyUrl": "https://www.contoso.com/privacy",
-        "termsOfUseUrl": "https://www.contoso.com/servicesagreement"
+        "name": "TaskMaster",
+        "websiteUrl": "https://taskmaster.local",
+        "privacyUrl": "https://taskmaster.local/privacy",
+        "termsOfUseUrl": "https://taskmaster.local/terms"
     },
     "name": {
         "short": "TMW",
-        "full": "Contoso Task Pane Add-in"
+        "full": "TaskMaster for Outlook"
     },
     "description": {
-        "short": "A template to get started.",
-        "full": "This is the template to get started."
+        "short": "TaskMaster task pane for Outlook.",
+        "full": "TaskMaster task pane for Outlook that tracks selected-message context for triage workflows."
     },
     "icons": {
         "outline": "assets/outline.png",
@@ -27,7 +27,7 @@
     },
     "accentColor": "#230201",
     "validDomains": [
-        "contoso.com"
+        "localhost"
     ],
     "authorization": {
         "permissions": {
@@ -45,7 +45,7 @@
                 "capabilities": [
                     {
                         "name": "Mailbox",
-                        "minVersion": "1.3"
+                        "minVersion": "1.5"
                     }
                 ],
                 "scopes": [
@@ -58,7 +58,7 @@
                         "capabilities": [
                             {
                                 "name": "Mailbox",
-                                "minVersion": "1.3"
+                                "minVersion": "1.5"
                             }
                         ]
                     },
@@ -72,7 +72,7 @@
                         {
                             "id": "TaskPaneRuntimeShow",
                             "type": "openPage",
-                            "pinnable": false,
+                            "pinnable": true,
                             "view": "dashboard"
                         }
                     ]
@@ -84,13 +84,7 @@
                         "page": "https://localhost:3000/commands.html",
                         "script": "https://localhost:3000/commands.js"
                     },
-                    "lifetime": "short",
-                    "actions": [
-                        {
-                            "id": "action",
-                            "type": "executeFunction"
-                        }
-                    ]
+                    "lifetime": "short"
                 }
             ],
             "ribbons": [
@@ -104,7 +98,7 @@
                             "groups": [
                                 {
                                     "id": "msgReadGroup",
-                                    "label": "Contoso Add-in",
+                                    "label": "TaskMaster",
                                     "icons": [
                                         {
                                             "size": 16,
@@ -123,7 +117,7 @@
                                         {
                                             "id": "msgReadOpenPaneButton",
                                             "type": "button",
-                                            "label": "Show Task Pane",
+                                            "label": "Open TaskMaster",
                                             "icons": [
                                                 {
                                                     "size": 16,
@@ -139,34 +133,10 @@
                                                 }
                                             ],
                                             "supertip": {
-                                                "title": "Show Task Pane",
-                                                "description": "Opens a pane displaying all available properties."
+                                                "title": "Open TaskMaster",
+                                                "description": "Open the TaskMaster pane to view selected-message context."
                                             },
                                             "actionId": "TaskPaneRuntimeShow"
-                                        },
-                                        {
-                                            "id": "ActionButton",
-                                            "type": "button",
-                                            "label": "Perform an action",
-                                            "icons": [
-                                                {
-                                                    "size": 16,
-                                                    "url": "https://localhost:3000/assets/icon-16.png"
-                                                },
-                                                {
-                                                    "size": 32,
-                                                    "url": "https://localhost:3000/assets/icon-32.png"
-                                                },
-                                                {
-                                                    "size": 80,
-                                                    "url": "https://localhost:3000/assets/icon-80.png"
-                                                }
-                                            ],
-                                            "supertip": {
-                                                "title": "Perform an action",
-                                                "description": "Perform an action when clicked."
-                                            },
-                                            "actionId": "action"
                                         }
                                     ]
                                 }
