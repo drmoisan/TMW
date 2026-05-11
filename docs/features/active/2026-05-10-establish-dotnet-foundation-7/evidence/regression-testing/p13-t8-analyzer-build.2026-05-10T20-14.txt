@@ -1,0 +1,10 @@
+Timestamp: 2026-05-10T20-14
+Task: P13-T8 [expect-fail]
+Command: dotnet build TaskMaster.sln --no-incremental
+EXIT_CODE: 1
+Output Summary:
+  src/TaskMaster.Domain/AnalyzerProbe.cs(10,44): error MA0011: Use an overload of 'Parse' that has a 'System.IFormatProvider' parameter (https://github.com/meziantou/Meziantou.Analyzer/blob/main/docs/Rules/MA0011.md)
+  Build FAILED.
+  2 Error(s)
+
+The build fails as expected. The failing diagnostic ID is MA0011 (Meziantou.Analyzer), matching the rule documented in P13-T7. AC29 satisfied — representative analyzer-rule violation blocks the build, evidence captured.
