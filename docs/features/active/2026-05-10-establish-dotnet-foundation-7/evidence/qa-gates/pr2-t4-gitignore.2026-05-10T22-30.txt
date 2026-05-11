@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path '.gitignore' -Pattern 'artifacts/csharp'; Add-Content if missing
+EXIT_CODE: 0
+
+Output Summary:
+- Pre-state: pattern 'artifacts/csharp' had 0 matches (not ignored).
+- Action: appended line 'artifacts/csharp/' to .gitignore.
+- Post-state: pattern 'artifacts/csharp' returns 1 match.

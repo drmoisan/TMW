@@ -1,0 +1,7 @@
+Timestamp: 2026-05-10T20-14
+Task: P13-T7
+Command: write src/TaskMaster.Domain/AnalyzerProbe.cs with `int.Parse(raw)` (missing IFormatProvider)
+EXIT_CODE: 0
+Output Summary: violating source created. Target diagnostic ID: MA0011 (Meziantou.Analyzer: "Use an overload of 'Parse' that has a 'System.IFormatProvider' parameter"). Default severity under `AnalysisMode=All` + `TreatWarningsAsErrors=true` is error.
+
+Rationale: Meziantou.Analyzer is one of the six analyzers in the stack referenced by Directory.Build.props. MA0011 enforces explicit IFormatProvider on parse APIs and is at warning severity by default; under TreatWarningsAsErrors=true the project's build fails. AC29 (precondition) satisfied — target rule ID documented.

@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P7-T3
+Command: Select-String -Path 'tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj' -Pattern 'Microsoft\.Extensions\.TimeProvider\.Testing'
+EXIT_CODE: 0
+Output Summary: `<PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />` present in the architecture test csproj (anchored use; not consumed by any test yet). AC23 satisfied.

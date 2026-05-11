@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: pwsh -NoProfile -File .github/scripts/validate-quality-tiers.ps1
+EXIT_CODE: 0
+
+Output Summary:
+- Validator exited 0 (no diagnostics emitted on success path; the script writes only on failure).
+- quality-tiers.yml schema validated; TaskMaster.Api.Tests entry accepted with tier t4.
+- All filesystem csproj entries are now represented in quality-tiers.yml.

@@ -1,0 +1,25 @@
+Timestamp: 2026-05-10T20-14
+Task: P0-T5
+Command: Grep pattern 'MSTest|TestClass|TestMethod|\bMoq\b|vstest\.console|TaskMaster\.sln|msbuild' across 8 Phase-1/2/3 target files
+EXIT_CODE: 0 (baseline grep ran successfully; non-empty results expected pre-Phase-1)
+
+Output Summary:
+- MSTest matches: many (csharp.md lines 33-35; csharp-unit-test instructions lines 23,31,35,37,38; csharp-typed-engineer agent line 30; csharp-qa-gate SKILL.md lines 22,43,55,58; invoke-csharp-engineer SKILL.md lines 3,16,40,43; .github agents file lines 3,30,251; .claude agents lines 3,24,36,37)
+- TestClass matches: csharp.md L36; csharp-unit-test instructions L38
+- TestMethod matches: csharp.md L36; csharp-unit-test instructions L38
+- Moq matches: csharp.md L34,L53; csharp-unit-test instructions L31; .github agents lines 30,155,252; .claude agents L37
+- vstest.console matches: csharp.md L17; csharp-unit-test instructions L48; csharp-qa-gate SKILL.md L33; feature-review-workflow SKILL.md L99; .github agents L175
+- TaskMaster.sln matches: csharp.md L15,L16; csharp-code-change instructions L41,L42,L50,L51; csharp-unit-test instructions L46,L47; csharp-qa-gate SKILL.md L31,L32; .github agents L173,L174
+- msbuild matches: csharp.md L15,L16; csharp-code-change instructions L41,L42,L50,L51; csharp-unit-test instructions L46,L47; csharp-qa-gate SKILL.md L31,L32; .github agents L8,L173,L174
+
+Baseline is non-empty as expected. Phase 1-3 rewrites must drive all of these matches to zero in active prose.
+
+Full grep results captured above. Per-file counts:
+  .claude/rules/csharp.md: 7 hits across 7 patterns
+  .github/instructions/csharp-code-change.instructions.md: 4 hits (msbuild/TaskMaster.sln only)
+  .github/instructions/csharp-unit-test.instructions.md: 8 hits
+  .claude/agents/csharp-typed-engineer.md: 5 hits
+  .claude/skills/csharp-qa-gate/SKILL.md: 8 hits
+  .claude/skills/invoke-csharp-engineer/SKILL.md: 4 hits
+  .claude/skills/feature-review-workflow/SKILL.md: 1 hit (vstest.console)
+  .github/agents/csharp-typed-engineer.agent.md: 9 hits

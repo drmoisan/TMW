@@ -1,0 +1,12 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'src/TaskMaster.Api/TaskMaster.Api.csproj' -Pattern 'EnableNSwagEmission','TODO: Re-enable NSwag'; ContinueOnError/IgnoreExitCode forbidden checks
+EXIT_CODE: 0
+
+Output Summary:
+- Required patterns present: 4 matches (EnableNSwagEmission appears twice — property default and Target Condition; TODO comment present in two-line form).
+- Forbidden patterns: 0 matches for both ContinueOnError="true" and IgnoreExitCode="true".
+- Changes applied:
+  - Added <EnableNSwagEmission Condition="'$(EnableNSwagEmission)' == ''">false</EnableNSwagEmission> to PropertyGroup.
+  - Target Condition changed from SkipNSwag != true to EnableNSwagEmission == true.
+  - Removed ContinueOnError="true" and IgnoreExitCode="true" from <Exec>.
+  - Added TODO comment referencing NSwag GitHub issue tracker and noting artifacts/openapi/current.json is hand-authored.

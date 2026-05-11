@@ -1,0 +1,26 @@
+name: dotnet-test
+description: Run the TaskMaster solution unit tests with coverage.
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: dotnet test (with coverage)
+      shell: pwsh
+      run: dotnet test TaskMaster.sln --collect:"XPlat Code Coverage" --no-build --results-directory TestResults/
+    - name: Emit canonical coverage artifact to artifacts/csharp/coverage.xml
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        New-Item -ItemType Directory -Force -Path artifacts/csharp | Out-Null
+        $latest = Get-ChildItem TestResults -Recurse -Filter coverage.cobertura.xml |
+          Sort-Object LastWriteTime -Descending |
+          Select-Object -First 1
+        if (-not $latest) {
+          Write-Error 'No coverage.cobertura.xml found under TestResults/. dotnet test did not emit coverage.'
+          exit 1
+        }
+        Copy-Item -Path $latest.FullName -Destination artifacts/csharp/coverage.xml -Force
+        Write-Host "Canonical coverage artifact written: artifacts/csharp/coverage.xml (source: $($latest.FullName))"

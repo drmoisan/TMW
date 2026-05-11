@@ -1,0 +1,49 @@
+<Project>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <AnalysisLevel>latest-all</AnalysisLevel>
+        <AnalysisMode>All</AnalysisMode>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <!-- Shared analyzer stack applied to every project. PrivateAssets="all" prevents analyzers from flowing transitively. Versions are pinned in Directory.Packages.props (Central Package Management). -->
+    <ItemGroup>
+        <PackageReference
+            Include="Meziantou.Analyzer"
+            PrivateAssets="all"
+            IncludeAssets="runtime; build; native; contentfiles; analyzers"
+        />
+        <PackageReference
+            Include="SonarAnalyzer.CSharp"
+            PrivateAssets="all"
+            IncludeAssets="runtime; build; native; contentfiles; analyzers"
+        />
+        <PackageReference
+            Include="Roslynator.Analyzers"
+            PrivateAssets="all"
+            IncludeAssets="runtime; build; native; contentfiles; analyzers"
+        />
+        <PackageReference
+            Include="AsyncFixer"
+            PrivateAssets="all"
+            IncludeAssets="runtime; build; native; contentfiles; analyzers"
+        />
+        <PackageReference
+            Include="SecurityCodeScan.VS2019"
+            PrivateAssets="all"
+            IncludeAssets="runtime; build; native; contentfiles; analyzers"
+        />
+        <PackageReference
+            Include="Microsoft.CodeAnalysis.BannedApiAnalyzers"
+            PrivateAssets="all"
+            IncludeAssets="runtime; build; native; contentfiles; analyzers"
+        />
+    </ItemGroup>
+
+    <!-- Banned-symbol wiring for Microsoft.CodeAnalysis.BannedApiAnalyzers. -->
+    <ItemGroup>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+    </ItemGroup>
+</Project>

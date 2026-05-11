@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P6-T1
+Command: Select-String -Path 'Directory.Build.props' -Pattern 'Meziantou\.Analyzer','SonarAnalyzer\.CSharp','Roslynator\.Analyzers','AsyncFixer','SecurityCodeScan\.VS2019','Microsoft\.CodeAnalysis\.BannedApiAnalyzers','PrivateAssets="all"'
+EXIT_CODE: 0
+Output Summary: six PackageReference entries (one per analyzer) plus PrivateAssets="all" present on each (6 + 6 = 12 hits across the seven required patterns). IncludeAssets="runtime; build; native; contentfiles; analyzers" present on each entry. AC17 satisfied — analyzers apply to every project automatically via Directory.Build.props.

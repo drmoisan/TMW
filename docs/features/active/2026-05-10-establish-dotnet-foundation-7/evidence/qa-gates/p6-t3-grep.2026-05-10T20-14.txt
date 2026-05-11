@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P6-T3
+Command: Select-String -Path 'Directory.Build.props' -Pattern 'BannedSymbols\.txt'
+EXIT_CODE: 0
+Output Summary: AdditionalFiles entry `<AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />` present in Directory.Build.props (within dedicated banned-symbol ItemGroup, line 47). Build-time wiring confirmed. AC18 satisfied.

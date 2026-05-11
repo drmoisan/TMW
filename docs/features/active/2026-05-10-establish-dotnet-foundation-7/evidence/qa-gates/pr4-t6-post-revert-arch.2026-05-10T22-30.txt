@@ -1,0 +1,11 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj --no-build (post-revert)
+EXIT_CODE: 0
+
+Output Summary:
+- Test results: Failed 0, Passed 3, Skipped 0, Total 3. Duration: 52 ms.
+- All three architecture facts pass:
+  - NoProjectDependsOnOutlookInterop
+  - NoProjectDependsOnForbiddenLegacyNamespaces
+  - DomainProjectDoesNotDependOnInfrastructure (now without any synthetic violation present)
+- Post-revert build also clean: 0 Warning(s), 0 Error(s).

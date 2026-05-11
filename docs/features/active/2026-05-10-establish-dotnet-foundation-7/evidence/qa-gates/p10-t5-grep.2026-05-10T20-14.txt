@@ -1,0 +1,11 @@
+Timestamp: 2026-05-10T20-14
+Task: P10-T5
+Command: Select-String -Path '.github/workflows/pr-pipeline.yml' -Pattern 'stage-1-dotnet-format','stage-2-dotnet-build','stage-3-dotnet-typecheck','stage-4-dotnet-architecture','stage-5-dotnet-test'
+EXIT_CODE: 0
+Output Summary: pr-pipeline.yml extended with five new jobs (each runs-on windows-latest, sequenced via `needs:` chain):
+  - stage-1-dotnet-format -> ./.github/actions/dotnet-format (needs: tier-classification)
+  - stage-2-dotnet-build -> ./.github/actions/dotnet-build (needs: stage-1-dotnet-format)
+  - stage-3-dotnet-typecheck -> documents nullable analysis runs inside dotnet build (needs: stage-2-dotnet-build)
+  - stage-4-dotnet-architecture -> ./.github/actions/dotnet-architecture (needs: stage-3-dotnet-typecheck)
+  - stage-5-dotnet-test -> ./.github/actions/dotnet-test (needs: stage-4-dotnet-architecture)
+All five stage names matched. AC25 satisfied.

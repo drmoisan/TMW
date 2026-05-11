@@ -1,0 +1,15 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test TaskMaster.sln --collect:"XPlat Code Coverage" --results-directory TestResults/
+EXIT_CODE: 0
+
+Output Summary:
+- Test run completed: Failed: 0, Passed: 3, Skipped: 0, Total: 3 (TaskMaster.ArchitectureTests).
+- Cobertura artifact: TestResults/1f4402a2-eb8a-4c7e-840b-448fb477064b/coverage.cobertura.xml
+- Overall line-rate: 1 (100%) — but lines-valid: 0 (no production lines instrumented).
+- Overall branch-rate: 1 (100%) — but branches-valid: 0.
+- Per-file coverage (target production files):
+  - Program.cs           : NO CLASS NODE FOUND in cobertura — 0 covered lines, 0 lines-valid (anomaly confirms F1: file is not instrumented because no test references the API/Domain assemblies).
+  - HealthResponse.cs    : NO CLASS NODE FOUND — 0 covered lines (F1).
+  - AssemblyMarker.cs    : NO CLASS NODE FOUND — 0 covered lines (F1).
+- Baseline confirms F1 (no effective coverage on new production files) and F2 (no canonical artifact at artifacts/csharp/coverage.xml — only the per-run cobertura.xml exists under TestResults/).
+- Note: target framework observed is net10.0 (not net8.0 as stated in plan task framework hints); test project will be created with net10.0 to match the solution.

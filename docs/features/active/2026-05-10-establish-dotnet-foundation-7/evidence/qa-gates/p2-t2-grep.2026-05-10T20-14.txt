@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P2-T2
+Command: Select-String -Path '.github/instructions/csharp-code-change.instructions.md' -Pattern 'Meziantou\.Analyzer','SonarAnalyzer\.CSharp','Roslynator\.Analyzers','AsyncFixer','SecurityCodeScan\.VS2019','Microsoft\.CodeAnalysis\.BannedApiAnalyzers','TimeProvider','Microsoft\.Extensions\.TimeProvider\.Testing','BannedSymbols\.txt','line >= 85%','branch >= 75%','CsCheck','Stryker\.NET','Verify\.Xunit'
+EXIT_CODE: 0
+Output Summary: 16 total matches across the 14 required patterns. Analyzer Stack, DI Seams (TimeProvider), Banned APIs (BannedSymbols.txt), Coverage rule (line >= 85%, branch >= 75%, uniform), and Property-Based/Mutation/Golden tests (CsCheck, Stryker.NET, Verify.Xunit) all mirrored. AC8 satisfied.

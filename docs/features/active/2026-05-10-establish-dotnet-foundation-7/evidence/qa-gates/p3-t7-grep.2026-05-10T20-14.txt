@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P3-T7
+Command: Select-String -Path '.github/skills/feature-review-workflow/SKILL.md' -Pattern 'dotnet test --collect:"XPlat Code Coverage"'; -Pattern 'vstest\.console'
+EXIT_CODE: 0
+Output Summary: mirror file updated; required `dotnet test --collect:"XPlat Code Coverage"` present (line 96, added in 'Run required checks' section since the mirror does not enumerate per-language coverage commands by default); forbidden `vstest.console` absent. AC13 mirror discipline satisfied.

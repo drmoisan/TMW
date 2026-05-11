@@ -49,3 +49,9 @@ Desktop.ini
 
 # Temporary artifacts
 artifacts/
+
+# .NET build and test output
+**/bin/
+**/obj/
+**/TestResults/
+.vs/artifacts/csharp/

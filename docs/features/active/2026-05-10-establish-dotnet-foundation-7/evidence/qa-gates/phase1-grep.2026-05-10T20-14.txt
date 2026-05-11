@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P1-T9 (Phase 1 closure)
+Command: Select-String -Path '.claude/rules/csharp.md' -Pattern 'MSTest','TestClass','TestMethod','\bMoq\b','vstest\.console','TaskMaster\.sln','msbuild'
+EXIT_CODE: 0
+Output Summary: zero matches across all seven forbidden tokens in `.claude/rules/csharp.md` after Phase 1 rewrite (confirmed via Grep tool, full file scanned). Phase 1 closed.

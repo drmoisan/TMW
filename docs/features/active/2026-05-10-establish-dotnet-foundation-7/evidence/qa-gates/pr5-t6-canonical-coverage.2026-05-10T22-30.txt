@@ -1,0 +1,12 @@
+Timestamp: 2026-05-10T22-30
+Command: Copy step from PR2-T1 executed locally as part of PR2-T5; verify Test-Path and XML parse
+EXIT_CODE: 0
+
+Output Summary:
+- Test-Path artifacts/csharp/coverage.xml: True.
+- XML parse: successful.
+- Headline coverage values from canonical file:
+  - line-rate: 0.0379 (3.79% overall — same observation as PR2-T5; dominated by Microsoft.AspNetCore.OpenApi source-generated infrastructure).
+  - branch-rate: 0.0096 (0.96% overall).
+- Per-file values for the three audited production files (see pr1-t14, pr5-t5): all PASS the uniform tier threshold.
+- F2 contract satisfied: canonical artifact lives at the required path artifacts/csharp/coverage.xml and is regenerated on each full QA loop.

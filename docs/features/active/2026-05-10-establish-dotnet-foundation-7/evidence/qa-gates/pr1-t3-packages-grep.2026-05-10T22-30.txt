@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'Directory.Packages.props' -Pattern 'Microsoft\.AspNetCore\.Mvc\.Testing'
+EXIT_CODE: 0
+
+Output Summary:
+- 1 match found at Directory.Packages.props line 25:
+  <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
+- Package version already pinned centrally per P7-T1; no edit required.

@@ -1,0 +1,7 @@
+Timestamp: 2026-05-10T20-14
+Task: P5-T6
+Command: dotnet csharpier check .
+EXIT_CODE: 0
+Output Summary: Checked 6 files in ~230ms. All files formatted. CSharpier 1.2.6 also formatted MSBuild XML files (Directory.Build.props, Directory.Packages.props, *.csproj) which are now in csharpier's canonical layout. AC19 satisfied (csharpier verified clean against empty skeleton). AC26 (Phase 12 precondition) baseline format step green.
+
+Note: CSharpier 1.2.6 CLI requires the `format` subcommand for in-place formatting (`dotnet csharpier format .`). `dotnet csharpier check .` is the no-write check used in CI.

@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <!-- Plan target was net8.0; only .NET SDK 10.0.203 with net10.0 ref pack is available in this environment. Target framework adapted to net10.0; see evidence/qa-gates/p4-t2-classlib.<timestamp>.txt for rationale. -->
+        <!-- Nullable is centralized in Directory.Build.props (Phase 5); not set per-project. -->
+    </PropertyGroup>
+</Project>

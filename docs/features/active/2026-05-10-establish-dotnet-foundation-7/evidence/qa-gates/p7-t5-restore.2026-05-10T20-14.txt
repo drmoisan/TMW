@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T20-14
+Task: P7-T5
+Command: dotnet restore TaskMaster.sln
+EXIT_CODE: 0
+Output Summary:
+  Restored src/TaskMaster.Domain/TaskMaster.Domain.csproj (in 703 ms).
+  Restored tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj (in 4.69 sec).
+All test SDK + analyzer + architecture-test references resolved. AC20, AC22, AC23 satisfied.

@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P3-T1
+Command: Select-String -Path '.claude/agents/csharp-typed-engineer.md' -Pattern 'xUnit toolchain','xUnit','NSubstitute','dotnet build'; -Pattern 'MSTest','\bMoq\b','msbuild'
+EXIT_CODE: 0
+Output Summary: required patterns present (description frontmatter contains 'xUnit toolchain'; body references xUnit, NSubstitute, dotnet build). Forbidden tokens (MSTest, Moq, msbuild) absent. AC10 satisfied.

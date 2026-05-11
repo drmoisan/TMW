@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P3-T4
+Command: Select-String -Path '.claude/skills/invoke-csharp-engineer/SKILL.md' -Pattern 'CSharpier -> \.NET Analyzers -> Nullable Analysis -> xUnit'; -Pattern 'MSTest','\bMoq\b'
+EXIT_CODE: 0
+Output Summary: required toolchain ordering 'CSharpier -> .NET Analyzers -> Nullable Analysis -> xUnit' present (at least 1 match per Grep tool). Parenthetical references replaced to use xUnit (lines 16, 40, 43). Forbidden tokens MSTest and Moq absent. AC12 satisfied.

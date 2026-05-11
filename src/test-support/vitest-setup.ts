@@ -4,12 +4,12 @@ import officeFake from "./office-fake";
 
 // Inject Office global before any test runs
 beforeAll(() => {
-  (globalThis as Record<string, unknown>)["Office"] = officeFake;
+    (globalThis as Record<string, unknown>)["Office"] = officeFake;
 });
 
 // Enable fake timers by default for determinism (per typescript.md runtime determinism policy)
 beforeAll(() => {
-  vi.useFakeTimers();
+    vi.useFakeTimers();
 });
 
 // MSW server lifecycle

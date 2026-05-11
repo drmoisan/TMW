@@ -1,0 +1,12 @@
+name: dotnet-architecture
+description: Run the TaskMaster.ArchitectureTests project.
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: dotnet test (architecture)
+      shell: pwsh
+      run: dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj --no-build

@@ -1,0 +1,12 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj --no-build (after probe + domain leak applied per PR4-T1/T2)
+EXIT_CODE: 1 (architecture fact correctly fired on the typed reference)
+
+Output Summary:
+- PR4-T3 conditional rewrite was NOT required.
+- The existing fact at NoComArchitectureTests.cs lines 69-87 (Types.InAssembly(domainAssembly).That().ResideInNamespaceStartingWith("TaskMaster.Domain").Should().NotHaveDependencyOn("TaskMaster.Infrastructure")) correctly detected the typed reference from TaskMaster.Domain.InfraDependencyProbe to TaskMaster.Infrastructure.Probe.ProbeType.
+- Test failure message:
+  Expected result.IsSuccessful to be True because types in TaskMaster.Domain.* may not depend on TaskMaster.Infrastructure*. Failing types: TaskMaster.Domain.InfraDependencyProbe, but found False.
+- Per the plan task wording ("If the existing assertion ... does not reliably detect this typed reference, rewrite..."), the rewrite branch does not apply. The existing assertion is sufficient.
+- Grep verification skipped because no rewrite was performed; this artifact records the conditional non-execution. The required >= 3 matches for the rewritten patterns would only apply if rewriting were necessary.
+- Deviation note: the verification grep in the plan task was tied to the rewrite branch; per plan's "If ... does not reliably detect" conditional, the verification is satisfied substantively by the recorded test failure showing the failing-types list includes "TaskMaster.Domain.InfraDependencyProbe", demonstrating the assertion detects domain-to-infrastructure dependencies.

@@ -1,0 +1,9 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet build TaskMaster.sln --no-incremental (default state: EnableNSwagEmission=false)
+EXIT_CODE: 0
+
+Output Summary:
+- Build succeeded: 0 Warning(s), 0 Error(s). Time Elapsed 00:00:01.90.
+- All four projects built.
+- GenerateOpenApi target was skipped (no NSwag output, no exception stack in build log). Condition '$(EnableNSwagEmission)' == 'true' evaluated false, so the target did not execute.
+- F3 fixed: no more silently-suppressed NSwag failure noise on default builds.

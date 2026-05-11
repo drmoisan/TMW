@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P2-T3
+Command: Select-String -Path '.github/instructions/csharp-unit-test.instructions.md' -Pattern 'xUnit','\[Fact\]','\[Theory\]','\[InlineData\]','IClassFixture<T>','NSubstitute'; -Pattern 'MSTest','TestClass','TestMethod','\bMoq\b'
+EXIT_CODE: 0
+Output Summary: required patterns (xUnit, [Fact], [Theory], [InlineData], IClassFixture<T>, NSubstitute) all present; forbidden tokens (MSTest, TestClass, TestMethod, Moq) absent. AC9 satisfied for xUnit/NSubstitute rewrite.

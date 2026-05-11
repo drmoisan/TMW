@@ -1,0 +1,15 @@
+name: dotnet-format
+description: Verify all C# files are formatted with CSharpier.
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: Restore local tools
+      shell: pwsh
+      run: dotnet tool restore
+    - name: CSharpier check
+      shell: pwsh
+      run: dotnet csharpier check .

@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P9-T3
+Command: Select-String -Path 'src/TaskMaster.Api/TaskMaster.Api.csproj' -Pattern 'GenerateOpenApi','artifacts/openapi/current\.json','NSwag'
+EXIT_CODE: 0
+Output Summary: csproj contains a `<Target Name="GenerateOpenApi" AfterTargets="Build">` that invokes `$(NSwagExe_Net100) aspnetcore2openapi` and emits to `..\..\artifacts\openapi\current.json`. Three required patterns matched (Target name `GenerateOpenApi`, output path `artifacts/openapi/current.json`, package `NSwag`). AC24 wiring satisfied.

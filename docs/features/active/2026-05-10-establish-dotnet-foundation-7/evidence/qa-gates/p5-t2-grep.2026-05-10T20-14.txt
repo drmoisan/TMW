@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P5-T2
+Command: Select-String -Path 'Directory.Packages.props' -Pattern 'ManagePackageVersionsCentrally','Meziantou\.Analyzer','SonarAnalyzer\.CSharp','Roslynator\.Analyzers','AsyncFixer','SecurityCodeScan\.VS2019','Microsoft\.CodeAnalysis\.BannedApiAnalyzers'
+EXIT_CODE: 0
+Output Summary: 7 matches: ManagePackageVersionsCentrally=true plus six analyzer PackageVersion entries. Test SDK and architecture-test versions also pinned (xunit, FluentAssertions, NSubstitute, NetArchTest.Rules, WireMock.Net, Testcontainers, Microsoft.AspNetCore.Mvc.Testing, coverlet.collector, NSwag.MSBuild, Microsoft.Extensions.TimeProvider.Testing). AC16 satisfied.

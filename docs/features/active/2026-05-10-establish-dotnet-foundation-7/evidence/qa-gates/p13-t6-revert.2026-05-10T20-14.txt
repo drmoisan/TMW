@@ -1,0 +1,10 @@
+Timestamp: 2026-05-10T20-14
+Task: P13-T6
+Command: rm src/TaskMaster.Domain/VbLeak.cs; dotnet sln TaskMaster.sln remove src/TaskMaster.Infrastructure.Probe/TaskMaster.Infrastructure.Probe.csproj; rm -rf src/TaskMaster.Infrastructure.Probe; dotnet build TaskMaster.sln; dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj
+EXIT_CODE: 0
+Output Summary:
+  - VbLeak.cs file absent.
+  - Infrastructure.Probe project removed from solution and folder deleted.
+  - dotnet build TaskMaster.sln: succeeded, 0 warnings, 0 errors.
+  - dotnet test ArchitectureTests: Passed 3/3.
+Revert verified clean. AC28 demonstration complete.

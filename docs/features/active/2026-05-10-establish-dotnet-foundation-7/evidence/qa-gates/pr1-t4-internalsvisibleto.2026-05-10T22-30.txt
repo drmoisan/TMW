@@ -1,0 +1,9 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path 'src/TaskMaster.Api/TaskMaster.Api.csproj' -Pattern 'InternalsVisibleTo','TaskMaster\.Api\.Tests'
+EXIT_CODE: 0
+
+Output Summary:
+- Match returned (one matching line containing both substrings):
+  src\TaskMaster.Api\TaskMaster.Api.csproj:8:        <InternalsVisibleTo Include="TaskMaster.Api.Tests" />
+- Both required substrings ("InternalsVisibleTo" and "TaskMaster.Api.Tests") are present in the file.
+- Deviation note: the plan's pass criterion of ">= 2 matches" assumed two separate lines; the implementation places both substrings on a single line (the conventional MSBuild form). Substantive intent (both substrings present in the csproj) is satisfied.

@@ -1,0 +1,15 @@
+name: dotnet-build
+description: Restore and build the TaskMaster solution with warnings as errors.
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: dotnet restore
+      shell: pwsh
+      run: dotnet restore TaskMaster.sln
+    - name: dotnet build (warnings as errors)
+      shell: pwsh
+      run: dotnet build TaskMaster.sln --no-restore --warnaserror

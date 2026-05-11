@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P13-T3
+Command: rm -rf src/TaskMaster.Domain/_violations; dotnet build TaskMaster.sln
+EXIT_CODE: 0
+Output Summary: file absent (`Test-Path src/TaskMaster.Domain/_violations/BannedApiProbe.cs` returns false). Build succeeded. 0 Warning(s). 0 Error(s). AC27 demonstration complete; post-state clean.

@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P7-T2
+Command: Select-String -Path 'tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj' -Pattern 'xunit','FluentAssertions','NSubstitute','NetArchTest\.Rules','coverlet\.collector'
+EXIT_CODE: 0
+Output Summary: tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj contains PackageReference entries for: coverlet.collector, Microsoft.NET.Test.Sdk, xunit, xunit.runner.visualstudio, FluentAssertions, NSubstitute, NetArchTest.Rules (plus anchored Microsoft.Extensions.TimeProvider.Testing, WireMock.Net, Testcontainers, Microsoft.AspNetCore.Mvc.Testing for AC22/23). Versions resolved centrally via Directory.Packages.props. AC20, AC21 satisfied.

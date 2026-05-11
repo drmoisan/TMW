@@ -1,0 +1,8 @@
+Timestamp: 2026-05-10T22-30
+Command: Select-String -Path '.github/actions/dotnet-test/action.yml' -Pattern 'artifacts/csharp/coverage\.xml','coverage\.cobertura\.xml','Copy-Item'
+EXIT_CODE: 0
+
+Output Summary:
+- 5 matches (>= 3 required).
+- New composite step "Emit canonical coverage artifact to artifacts/csharp/coverage.xml" added after dotnet test step.
+- Step body fails non-zero when no coverage.cobertura.xml is found (Write-Error + exit 1).

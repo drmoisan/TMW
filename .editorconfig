@@ -1,0 +1,60 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{json,yml,yaml,md}]
+indent_size = 2
+
+[*.cs]
+# File-scoped namespaces required.
+csharp_style_namespace_declarations = file_scoped:error
+
+# Using-directive ordering.
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# Async naming.
+# Async methods must use the Async suffix.
+
+# --- Naming conventions ---
+
+# Interfaces start with 'I'.
+dotnet_naming_rule.interfaces_should_be_prefixed.severity = error
+dotnet_naming_rule.interfaces_should_be_prefixed.symbols = interface_symbols
+dotnet_naming_rule.interfaces_should_be_prefixed.style = i_prefix_style
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
+dotnet_naming_style.i_prefix_style.capitalization = pascal_case
+dotnet_naming_style.i_prefix_style.required_prefix = I
+
+# Private fields use _camelCase.
+dotnet_naming_rule.private_fields_underscore.severity = error
+dotnet_naming_rule.private_fields_underscore.symbols = private_field_symbols
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_style
+dotnet_naming_symbols.private_field_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel_style.capitalization = camel_case
+dotnet_naming_style.underscore_camel_style.required_prefix = _
+
+# Constants use PascalCase.
+dotnet_naming_rule.constants_pascal_case.severity = error
+dotnet_naming_rule.constants_pascal_case.symbols = const_symbols
+dotnet_naming_rule.constants_pascal_case.style = pascal_case_style
+dotnet_naming_symbols.const_symbols.applicable_kinds = field
+dotnet_naming_symbols.const_symbols.required_modifiers = const
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# Async methods must end in 'Async'.
+dotnet_naming_rule.async_methods_async_suffix.severity = error
+dotnet_naming_rule.async_methods_async_suffix.symbols = async_method_symbols
+dotnet_naming_rule.async_methods_async_suffix.style = async_suffix_style
+dotnet_naming_symbols.async_method_symbols.applicable_kinds = method
+dotnet_naming_symbols.async_method_symbols.required_modifiers = async
+dotnet_naming_style.async_suffix_style.capitalization = pascal_case
+dotnet_naming_style.async_suffix_style.required_suffix = Async

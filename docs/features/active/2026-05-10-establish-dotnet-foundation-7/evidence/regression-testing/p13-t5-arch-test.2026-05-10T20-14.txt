@@ -1,0 +1,10 @@
+Timestamp: 2026-05-10T20-14
+Task: P13-T5 [expect-fail]
+Command: dotnet test tests/TaskMaster.ArchitectureTests/TaskMaster.ArchitectureTests.csproj
+EXIT_CODE: 1
+Output Summary:
+  Failed: TaskMaster.ArchitectureTests.NoComArchitectureTests.NoProjectDependsOnForbiddenLegacyNamespaces
+  Error Message: Expected result.IsSuccessful to be True because no TaskMaster.* project may depend on System.Windows.Forms, System.Web, or Microsoft.VisualBasic. Failing types: TaskMaster.Domain.VbLeak, but found False.
+  Failed: 1, Passed: 2, Skipped: 0, Total: 3, Duration: 138 ms.
+
+The architecture-rule violation correctly blocks the test stage. The failing fact name is `NoProjectDependsOnForbiddenLegacyNamespaces`; the error message references `Microsoft.VisualBasic` and the failing type `TaskMaster.Domain.VbLeak`. AC28 satisfied.

@@ -1,0 +1,16 @@
+Timestamp: 2026-05-10T20-14
+Task: P7-T1
+Command: Select-String -Path 'Directory.Packages.props' -Pattern 'xunit','FluentAssertions','NSubstitute','Microsoft\.Extensions\.TimeProvider\.Testing','WireMock\.Net','Testcontainers','Microsoft\.AspNetCore\.Mvc\.Testing','coverlet\.collector'
+EXIT_CODE: 0
+Output Summary: PackageVersion entries pinned for all required test SDK packages:
+  - xunit 2.9.3
+  - xunit.runner.visualstudio 3.1.4
+  - Microsoft.NET.Test.Sdk 17.14.1
+  - FluentAssertions 7.2.0
+  - NSubstitute 5.3.0
+  - Microsoft.Extensions.TimeProvider.Testing 9.5.0
+  - WireMock.Net 1.7.2
+  - Testcontainers 4.6.0
+  - Microsoft.AspNetCore.Mvc.Testing 9.0.10
+  - coverlet.collector 6.0.4
+Eight required pattern matches (10 packages total). AC20, AC22, AC23 (central pin portion) satisfied.

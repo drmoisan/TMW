@@ -1,0 +1,14 @@
+Timestamp: 2026-05-10T22-30
+Command: dotnet test TaskMaster.sln --no-build --collect:"XPlat Code Coverage" --results-directory TestResults/
+EXIT_CODE: 0
+
+Output Summary:
+- Total tests: 11 passed, 0 failed, 0 skipped.
+  - TaskMaster.ArchitectureTests: 3/3 passed (65 ms)
+  - TaskMaster.Api.Tests: 8/8 passed (151 ms)
+- Two cobertura artifacts emitted (one per test project).
+- Per-file coverage (parsed from TaskMaster.Api.Tests cobertura, the file containing the audited production files):
+  - Program.cs:           line=100.00%  branch=100.00%  PASS (>= 85% / >= 75%)
+  - HealthResponse.cs:    line=100.00%  branch=100.00%  PASS
+  - AssemblyMarker.cs:    no instrumentable lines (const-only); two unit tests verify the constant value. Vacuously compliant; documented in pr1-t14-per-file-coverage.
+- Overall headline (single-package report): line-rate 0.0379, branch-rate 0.0096 — dominated by Microsoft.AspNetCore.OpenApi source-generated infrastructure attributed to the TaskMaster.Api package.

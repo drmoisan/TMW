@@ -1,0 +1,5 @@
+Timestamp: 2026-05-10T20-14
+Task: P14-T3
+Command: Select-String -Path 'docs/features/active/2026-05-10-establish-dotnet-foundation-7/p14-acceptance-criteria-checkoff.md' -Pattern '^\| AC([1-9]|[12][0-9]|30) '
+EXIT_CODE: 0
+Output Summary: 30 distinct AC rows present (AC1 through AC30); every row status column is PASS. AC1-AC30 reconciliation complete.

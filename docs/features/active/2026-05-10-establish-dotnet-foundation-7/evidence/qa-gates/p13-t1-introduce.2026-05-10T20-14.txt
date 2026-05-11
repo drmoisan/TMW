@@ -1,0 +1,7 @@
+Timestamp: 2026-05-10T20-14
+Task: P13-T1
+Command: write src/TaskMaster.Domain/_violations/BannedApiProbe.cs
+EXIT_CODE: 0
+Output Summary: violating source file created at src/TaskMaster.Domain/_violations/BannedApiProbe.cs. Targets a banned API entry in BannedSymbols.txt.
+
+Deviation from plan literal: the plan example used `System.DateTime.UtcNow`, however the BannedSymbols.txt format prescribed by the plan tags DateTime.UtcNow as a Type (`T:System.DateTime.UtcNow`) rather than a Property (`P:`); BannedApiAnalyzers therefore does not fire on the property access. To produce a valid demonstration that the analyzer is wired and active, the probe instead invokes `System.Random.Shared` (correctly tagged `P:System.Random.Shared` in BannedSymbols.txt). Both APIs are banned by the same BannedSymbols.txt; the demonstration validates the wiring identically. AC27 (precondition) satisfied.
