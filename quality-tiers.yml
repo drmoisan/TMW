@@ -50,6 +50,38 @@ projects:
       production files under test (Program.cs, HealthResponse.cs, AssemblyMarker.cs)
       are tiered separately under their owning projects.
 
+  # New projects added by Issue #12 (Prompt C2 — Backend API Foundation).
+  - name: TaskMaster.Application
+    path: src/TaskMaster.Application
+    language: csharp
+    tier: t2
+    rationale: |
+      Core application layer (T2). Contains command bus, IUserSettingsRepository contract,
+      IGraphClientFactory interface, and DI wiring. Bugs here cause feature regressions.
+      Property-based tests required for all pure functions per T2 policy.
+  - name: TaskMaster.Infrastructure
+    path: src/TaskMaster.Infrastructure
+    language: csharp
+    tier: t3
+    rationale: |
+      Infrastructure adapter layer (T3). Contains JsonFileUserSettingsRepository,
+      InMemoryUserSettingsRepository, GraphClientFactory, and IFileWriter seam.
+      Adapter-glue around file I/O and Microsoft Graph SDK.
+  - name: TaskMaster.Application.Tests
+    path: tests/TaskMaster.Application.Tests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): xUnit + CsCheck tests for TaskMaster.Application and
+      InMemoryUserSettingsRepository. Tier reflects test-infrastructure role.
+  - name: TaskMaster.Infrastructure.Tests
+    path: tests/TaskMaster.Infrastructure.Tests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): xUnit + WireMock.Net + NSubstitute tests for
+      TaskMaster.Infrastructure. Tier reflects test-infrastructure role.
+
 # Validator behavior (read by .github/workflows/pr-pipeline.yml stage tier-classification):
 # - Every entry under projects MUST have name, path, language, tier.
 # - tier value MUST be one of: t1, t2, t3, t4.

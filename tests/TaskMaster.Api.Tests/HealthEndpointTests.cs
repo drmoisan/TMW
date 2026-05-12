@@ -14,11 +14,11 @@ namespace TaskMaster.Api.Tests;
 /// in-process so the endpoint, response shape, and content-type can be exercised
 /// without binding a real network port.
 /// </summary>
-public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public class HealthEndpointTests : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory _factory;
 
-    public HealthEndpointTests(WebApplicationFactory<Program> factory)
+    public HealthEndpointTests(CustomWebApplicationFactory factory)
     {
         _factory = factory;
     }
