@@ -28,17 +28,17 @@ Extend `TaskMaster.Api` and introduce `TaskMaster.Application` and `TaskMaster.I
 
 ## Acceptance Criteria (early draft)
 
-- [ ] `TaskMaster.Application` project exists; contains command bus abstraction and `IUserSettingsRepository` interface.
-- [ ] `TaskMaster.Infrastructure` project exists; contains Graph adapter and at least one `IUserSettingsRepository` implementation.
+- [x] `TaskMaster.Application` project exists; contains command bus abstraction and `IUserSettingsRepository` interface.
+- [x] `TaskMaster.Infrastructure` project exists; contains Graph adapter and at least one `IUserSettingsRepository` implementation.
 - [x] Bearer token validation is wired in `TaskMaster.Api` via `Microsoft.Identity.Web`.
-- [ ] Correlation ID middleware propagates `X-Correlation-Id` through all requests.
-- [ ] `/health` endpoint returns `{"status":"ok"}`.
-- [ ] `dotnet build` passes with zero warnings and zero analyzer errors.
-- [ ] All new projects pass `dotnet csharpier check .`, architecture tests, and `dotnet test`.
-- [ ] `quality-tiers.yml` updated for all new projects.
-- [ ] Unit tests cover settings CRUD and command routing at >= 85% line / >= 75% branch.
-- [ ] Auth and Graph token flow covered by integration test or documented manual test plan.
-- [ ] No `Microsoft.Office.Interop.Outlook` or VSTO references anywhere.
+- [x] Correlation ID middleware propagates `X-Correlation-Id` through all requests.
+- [x] `/health` endpoint returns `{"status":"ok"}`.
+- [x] `dotnet build` passes with zero warnings and zero analyzer errors.
+- [x] All new projects pass `dotnet csharpier check .`, architecture tests, and `dotnet test`.
+- [x] `quality-tiers.yml` updated for all new projects.
+- [x] Unit tests cover settings CRUD and command routing at >= 85% line / >= 75% branch.
+- [x] Auth and Graph token flow covered by integration test or documented manual test plan.
+- [x] No `Microsoft.Office.Interop.Outlook` or VSTO references anywhere.
 
 ## Constraints & Risks
 
