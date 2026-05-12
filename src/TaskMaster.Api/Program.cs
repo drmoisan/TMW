@@ -38,4 +38,8 @@ app.UseAuthorization();
 
 app.MapGet("/health", () => new HealthResponse(Status: "ok")).WithName("Health").AllowAnonymous();
 
+app.MapGet("/api/ping", () => Results.Ok(new { status = "pong" }))
+    .WithName("Ping")
+    .RequireAuthorization();
+
 await app.RunAsync().ConfigureAwait(false);

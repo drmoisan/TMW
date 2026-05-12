@@ -30,7 +30,7 @@ Extend `TaskMaster.Api` and introduce `TaskMaster.Application` and `TaskMaster.I
 
 - [ ] `TaskMaster.Application` project exists; contains command bus abstraction and `IUserSettingsRepository` interface.
 - [ ] `TaskMaster.Infrastructure` project exists; contains Graph adapter and at least one `IUserSettingsRepository` implementation.
-- [ ] Bearer token validation is wired in `TaskMaster.Api` via `Microsoft.Identity.Web`.
+- [x] Bearer token validation is wired in `TaskMaster.Api` via `Microsoft.Identity.Web`.
 - [ ] Correlation ID middleware propagates `X-Correlation-Id` through all requests.
 - [ ] `/health` endpoint returns `{"status":"ok"}`.
 - [ ] `dotnet build` passes with zero warnings and zero analyzer errors.
