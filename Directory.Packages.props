@@ -35,6 +35,10 @@
         <!-- Property-based testing. -->
         <PackageVersion Include="CsCheck" Version="4.6.2" />
 
+        <!-- Golden tests (xunit.v3 + Verify). Used by TaskMaster.PlaceholderGolden.Tests only. -->
+        <PackageVersion Include="xunit.v3" Version="3.2.2" />
+        <PackageVersion Include="Verify.XunitV3" Version="31.16.3" />
+
         <!-- Architecture tests (Phase 8). -->
         <PackageVersion Include="NetArchTest.Rules" Version="1.3.2" />
 

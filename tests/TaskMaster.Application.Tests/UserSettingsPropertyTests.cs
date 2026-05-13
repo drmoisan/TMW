@@ -20,32 +20,18 @@ public sealed class UserSettingsPropertyTests
     [Fact]
     public void UserSettings_RoundTripSerialization_PreservesAllFields()
     {
-        Gen.Select(Gen.String, Gen.Bool, Gen.Bool, Gen.DateTimeOffset)
-            .Sample(
-                (userId, notif, triage, ts) =>
-                {
-                    // Arrange
-                    var original = new UserSettings(
-                        UserId: userId ?? string.Empty,
-                        NotificationsEnabled: notif,
-                        TriageEnabled: triage,
-                        LastModifiedAt: ts
-                    );
+        UserSettingsGen.Arbitrary.Sample(original =>
+        {
+            // Act
+            var json = JsonSerializer.Serialize(original, s_jsonOptions);
+            var deserialized = JsonSerializer.Deserialize<UserSettings>(json, s_jsonOptions);
 
-                    // Act
-                    var json = JsonSerializer.Serialize(original, s_jsonOptions);
-                    var deserialized = JsonSerializer.Deserialize<UserSettings>(
-                        json,
-                        s_jsonOptions
-                    );
-
-                    // Assert
-                    deserialized.Should().NotBeNull();
-                    deserialized!.UserId.Should().Be(original.UserId);
-                    deserialized.NotificationsEnabled.Should().Be(original.NotificationsEnabled);
-                    deserialized.TriageEnabled.Should().Be(original.TriageEnabled);
-                    deserialized.LastModifiedAt.Should().Be(original.LastModifiedAt);
-                }
-            );
+            // Assert
+            deserialized.Should().NotBeNull();
+            deserialized!.UserId.Should().Be(original.UserId);
+            deserialized.NotificationsEnabled.Should().Be(original.NotificationsEnabled);
+            deserialized.TriageEnabled.Should().Be(original.TriageEnabled);
+            deserialized.LastModifiedAt.Should().Be(original.LastModifiedAt);
+        });
     }
 }

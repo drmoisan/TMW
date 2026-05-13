@@ -34,6 +34,7 @@ pnpm-debug.log*
 # Test artifacts
 test-results/
 playwright-report/
+mutation-report/
 
 # OS files
 .DS_Store
@@ -55,3 +56,7 @@ artifacts/
 **/obj/
 **/TestResults/
 .vs/artifacts/csharp/
+
+# Verify snapshot received files (temporary, never committed)
+*.received.*
+*.received/
