@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NetArchTest.Rules;
 using TaskMaster.Application;
+using TaskMaster.Classifier;
 
 namespace TaskMaster.ArchitectureTests;
 
@@ -43,6 +44,24 @@ public sealed class LayerBoundaryTests
             .IsSuccessful.Should()
             .BeTrue(
                 "types in TaskMaster.Application must not depend on Microsoft.Identity. "
+                    + "Failing types: "
+                    + string.Join(", ", result.FailingTypeNames ?? System.Array.Empty<string>())
+            );
+    }
+
+    [Fact]
+    public void ClassifierProjectDoesNotDependOnInfrastructure()
+    {
+        var result = Types
+            .InAssembly(typeof(KeywordClassifier).Assembly)
+            .Should()
+            .NotHaveDependencyOn("TaskMaster.Infrastructure")
+            .GetResult();
+
+        result
+            .IsSuccessful.Should()
+            .BeTrue(
+                "types in TaskMaster.Classifier must not depend on TaskMaster.Infrastructure. "
                     + "Failing types: "
                     + string.Join(", ", result.FailingTypeNames ?? System.Array.Empty<string>())
             );

@@ -9,6 +9,8 @@
 
 /* global document, Office, HTMLElement */
 
+import type { ClassifyResponse } from "./classifier-client";
+
 /**
  * Normalizes a task title by trimming leading and trailing whitespace.
  * Pure function with no side effects; suitable for property-based testing.
@@ -26,6 +28,35 @@ export interface RenderDom {
     status: HTMLElement;
     subject: HTMLElement;
     from: HTMLElement;
+    classification?: HTMLElement;
+    classifyBtn?: HTMLElement;
+    confirmBtn?: HTMLElement;
+    rejectBtn?: HTMLElement;
+}
+
+/**
+ * Sets the status text to "Classifying..." while a classification is in progress.
+ * Pure function; operates only on DOM parameters.
+ */
+export function renderClassifying(dom: RenderDom): void {
+    dom.status.textContent = "Classifying...";
+}
+
+/**
+ * Renders a classification result to the DOM, enabling confirm/reject buttons.
+ * Pure function; operates only on DOM parameters without Office.js calls.
+ */
+export function renderClassificationResult(result: ClassifyResponse, dom: RenderDom): void {
+    if (dom.classification !== undefined) {
+        const pct = Math.round(result.confidence * 100);
+        dom.classification.textContent = `${result.label} (${String(pct)}%)`;
+    }
+    if (dom.confirmBtn !== undefined) {
+        dom.confirmBtn.removeAttribute("disabled");
+    }
+    if (dom.rejectBtn !== undefined) {
+        dom.rejectBtn.removeAttribute("disabled");
+    }
 }
 
 export function renderItem(item: RenderableItem, dom: RenderDom): void {

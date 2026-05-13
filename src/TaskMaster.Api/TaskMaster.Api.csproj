@@ -32,6 +32,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\TaskMaster.Application\TaskMaster.Application.csproj" />
+        <ProjectReference Include="..\TaskMaster.Classifier\TaskMaster.Classifier.csproj" />
         <ProjectReference Include="..\TaskMaster.Infrastructure\TaskMaster.Infrastructure.csproj" />
     </ItemGroup>
 

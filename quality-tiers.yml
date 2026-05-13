@@ -82,6 +82,27 @@ projects:
       Test scaffolding (T4): xUnit + WireMock.Net + NSubstitute tests for
       TaskMaster.Infrastructure. Tier reflects test-infrastructure role.
 
+  # New projects added by Issue #17 (implement-classify-selected-message).
+  - name: TaskMaster.Classifier
+    path: src/TaskMaster.Classifier
+    language: csharp
+    tier: t1
+    rationale: |
+      Critical classifier engine (T1). KeywordClassifier implements IMessageClassifier and
+      drives the message classification feature. Behavior bugs cause silent misclassification
+      (model drift). Requires property-based tests, golden tests against a versioned corpus,
+      and Stryker.NET mutation score >= 75% per T1 policy.
+
+  - name: TaskMaster.Classifier.Tests
+    path: tests/TaskMaster.Classifier.Tests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): xUnit.v3 + Verify.XunitV3 + CsCheck + FluentAssertions tests for
+      TaskMaster.Classifier. Includes unit tests, property-based tests, and golden tests. Tier
+      reflects test-infrastructure role; the production code under test (KeywordClassifier) is
+      tiered separately as T1 under TaskMaster.Classifier.
+
   # New project added by Issue #15 (establish-behavior-correctness-test-infra).
   - name: TaskMaster.PlaceholderGolden.Tests
     path: tests/TaskMaster.PlaceholderGolden.Tests

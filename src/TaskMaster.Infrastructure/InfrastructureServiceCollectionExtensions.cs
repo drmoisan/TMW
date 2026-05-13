@@ -29,6 +29,9 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IUserSettingsRepository>(_ => new InMemoryUserSettingsRepository(
             TimeProvider.System
         ));
+        services.AddSingleton<ITrainingRepository>(_ => new InMemoryTrainingRepository(
+            TimeProvider.System
+        ));
         services.AddScoped<IGraphClientFactory, GraphClientFactory>();
         services
             .AddOptions<UserSettingsFileOptions>()
