@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMaster.Application.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMaster.Infrastructure.Tests", "tests\TaskMaster.Infrastructure.Tests\TaskMaster.Infrastructure.Tests.csproj", "{BE039129-E7A0-4D92-9F55-9D196D6535CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMaster.PlaceholderGolden.Tests", "tests\TaskMaster.PlaceholderGolden.Tests\TaskMaster.PlaceholderGolden.Tests.csproj", "{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +131,18 @@ Global
 		{BE039129-E7A0-4D92-9F55-9D196D6535CE}.Release|x64.Build.0 = Release|Any CPU
 		{BE039129-E7A0-4D92-9F55-9D196D6535CE}.Release|x86.ActiveCfg = Release|Any CPU
 		{BE039129-E7A0-4D92-9F55-9D196D6535CE}.Release|x86.Build.0 = Release|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Debug|x64.Build.0 = Debug|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Debug|x86.Build.0 = Debug|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Release|x64.ActiveCfg = Release|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Release|x64.Build.0 = Release|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Release|x86.ActiveCfg = Release|Any CPU
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,5 +156,6 @@ Global
 		{5FB7CF68-9253-485D-BC98-D5162C2D0B83} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{F3B2A218-121F-4C85-BA39-D69C7F08D70D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{BE039129-E7A0-4D92-9F55-9D196D6535CE} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{CD2F7AFE-DBF2-46EE-ABE0-2D789251901A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

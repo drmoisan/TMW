@@ -9,6 +9,14 @@
 
 /* global document, Office, HTMLElement */
 
+/**
+ * Normalizes a task title by trimming leading and trailing whitespace.
+ * Pure function with no side effects; suitable for property-based testing.
+ */
+export function normalizeTitle(s: string): string {
+    return s.trim();
+}
+
 export interface RenderableItem {
     subject?: string;
     from?: { displayName?: string; emailAddress?: string };

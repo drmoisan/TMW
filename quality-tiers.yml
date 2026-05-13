@@ -82,6 +82,16 @@ projects:
       Test scaffolding (T4): xUnit + WireMock.Net + NSubstitute tests for
       TaskMaster.Infrastructure. Tier reflects test-infrastructure role.
 
+  # New project added by Issue #15 (establish-behavior-correctness-test-infra).
+  - name: TaskMaster.PlaceholderGolden.Tests
+    path: tests/TaskMaster.PlaceholderGolden.Tests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): placeholder golden test project demonstrating
+      Verify.XunitV3 infrastructure. Establishes the baseline for golden/snapshot
+      testing; no production code under test. Tier reflects pure test-infrastructure role.
+
 # Validator behavior (read by .github/workflows/pr-pipeline.yml stage tier-classification):
 # - Every entry under projects MUST have name, path, language, tier.
 # - tier value MUST be one of: t1, t2, t3, t4.

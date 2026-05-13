@@ -11,6 +11,8 @@
     "paths": {
       "@office-fake": ["./src/test-support/office-fake.ts"]
     },
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "jsx": "react",

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/master/packages/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "checkers": ["typescript"],
+  "mutate": [],
+  "typescriptChecker": {
+    "prioritizePerformanceOverAccuracy": false
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 75,
+    "break": 75
+  },
+  "reporters": ["html", "json", "progress"],
+  "htmlReporter": {
+    "fileName": "mutation-report/index.html"
+  },
+  "coverageAnalysis": "perTest"
+}
