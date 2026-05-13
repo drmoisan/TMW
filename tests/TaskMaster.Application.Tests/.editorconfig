@@ -1,0 +1,11 @@
+# Test-project-scoped overrides. Relaxes member-naming analyzers for xUnit
+# test methods, which conventionally use the Method_Scenario_Outcome form
+# (underscores) to maximize readability of test names.
+
+[*.cs]
+# CA1707: Identifiers should not contain underscores — opt out for test methods.
+dotnet_diagnostic.CA1707.severity = none
+# Roslynator equivalent.
+dotnet_diagnostic.RCS1213.severity = none
+# Meziantou: MA0009 (identifiers with underscores).
+dotnet_diagnostic.MA0009.severity = none

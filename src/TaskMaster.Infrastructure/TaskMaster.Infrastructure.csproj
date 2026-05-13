@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="TaskMaster.Infrastructure.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Graph" />
+        <PackageReference Include="Microsoft.Identity.Web.GraphServiceClient" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\TaskMaster.Domain\TaskMaster.Domain.csproj" />
+        <ProjectReference Include="..\..\src\TaskMaster.Application\TaskMaster.Application.csproj" />
+    </ItemGroup>
+</Project>

@@ -5,3 +5,4 @@
 - [Sync bundled mirrors after runtime edits](feedback_bundle_sync_after_runtime_edit.md) — every runtime file under .claude/.codex/.agents/.github has a bundled mirror enforced by python contract tests; run pytest+pester before reporting completion.
 - [Run prd-feature before atomic-planner](feedback_spec_userstory_before_planning.md) — always produce spec.md and user-story.md via prd-feature before delegating to atomic-planner; never skip from issue.md straight to plan.md.
 - [Verify MCP promotion before manual gh](feedback_verify_mcp_promotion_before_manual.md) — do not assume drm-copilot MCP promotion is unavailable based on a prior checkpoint; surface the gap and ask before falling back to manual `gh issue create`.
+- [Use pr-author skill for all PR bodies](feedback_pr_author_skill_required.md) — always apply the pr-author skill from refreshed PR context artifacts; never manually compose the PR body inline.

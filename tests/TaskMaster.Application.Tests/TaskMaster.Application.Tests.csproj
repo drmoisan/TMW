@@ -2,25 +2,18 @@
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- xUnit test SDK (centralized versions per Directory.Packages.props). -->
         <PackageReference Include="coverlet.collector" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
-
-        <!-- Test framework helpers. -->
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="NSubstitute" />
-
-        <!-- WebApplicationFactory host for /health endpoint testing. -->
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-        <!-- Graph SDK needed for CustomWebApplicationFactory stub. -->
-        <PackageReference Include="Microsoft.Graph" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+        <PackageReference Include="CsCheck" />
     </ItemGroup>
 
     <ItemGroup>
@@ -28,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\TaskMaster.Api\TaskMaster.Api.csproj" />
-        <ProjectReference Include="..\..\src\TaskMaster.Domain\TaskMaster.Domain.csproj" />
+        <ProjectReference Include="..\..\src\TaskMaster.Application\TaskMaster.Application.csproj" />
+        <ProjectReference Include="..\..\src\TaskMaster.Infrastructure\TaskMaster.Infrastructure.csproj" />
     </ItemGroup>
 </Project>
