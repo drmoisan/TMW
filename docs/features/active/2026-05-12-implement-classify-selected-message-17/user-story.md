@@ -62,21 +62,21 @@ the full message.**
 
 ### Acceptance criteria covered
 
-- [ ] `POST /api/classify` endpoint accepts `{ messageId: string, subject: string, body?: string }`
+- [x] `POST /api/classify` endpoint accepts `{ messageId: string, subject: string, body?: string }`
       and returns `{ label: string, confidence: number }`.
-- [ ] `IMessageClassifier` interface is in `TaskMaster.Application`, registered via DI.
-- [ ] `MailMessageSnapshot` record exists in `TaskMaster.Application` with fields: `MessageId`,
+- [x] `IMessageClassifier` interface is in `TaskMaster.Application`, registered via DI.
+- [x] `MailMessageSnapshot` record exists in `TaskMaster.Application` with fields: `MessageId`,
       `Subject`, `BodyPreview`.
-- [ ] `ClassificationResult` record exists in `TaskMaster.Application` with fields: `Label`
+- [x] `ClassificationResult` record exists in `TaskMaster.Application` with fields: `Label`
       (string) and `Confidence` (double, 0.0–1.0).
-- [ ] `KeywordClassifier` exists in `TaskMaster.Classifier`, implements `IMessageClassifier`,
+- [x] `KeywordClassifier` exists in `TaskMaster.Classifier`, implements `IMessageClassifier`,
       and returns a deterministic result for any input.
-- [ ] TypeScript `classifier-client.ts` module sends and receives classify API calls via `fetch`.
-- [ ] Task pane UI shows classification label, confidence percentage, and "Confirm" / "Reject"
+- [x] TypeScript `classifier-client.ts` module sends and receives classify API calls via `fetch`.
+- [x] Task pane UI shows classification label, confidence percentage, and "Confirm" / "Reject"
       buttons after classification completes.
-- [ ] `dotnet build TaskMaster.sln` passes with 0 errors and 0 warnings.
-- [ ] `dotnet test TaskMaster.sln` passes (all tests green, 0 errors, 0 warnings).
-- [ ] `npm run test` passes (all TypeScript tests green).
+- [x] `dotnet build TaskMaster.sln` passes with 0 errors and 0 warnings.
+- [x] `dotnet test TaskMaster.sln` passes (all tests green, 0 errors, 0 warnings).
+- [x] `npm run test` passes (all TypeScript tests green).
 
 ---
 
@@ -103,9 +103,9 @@ The repository records the override for future training signal.
 
 ### Acceptance criteria covered
 
-- [ ] `POST /api/classify/feedback` endpoint accepts `{ messageId: string, label: string,
+- [x] `POST /api/classify/feedback` endpoint accepts `{ messageId: string, label: string,
       confirmed: boolean }` and returns `204 No Content`.
-- [ ] `ITrainingRepository` interface and `InMemoryTrainingRepository` exist.
+- [x] `ITrainingRepository` interface and `InMemoryTrainingRepository` exist.
 
 ---
 
@@ -130,9 +130,9 @@ pipeline treats them correctly from the first commit.**
 
 ### Acceptance criteria covered
 
-- [ ] `TaskMaster.Classifier` (source) and `TaskMaster.Classifier.Tests` (tests) added to
+- [x] `TaskMaster.Classifier` (source) and `TaskMaster.Classifier.Tests` (tests) added to
       `quality-tiers.yml` at tier t1 and t4 respectively.
-- [ ] Architecture boundary tests pass (classifier must not reference Outlook PIA or VSTO).
+- [x] Architecture boundary tests pass (classifier must not reference Outlook PIA or VSTO).
 
 ---
 
@@ -165,9 +165,9 @@ invalid outputs.**
 
 ### Acceptance criteria covered
 
-- [ ] At least one property test per pure function in the classifier/normalization path
+- [x] At least one property test per pure function in the classifier/normalization path
       (T1 policy: CsCheck for .NET; `test.prop` for TypeScript).
-- [ ] The TypeScript classifier-client is tested with at least one `test.prop` property test
+- [x] The TypeScript classifier-client is tested with at least one `test.prop` property test
       covering normalization edge cases.
 
 ---
@@ -194,7 +194,7 @@ produces a failing test before reaching CI.**
 
 ### Acceptance criteria covered
 
-- [ ] Golden test in `TaskMaster.Classifier.Tests` verifies `KeywordClassifier` output on a
+- [x] Golden test in `TaskMaster.Classifier.Tests` verifies `KeywordClassifier` output on a
       fixed corpus slice (at least 3 representative messages in
       `corpus/classifiers/keyword/`).
 
@@ -220,7 +220,7 @@ tests are caught before they reach the main branch.**
 
 ### Acceptance criteria covered
 
-- [ ] `stryker-config.json` placed in `TaskMaster.Classifier.Tests` project directory targeting
+- [x] `stryker-config.json` placed in `TaskMaster.Classifier.Tests` project directory targeting
       `TaskMaster.Classifier.csproj` with `break: 75`.
 
 ---
@@ -273,7 +273,7 @@ additional fact.
 
 ### Acceptance criteria covered
 
-- [ ] Architecture boundary tests pass (classifier must not reference Outlook PIA or VSTO).
+- [x] Architecture boundary tests pass (classifier must not reference Outlook PIA or VSTO).
 
 ---
 
