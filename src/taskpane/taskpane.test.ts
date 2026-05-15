@@ -223,3 +223,75 @@ describe("requireElement helper", () => {
         await expect(import("./taskpane")).rejects.toThrow(/Required element/);
     });
 });
+
+describe("renderClassifying and renderClassificationResult pure functions", () => {
+    beforeEach(() => {
+        vi.resetModules();
+        installShellDom();
+    });
+
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
+
+    it("renderClassifying sets status text to Classifying...", async () => {
+        // Arrange
+        installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
+        const mod = await import("./taskpane");
+        const status = document.getElementById("status") as HTMLElement;
+        const dom = {
+            status,
+            subject: document.getElementById("selected-subject") as HTMLElement,
+            from: document.getElementById("selected-from") as HTMLElement,
+        };
+
+        // Act
+        mod.renderClassifying(dom);
+
+        // Assert
+        expect(dom.status.textContent).toBe("Classifying...");
+    });
+
+    it("renderClassificationResult writes label and confidence to classification element", async () => {
+        // Arrange
+        installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
+        const mod = await import("./taskpane");
+        const classification = document.createElement("span");
+        const confirmBtn = document.createElement("button");
+        const rejectBtn = document.createElement("button");
+        confirmBtn.setAttribute("disabled", "");
+        rejectBtn.setAttribute("disabled", "");
+        const dom = {
+            status: document.getElementById("status") as HTMLElement,
+            subject: document.getElementById("selected-subject") as HTMLElement,
+            from: document.getElementById("selected-from") as HTMLElement,
+            classification,
+            confirmBtn,
+            rejectBtn,
+        };
+
+        // Act
+        mod.renderClassificationResult({ label: "HighPriority", confidence: 0.9 }, dom);
+
+        // Assert
+        expect(classification.textContent).toBe("HighPriority (90%)");
+        expect(confirmBtn.hasAttribute("disabled")).toBe(false);
+        expect(rejectBtn.hasAttribute("disabled")).toBe(false);
+    });
+
+    it("renderClassificationResult works when optional DOM elements are absent", async () => {
+        // Arrange
+        installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
+        const mod = await import("./taskpane");
+        const dom = {
+            status: document.getElementById("status") as HTMLElement,
+            subject: document.getElementById("selected-subject") as HTMLElement,
+            from: document.getElementById("selected-from") as HTMLElement,
+        };
+
+        // Act + Assert — must not throw when optional properties are absent
+        expect(() =>
+            mod.renderClassificationResult({ label: "General", confidence: 0.5 }, dom)
+        ).not.toThrow();
+    });
+});

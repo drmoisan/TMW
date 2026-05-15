@@ -26,10 +26,11 @@ jobs:
       - name: Install npm dependencies
         shell: pwsh
         run: npm ci --no-audit --no-fund
-      - name: Stub — no T1 module present
+      - name: stage-8-mutation-classifier
         shell: pwsh
         run: |
-          Write-Host "Stage 8 (mutation): no T1 module exists yet. This step becomes active when a T1 source module is introduced. break: 75 threshold is configured in stryker-config.json and stryker.conf.json."
+          cd tests/TaskMaster.Classifier.Tests
+          dotnet stryker --config-file stryker-config.json
 
   stage-9-golden:
     runs-on: windows-latest
@@ -47,3 +48,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet test tests/TaskMaster.PlaceholderGolden.Tests/TaskMaster.PlaceholderGolden.Tests.csproj --no-restore --collect:"XPlat Code Coverage"
+      - name: Run classifier golden tests
+        shell: pwsh
+        run: |
+          dotnet test tests/TaskMaster.Classifier.Tests/TaskMaster.Classifier.Tests.csproj --no-restore --collect:"XPlat Code Coverage"

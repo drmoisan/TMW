@@ -1,0 +1,14 @@
+{
+  "stryker-config": {
+    "project": "TaskMaster.Classifier.csproj",
+    "test-projects": ["TaskMaster.Classifier.Tests.csproj"],
+    "mutation-level": "Standard",
+    "thresholds": {
+      "high": 90,
+      "low": 75,
+      "break": 75
+    },
+    "reporters": ["html", "json", "progress"],
+    "output-path": "StrykerOutput"
+  }
+}
