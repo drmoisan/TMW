@@ -44,17 +44,30 @@ runs:
       run: npm run lint:openapi
 
     - name: Extract merge-base baseline OpenAPI document
+      id: baseline
       shell: bash
       run: |
         # stage-6-contract checks out with fetch-depth: 0 so the base ref is
         # reachable. The committed snapshot at the merge base is the contract
         # baseline that oasdiff compares the PR-head document against.
-        git show "origin/${{ github.base_ref }}:artifacts/openapi/current.json" \
-          > artifacts/openapi/baseline.json
-        echo "Extracted baseline from origin/${{ github.base_ref }}"
+        #
+        # When the PR is the first one to introduce artifacts/openapi/current.json,
+        # there is no baseline to compare against. In that case skip the diff
+        # gates; this PR establishes the contract baseline for future PRs.
+        if git cat-file -e "origin/${{ github.base_ref }}:artifacts/openapi/current.json" 2>/dev/null; then
+          git show "origin/${{ github.base_ref }}:artifacts/openapi/current.json" \
+            > artifacts/openapi/baseline.json
+          echo "Extracted baseline from origin/${{ github.base_ref }}"
+          echo "baseline_exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "No prior OpenAPI snapshot on origin/${{ github.base_ref }};"
+          echo "this PR introduces the contract baseline. oasdiff is skipped."
+          echo "baseline_exists=false" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Compare API info.version (bump bypass)
       id: version-check
+      if: steps.baseline.outputs.baseline_exists == 'true'
       shell: bash
       run: |
         # If info.version differs between the baseline and the PR-head document,
@@ -75,7 +88,7 @@ runs:
         fi
 
     - name: Install oasdiff
-      if: steps.version-check.outputs.version_bumped == 'false'
+      if: steps.baseline.outputs.baseline_exists == 'true' && steps.version-check.outputs.version_bumped == 'false'
       shell: bash
       run: |
         # oasdiff has no npm distribution; download a version-pinned Linux
@@ -89,7 +102,7 @@ runs:
         oasdiff --version
 
     - name: Run oasdiff breaking-change check
-      if: steps.version-check.outputs.version_bumped == 'false'
+      if: steps.baseline.outputs.baseline_exists == 'true' && steps.version-check.outputs.version_bumped == 'false'
       shell: bash
       run: |
         # Error-level breaking changes fail the step. The githubactions format
