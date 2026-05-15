@@ -107,7 +107,21 @@ export default tseslint.config(
     },
   },
 
-  // 4. Test file overrides — relax type-unsafe rules where mocks require it
+  // 4. Generated API client — relax stylistic rules that conflict with the
+  // openapi-typescript generator output. This file is auto-generated from
+  // artifacts/openapi/current.json by `npm run generate:api` and must not be
+  // hand-edited; the folder guard in block 6 enforces that for sibling files.
+  {
+    files: ["src/api-client/v1.ts"],
+    rules: {
+      // justification: openapi-typescript emits index signatures for the
+      // `paths`/`components`/`operations` maps; converting them to Record types
+      // would require hand-editing generated output.
+      "@typescript-eslint/consistent-indexed-object-style": "off",
+    },
+  },
+
+  // 5. Test file overrides — relax type-unsafe rules where mocks require it
   {
     files: ["**/*.test.ts", "src/test-support/**/*.ts"],
     extends: [tseslint.configs.disableTypeChecked],
@@ -122,6 +136,30 @@ export default tseslint.config(
       // justification: floating promises are intentional in afterEach/beforeEach
       // lifecycle hooks; Vitest handles the returned promise.
       "@typescript-eslint/no-floating-promises": "off",
+    },
+  },
+
+  // 6. API client folder guard — hand-editable files under src/api-client/ must
+  // not declare wire types. The generated client (v1.ts) is the single source of
+  // type truth; the `!(v1).ts` glob excludes it. Test files inside the folder are
+  // also excluded so the guard test itself can reference type fixtures as strings.
+  {
+    files: ["src/api-client/!(v1).ts"],
+    ignores: ["src/api-client/**/*.test.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "TSInterfaceDeclaration",
+          message:
+            "Do not hand-write wire types in src/api-client/. Regenerate the client from artifacts/openapi/current.json with `npm run generate:api`.",
+        },
+        {
+          selector: "TSTypeAliasDeclaration",
+          message:
+            "Do not hand-write wire types in src/api-client/. Regenerate the client from artifacts/openapi/current.json with `npm run generate:api`.",
+        },
+      ],
     },
   }
 );

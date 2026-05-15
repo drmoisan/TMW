@@ -49,13 +49,25 @@ Desktop.ini
 *.sln.docstates
 
 # Temporary artifacts
-artifacts/
+# `artifacts/*` (rather than `artifacts/`) ignores the directory contents while
+# leaving the directory traversable, so the committed OpenAPI contract snapshot
+# (Issue #19) can be re-included below. Git cannot re-include files under a
+# fully ignored parent directory.
+artifacts/*
+!artifacts/openapi/
+!artifacts/openapi/*
 
 # .NET build and test output
 **/bin/
 **/obj/
 **/TestResults/
 .vs/artifacts/csharp/
+
+# Playwright E2E auth state (generated at runtime by tests/e2e/auth.setup.ts;
+# contains bearer tokens — must never be committed).
+tests/e2e/.auth/
+test-results/
+playwright-report/
 
 # Verify snapshot received files (temporary, never committed)
 *.received.*
