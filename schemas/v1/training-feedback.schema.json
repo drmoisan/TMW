@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["messageId", "label", "confirmed", "recordedAt"],
+  "properties": {
+    "messageId": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "confirmed": {
+      "type": "boolean"
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

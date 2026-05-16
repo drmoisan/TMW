@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using TaskMaster.Application;
+using TaskMaster.Infrastructure.Validation;
 
 namespace TaskMaster.Infrastructure;
 
@@ -52,6 +53,7 @@ public sealed class JsonFileUserSettingsRepository : IUserSettingsRepository, ID
     public async Task SaveAsync(UserSettings settings, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(settings);
+        PayloadSchemaValidator.Validate(settings, GetSchemaPath("user-settings.schema.json"));
         await _lock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
@@ -92,6 +94,21 @@ public sealed class JsonFileUserSettingsRepository : IUserSettingsRepository, ID
             _disposed = true;
         }
     }
+
+    private static string GetSchemaPath(string schemaFileName) =>
+        Path.GetFullPath(
+            Path.Combine(
+                AppContext.BaseDirectory,
+                "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "schemas",
+                "v1",
+                schemaFileName
+            )
+        );
 
     private async Task<Dictionary<string, UserSettings>> ReadStoreAsync(CancellationToken ct)
     {

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["userId", "notificationsEnabled", "triageEnabled", "lastModifiedAt"],
+  "properties": {
+    "userId": {
+      "type": "string"
+    },
+    "notificationsEnabled": {
+      "type": "boolean"
+    },
+    "triageEnabled": {
+      "type": "boolean"
+    },
+    "lastModifiedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

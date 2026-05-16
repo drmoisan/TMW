@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Stub schema: TaskMetadata type is not yet implemented. Replace this stub before writing any TaskMetadata payload to storage.",
+  "type": "object",
+  "properties": {}
+}
