@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Stub schema: migration provenance type is not yet implemented. Replace this stub before writing any migration-provenance payload to storage.",
+  "type": "object",
+  "properties": {}
+}

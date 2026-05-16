@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using TaskMaster.Application;
+using TaskMaster.Infrastructure.Validation;
 
 namespace TaskMaster.Infrastructure;
 
@@ -27,8 +28,24 @@ internal sealed class InMemoryTrainingRepository : ITrainingRepository
     public Task RecordAsync(TrainingFeedback feedback, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(feedback);
+        PayloadSchemaValidator.Validate(feedback, GetSchemaPath("training-feedback.schema.json"));
         var stamped = feedback with { RecordedAt = _timeProvider.GetUtcNow() };
         _queue.Enqueue(stamped);
         return Task.CompletedTask;
     }
+
+    private static string GetSchemaPath(string schemaFileName) =>
+        Path.GetFullPath(
+            Path.Combine(
+                AppContext.BaseDirectory,
+                "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "schemas",
+                "v1",
+                schemaFileName
+            )
+        );
 }

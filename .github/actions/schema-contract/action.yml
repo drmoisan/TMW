@@ -1,0 +1,56 @@
+name: Schema Contract
+description: Checks for breaking JSON Schema changes in schemas/ using the schema-diff .NET tool.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore solution
+      shell: bash
+      run: dotnet restore TaskMaster.sln
+
+    - name: Build schema-diff tool
+      shell: bash
+      run: dotnet build tools/schema-diff/schema-diff.csproj --no-restore
+
+    - name: Check schema files for breaking changes
+      shell: bash
+      run: |
+        checked=0
+        failed=0
+        while IFS= read -r -d '' schema_path; do
+          relative_path="${schema_path#./}"
+          # Try to get the baseline from the PR base branch.
+          baseline_content=$(git show "origin/${{ github.base_ref }}:${relative_path}" 2>/dev/null || true)
+          if [ -z "$baseline_content" ]; then
+            echo "No baseline for ${relative_path} — first-PR pattern, skipping."
+            continue
+          fi
+          tmp_baseline=$(mktemp)
+          echo "$baseline_content" > "$tmp_baseline"
+          exit_code=0
+          dotnet run --project tools/schema-diff --no-build -- \
+            --current "$schema_path" \
+            --baseline "$tmp_baseline" || exit_code=$?
+          rm -f "$tmp_baseline"
+          if [ "$exit_code" -eq 1 ]; then
+            echo "Breaking change detected in: ${relative_path}"
+            failed=$((failed + 1))
+          elif [ "$exit_code" -eq 2 ]; then
+            echo "Tool error for: ${relative_path}"
+            failed=$((failed + 1))
+          fi
+          checked=$((checked + 1))
+        done < <(find ./schemas -name "*.schema.json" -print0)
+        echo "Checked ${checked} schema(s); ${failed} with breaking changes."
+        if [ "$failed" -gt 0 ]; then
+          exit 1
+        fi
+
+    - name: Summary
+      shell: bash
+      run: echo "Schema contract check complete."

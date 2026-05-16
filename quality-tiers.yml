@@ -113,6 +113,22 @@ projects:
       Verify.XunitV3 infrastructure. Establishes the baseline for golden/snapshot
       testing; no production code under test. Tier reflects pure test-infrastructure role.
 
+  # New projects added by Issue #22 (metadata-schema-evolution-infra).
+  - name: TaskMaster.Schema.Tests
+    path: tests/TaskMaster.Schema.Tests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): xUnit schema-evolution tests for JSON Schema files and
+      write-path validation. Tier reflects test-infrastructure role.
+  - name: schema-diff
+    path: tools/schema-diff
+    language: csharp
+    tier: t4
+    rationale: |
+      Scaffolding (T4): CLI tool that wraps JsonSchema.Net to perform breaking-change
+      analysis between two schema versions. Used exclusively by the schema-contract CI action.
+
 # Validator behavior (read by .github/workflows/pr-pipeline.yml stage tier-classification):
 # - Every entry under projects MUST have name, path, language, tier.
 # - tier value MUST be one of: t1, t2, t3, t4.

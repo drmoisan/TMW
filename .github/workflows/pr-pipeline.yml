@@ -51,6 +51,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/contract
+      - uses: ./.github/actions/schema-contract
   stage-7-integration:
     runs-on: windows-latest
     needs: [stage-6-contract]
