@@ -32,8 +32,8 @@
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string]$BaselinePath,
-    [Parameter(Mandatory = $true)][string]$CurrentPath,
+    [string]$BaselinePath,
+    [string]$CurrentPath,
     [string]$T1BenchmarkIdPattern = '',
     [double]$LatencyThresholdPercent = 5.0,
     [double]$AllocationThresholdPercent = 10.0
@@ -47,7 +47,9 @@ function Read-BenchmarkReport {
 
     if (-not (Test-Path -LiteralPath $Path)) {
         [Console]::Error.WriteLine("Benchmark report not found: $Path")
-        exit 2
+        $ex = [System.Management.Automation.RuntimeException]::new("Benchmark report not found: $Path")
+        $ex.Data['ExitCode'] = 2
+        throw $ex
     }
     try {
         $raw = Get-Content -LiteralPath $Path -Raw
@@ -55,11 +57,15 @@ function Read-BenchmarkReport {
     }
     catch {
         [Console]::Error.WriteLine("Failed to parse JSON at $Path : $_")
-        exit 2
+        $ex = [System.Management.Automation.RuntimeException]::new("Failed to parse JSON at $Path : $_")
+        $ex.Data['ExitCode'] = 2
+        throw $ex
     }
     if ($null -eq $json.Benchmarks) {
         [Console]::Error.WriteLine("Report at $Path has no Benchmarks array.")
-        exit 2
+        $ex = [System.Management.Automation.RuntimeException]::new("Report at $Path has no Benchmarks array.")
+        $ex.Data['ExitCode'] = 2
+        throw $ex
     }
     return $json.Benchmarks
 }
@@ -78,50 +84,81 @@ function Get-PercentDelta {
     return (($Current - $Baseline) / $Baseline) * 100.0
 }
 
-$baselineBenchmarks = Read-BenchmarkReport -Path $BaselinePath
-$currentBenchmarks = Read-BenchmarkReport -Path $CurrentPath
+function Invoke-CompareBenchmarksMain {
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory = $true)][string]$BaselinePath,
+        [Parameter(Mandatory = $true)][string]$CurrentPath,
+        [string]$T1BenchmarkIdPattern = '',
+        [double]$LatencyThresholdPercent = 5.0,
+        [double]$AllocationThresholdPercent = 10.0
+    )
 
-# Build lookup by FullName.
-$baselineMap = @{}
-foreach ($b in $baselineBenchmarks) {
-    $baselineMap[$b.FullName] = $b
+    try {
+        $baselineBenchmarks = Read-BenchmarkReport -Path $BaselinePath
+        $currentBenchmarks = Read-BenchmarkReport -Path $CurrentPath
+    }
+    catch {
+        if ($_.Exception.Data['ExitCode']) {
+            return [int]$_.Exception.Data['ExitCode']
+        }
+        throw
+    }
+
+    # Build lookup by FullName.
+    $baselineMap = @{}
+    foreach ($b in $baselineBenchmarks) {
+        $baselineMap[$b.FullName] = $b
+    }
+
+    $anyRegression = $false
+    Write-Output 'id, p99_baseline_ns, p99_current_ns, p99_delta_pct, alloc_baseline_b, alloc_current_b, alloc_delta_pct, verdict'
+
+    foreach ($cur in $currentBenchmarks) {
+        $id = [string]$cur.FullName
+        if (-not $baselineMap.ContainsKey($id)) {
+            Write-Output ("{0}, NA, NA, NA, NA, NA, NA, SKIP_NO_BASELINE" -f $id)
+            continue
+        }
+        $base = $baselineMap[$id]
+
+        $p99Baseline = [double]$base.Statistics.Percentiles.P99
+        $p99Current = [double]$cur.Statistics.Percentiles.P99
+        $allocBaseline = [double]$base.Memory.BytesAllocatedPerOperation
+        $allocCurrent = [double]$cur.Memory.BytesAllocatedPerOperation
+
+        $p99Delta = Get-PercentDelta -Baseline $p99Baseline -Current $p99Current
+        $allocDelta = Get-PercentDelta -Baseline $allocBaseline -Current $allocCurrent
+
+        $isT1 = ($T1BenchmarkIdPattern -ne '') -and ($id -like "*${T1BenchmarkIdPattern}*")
+        if ($T1BenchmarkIdPattern -eq '') { $isT1 = $true }
+
+        $verdict = 'PASS'
+        if ($isT1 -and $p99Delta -gt $LatencyThresholdPercent) {
+            $verdict = 'FAIL_LATENCY'
+            $anyRegression = $true
+        }
+        if ($allocDelta -gt $AllocationThresholdPercent) {
+            $verdict = if ($verdict -eq 'PASS') { 'FAIL_ALLOC' } else { 'FAIL_LATENCY_AND_ALLOC' }
+            $anyRegression = $true
+        }
+
+        $row = "{0}, {1:F4}, {2:F4}, {3:F2}, {4:F0}, {5:F0}, {6:F2}, {7}" -f `
+            $id, $p99Baseline, $p99Current, $p99Delta, $allocBaseline, $allocCurrent, $allocDelta, $verdict
+        Write-Output $row
+    }
+
+    if ($anyRegression) { return 1 } else { return 0 }
 }
 
-$anyRegression = $false
-Write-Output 'id, p99_baseline_ns, p99_current_ns, p99_delta_pct, alloc_baseline_b, alloc_current_b, alloc_delta_pct, verdict'
-
-foreach ($cur in $currentBenchmarks) {
-    $id = [string]$cur.FullName
-    if (-not $baselineMap.ContainsKey($id)) {
-        Write-Output ("{0}, NA, NA, NA, NA, NA, NA, SKIP_NO_BASELINE" -f $id)
-        continue
-    }
-    $base = $baselineMap[$id]
-
-    $p99Baseline = [double]$base.Statistics.Percentiles.P99
-    $p99Current = [double]$cur.Statistics.Percentiles.P99
-    $allocBaseline = [double]$base.Memory.BytesAllocatedPerOperation
-    $allocCurrent = [double]$cur.Memory.BytesAllocatedPerOperation
-
-    $p99Delta = Get-PercentDelta -Baseline $p99Baseline -Current $p99Current
-    $allocDelta = Get-PercentDelta -Baseline $allocBaseline -Current $allocCurrent
-
-    $isT1 = ($T1BenchmarkIdPattern -ne '') -and ($id -like "*${T1BenchmarkIdPattern}*")
-    if ($T1BenchmarkIdPattern -eq '') { $isT1 = $true }
-
-    $verdict = 'PASS'
-    if ($isT1 -and $p99Delta -gt $LatencyThresholdPercent) {
-        $verdict = 'FAIL_LATENCY'
-        $anyRegression = $true
-    }
-    if ($allocDelta -gt $AllocationThresholdPercent) {
-        $verdict = if ($verdict -eq 'PASS') { 'FAIL_ALLOC' } else { 'FAIL_LATENCY_AND_ALLOC' }
-        $anyRegression = $true
-    }
-
-    $row = "{0}, {1:F4}, {2:F4}, {3:F2}, {4:F0}, {5:F0}, {6:F2}, {7}" -f `
-        $id, $p99Baseline, $p99Current, $p99Delta, $allocBaseline, $allocCurrent, $allocDelta, $verdict
-    Write-Output $row
+# Top-level entrypoint: only execute when the script is run directly (not when dot-sourced
+# by test helpers). $MyInvocation.InvocationName is the script path when run directly.
+if ($MyInvocation.InvocationName -ne '.') {
+    exit (Invoke-CompareBenchmarksMain `
+            -BaselinePath $BaselinePath `
+            -CurrentPath $CurrentPath `
+            -T1BenchmarkIdPattern $T1BenchmarkIdPattern `
+            -LatencyThresholdPercent $LatencyThresholdPercent `
+            -AllocationThresholdPercent $AllocationThresholdPercent)
 }
-
-if ($anyRegression) { exit 1 } else { exit 0 }
