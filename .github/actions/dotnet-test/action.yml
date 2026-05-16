@@ -14,8 +14,13 @@ runs:
       shell: pwsh
       run: dotnet build TaskMaster.sln --no-restore --warnaserror
     - name: dotnet test (with coverage)
+      # Excludes the `benchmark-gate-self-validation` category (Issue #23):
+      # those tests assert the comparator/idempotency-base-class gate fires
+      # against synthetic fixtures and a deliberately non-idempotent handler.
+      # They are exercised only by the dedicated `benchmark-gate-self-validation`
+      # job, which inverts the inner exit codes to prove the gate works.
       shell: pwsh
-      run: dotnet test TaskMaster.sln --collect:"XPlat Code Coverage" --no-build --results-directory TestResults/
+      run: dotnet test TaskMaster.sln --collect:"XPlat Code Coverage" --no-build --results-directory TestResults/ --filter "Category!=benchmark-gate-self-validation"
     - name: Emit canonical coverage artifact to artifacts/csharp/coverage.xml
       shell: pwsh
       run: |

@@ -125,7 +125,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
+          dotnet-version: 10.0.x
       - name: Run classifier benchmarks
         shell: pwsh
         run: |
@@ -149,7 +149,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
+          dotnet-version: 10.0.x
       - name: Run self-validation suite (LatencyRegressionGateTests passes; NonIdempotentHandlerNegativeTests is expected to fail; both inner outcomes prove the gate fires)
         shell: pwsh
         run: |
