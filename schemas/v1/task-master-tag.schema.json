@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "$comment": "Stub schema — TaskMasterTag is not yet implemented. Replace with concrete schema before any TaskMasterTag payload is written to storage.",
+  "properties": {}
+}

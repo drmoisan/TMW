@@ -26,6 +26,7 @@ public sealed class SchemaCompatibilityTests
             "schemas/v1/training-feedback.schema.json",
             "schemas/v1/task-metadata.schema.json",
             "schemas/v1/migration-provenance.schema.json",
+            "schemas/v1/task-master-tag.schema.json",
         };
 
         // Act & Assert

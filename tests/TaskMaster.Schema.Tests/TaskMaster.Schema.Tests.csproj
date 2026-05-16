@@ -23,5 +23,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\TaskMaster.Infrastructure\TaskMaster.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\tools\schema-diff\schema-diff.csproj" />
     </ItemGroup>
 </Project>

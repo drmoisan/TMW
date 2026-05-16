@@ -28,13 +28,13 @@ internal static class Program
             return 2;
         }
 
-        if (IsStubSchema(baseline!) || IsStubSchema(current!))
+        if (SchemaDiffAnalyzer.IsStubSchema(baseline!) || SchemaDiffAnalyzer.IsStubSchema(current!))
         {
             Console.WriteLine("Schema is a stub — skipping comparison.");
             return 0;
         }
 
-        var breakingChanges = DetectBreakingChanges(baseline!, current!);
+        var breakingChanges = SchemaDiffAnalyzer.DetectBreakingChanges(baseline!, current!);
 
         if (breakingChanges.Count == 0)
         {
@@ -97,68 +97,5 @@ internal static class Program
         }
 
         return currentPath is not null && baselinePath is not null;
-    }
-
-    private static bool IsStubSchema(JsonSchema schema)
-    {
-        var comment = schema.GetComment();
-        return comment is not null
-            && comment.Contains("Stub schema", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static List<string> DetectBreakingChanges(JsonSchema baseline, JsonSchema current)
-    {
-        var changes = new List<string>();
-        var baselineRequired = GetRequired(baseline);
-        var currentRequired = GetRequired(current);
-        var baselineProperties = GetProperties(baseline);
-        var currentProperties = GetProperties(current);
-
-        changes.AddRange(
-            baselineRequired
-                .Where(f => !currentRequired.Contains(f))
-                .Select(f => $"Required field '{f}' was removed from the 'required' array.")
-        );
-
-        changes.AddRange(
-            currentRequired
-                .Where(f => !baselineRequired.Contains(f) && !baselineProperties.Contains(f))
-                .Select(f =>
-                    $"New required field '{f}' added without a baseline property definition."
-                )
-        );
-
-        if (!GetAdditionalPropertiesFalse(baseline) && GetAdditionalPropertiesFalse(current))
-        {
-            changes.Add(
-                "'additionalProperties' changed to false — existing payloads with extra properties would be rejected."
-            );
-        }
-
-        changes.AddRange(
-            baselineProperties
-                .Where(p => !currentProperties.Contains(p))
-                .Select(p => $"Property '{p}' was removed from the schema definition.")
-        );
-
-        return changes;
-    }
-
-    private static HashSet<string> GetRequired(JsonSchema schema)
-    {
-        var keyword = schema.GetRequired();
-        return keyword is null ? [] : [.. keyword];
-    }
-
-    private static HashSet<string> GetProperties(JsonSchema schema)
-    {
-        var keyword = schema.GetProperties();
-        return keyword is null ? [] : [.. keyword.Keys];
-    }
-
-    private static bool GetAdditionalPropertiesFalse(JsonSchema schema)
-    {
-        var keyword = schema.GetAdditionalProperties();
-        return keyword == JsonSchema.False;
     }
 }

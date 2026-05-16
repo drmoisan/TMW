@@ -1,7 +1,5 @@
 using FluentAssertions;
 using Json.Schema;
-using Microsoft.Extensions.Options;
-using NSubstitute;
 using TaskMaster.Infrastructure;
 using TaskMaster.Infrastructure.Validation;
 
