@@ -1,28 +1,19 @@
 /**
  * HTTP client and pure helper functions for the TaskMaster classifier API.
  *
- * - ClassifyRequest / ClassifyResponse / FeedbackRequest — wire-level shapes
+ * - ClassifyRequest / ClassifyResponse / FeedbackRequest — wire-level shapes,
+ *   re-exported from the generated OpenAPI client (src/api-client/v1.ts).
  * - normalizeClassifyRequest — pure transform, trims inputs and coerces undefined body
  * - parseClassifyResponse — pure validator, throws TypeError on invalid shape
  * - ClassifierClient — thin HTTP wrapper, no Office.js references
  */
 
-export interface ClassifyRequest {
-    messageId: string;
-    subject: string;
-    body: string | null;
-}
+import type { components } from "../api-client/v1";
 
-export interface ClassifyResponse {
-    label: string;
-    confidence: number;
-}
-
-export interface FeedbackRequest {
-    messageId: string;
-    label: string;
-    confirmed: boolean;
-}
+/** Wire-level request/response shapes generated from artifacts/openapi/current.json. */
+export type ClassifyRequest = components["schemas"]["ClassifyRequest"];
+export type ClassifyResponse = components["schemas"]["ClassifyResponse"];
+export type FeedbackRequest = components["schemas"]["FeedbackRequest"];
 
 /**
  * Trims whitespace from messageId and subject, and coerces an undefined body to null.

@@ -1,0 +1,55 @@
+# Spectral ruleset for the TaskMaster OpenAPI contract (Issue #19).
+#
+# Extends the standard spectral:oas rules and adds three error-level project
+# rules required by the boundary-contract feature:
+#   1. operation-description       — every operation has a non-empty description
+#   2. response-schema-required    — every body-bearing success response
+#                                    declares a schema
+#   3. no-inline-anonymous-schema  — request/response bodies reference a named
+#                                    component instead of an inline object schema
+extends:
+  - spectral:oas
+
+rules:
+  # Rule 1: operations must have a non-empty description.
+  operation-description:
+    description: Every operation must have a non-empty description.
+    severity: error
+    given: $.paths[*][get,put,post,delete,patch,options,head,trace]
+    then:
+      field: description
+      function: truthy
+
+  # Rule 2: body-bearing success responses must declare a schema. 2xx responses
+  # are the responses a generated client must type; 204 No Content carries no
+  # body by definition and is excluded. Error responses (4xx/5xx) may be
+  # body-less and are not constrained by this rule.
+  response-schema-required:
+    description: Every body-bearing success response must declare a schema.
+    severity: error
+    given: $.paths[*][*].responses[?(@property >= '200' && @property < '300' && @property != '204')]
+    then:
+      field: content
+      function: truthy
+
+  # Rule 3: no inline anonymous schemas — request and response body schemas must
+  # reference a named component via $ref rather than declaring an inline object.
+  # `resolved: false` keeps the literal $ref in view; otherwise Spectral resolves
+  # the reference and the rule would inspect the component definition instead.
+  no-inline-anonymous-request-schema:
+    description: Request body schemas must reference a named component ($ref).
+    severity: error
+    resolved: false
+    given: $.paths[*][*].requestBody.content[*].schema
+    then:
+      field: "$ref"
+      function: truthy
+
+  no-inline-anonymous-response-schema:
+    description: Response body schemas must reference a named component ($ref).
+    severity: error
+    resolved: false
+    given: $.paths[*][*].responses[*].content[*].schema
+    then:
+      field: "$ref"
+      function: truthy

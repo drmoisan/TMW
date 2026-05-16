@@ -1,9 +1,114 @@
 name: Contract
-description: Contract / schema compatibility stage. Wires oasdiff or schema-snapshot diff when API specs exist.
+description: >
+  Contract / schema compatibility stage. Emits the PR-head OpenAPI document,
+  lints it with Spectral, and runs oasdiff against the merge-base baseline.
+  Breaking changes fail the stage unless the API info.version was bumped.
 runs:
   using: composite
   steps:
-    - name: Contract checks (placeholder)
-      shell: pwsh
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore .NET tools
+      shell: bash
+      run: dotnet tool restore
+
+    - name: Restore NuGet packages
+      shell: bash
+      run: dotnet restore TaskMaster.sln
+
+    - name: Emit PR-head OpenAPI document
+      shell: bash
       run: |
-        Write-Host "Contract stage: no API specs in repo yet; skipping (no-op)."
+        rm -f artifacts/openapi/current.json
+        dotnet build src/TaskMaster.Api/TaskMaster.Api.csproj --no-restore
+        if [ ! -f artifacts/openapi/current.json ]; then
+          echo "::error::OpenAPI emission did not produce artifacts/openapi/current.json"
+          exit 1
+        fi
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: "npm"
+
+    - name: Install npm dependencies
+      shell: bash
+      run: npm ci --no-audit --no-fund
+
+    - name: Spectral lint OpenAPI document
+      shell: bash
+      run: npm run lint:openapi
+
+    - name: Extract merge-base baseline OpenAPI document
+      id: baseline
+      shell: bash
+      run: |
+        # stage-6-contract checks out with fetch-depth: 0 so the base ref is
+        # reachable. The committed snapshot at the merge base is the contract
+        # baseline that oasdiff compares the PR-head document against.
+        #
+        # When the PR is the first one to introduce artifacts/openapi/current.json,
+        # there is no baseline to compare against. In that case skip the diff
+        # gates; this PR establishes the contract baseline for future PRs.
+        if git cat-file -e "origin/${{ github.base_ref }}:artifacts/openapi/current.json" 2>/dev/null; then
+          git show "origin/${{ github.base_ref }}:artifacts/openapi/current.json" \
+            > artifacts/openapi/baseline.json
+          echo "Extracted baseline from origin/${{ github.base_ref }}"
+          echo "baseline_exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "No prior OpenAPI snapshot on origin/${{ github.base_ref }};"
+          echo "this PR introduces the contract baseline. oasdiff is skipped."
+          echo "baseline_exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Compare API info.version (bump bypass)
+      id: version-check
+      if: steps.baseline.outputs.baseline_exists == 'true'
+      shell: bash
+      run: |
+        # If info.version differs between the baseline and the PR-head document,
+        # breaking changes are explicitly permitted: the contract check passes
+        # without running oasdiff. If the version is unchanged, continue to
+        # oasdiff so breaking changes are blocked.
+        baseline_version=$(node -p "require('./artifacts/openapi/baseline.json').info.version")
+        head_version=$(node -p "require('./artifacts/openapi/current.json').info.version")
+        echo "Baseline info.version: ${baseline_version}"
+        echo "PR-head info.version:  ${head_version}"
+        if [ "${baseline_version}" != "${head_version}" ]; then
+          echo "API info.version was bumped (${baseline_version} -> ${head_version});"
+          echo "breaking changes are permitted. Skipping oasdiff breaking check."
+          echo "version_bumped=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "API info.version unchanged; oasdiff breaking check will run."
+          echo "version_bumped=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Install oasdiff
+      if: steps.baseline.outputs.baseline_exists == 'true' && steps.version-check.outputs.version_bumped == 'false'
+      shell: bash
+      run: |
+        # oasdiff has no npm distribution; download a version-pinned Linux
+        # binary. stage-6-contract runs on ubuntu-latest (see pr-pipeline.yml).
+        OASDIFF_VERSION="1.15.3"
+        curl -sSL \
+          "https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz" \
+          -o /tmp/oasdiff.tar.gz
+        tar -xzf /tmp/oasdiff.tar.gz -C /tmp oasdiff
+        sudo mv /tmp/oasdiff /usr/local/bin/oasdiff
+        oasdiff --version
+
+    - name: Run oasdiff breaking-change check
+      if: steps.baseline.outputs.baseline_exists == 'true' && steps.version-check.outputs.version_bumped == 'false'
+      shell: bash
+      run: |
+        # Error-level breaking changes fail the step. The githubactions format
+        # renders offending fields as annotations on the PR diff.
+        oasdiff breaking \
+          artifacts/openapi/baseline.json \
+          artifacts/openapi/current.json \
+          --fail-on ERR \
+          --format githubactions

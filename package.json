@@ -19,8 +19,10 @@
     "dev-server": "webpack serve --mode development",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
+    "generate:api": "openapi-typescript artifacts/openapi/current.json --output src/api-client/v1.ts",
     "lint": "office-addin-lint check",
     "lint:fix": "office-addin-lint fix",
+    "lint:openapi": "spectral lint artifacts/openapi/current.json --ruleset .spectral.yaml",
     "prettier": "office-addin-lint prettier",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -34,10 +36,13 @@
   },
   "dependencies": {
     "core-js": "^3.36.0",
+    "openapi-fetch": "^0.13.5",
     "regenerator-runtime": "^0.14.1"
   },
   "devDependencies": {
     "@fast-check/vitest": "0.3.0",
+    "@playwright/test": "^1.49.1",
+    "@stoplight/spectral-cli": "^6.15.0",
     "@stryker-mutator/core": "9.6.1",
     "@stryker-mutator/typescript-checker": "9.6.1",
     "@stryker-mutator/vitest-runner": "9.6.1",
@@ -68,6 +73,7 @@
     "office-addin-lint": "^3.0.3",
     "office-addin-manifest": "^2.0.3",
     "office-addin-prettier-config": "^2.0.1",
+    "openapi-typescript": "^7.5.0",
     "os-browserify": "^0.3.0",
     "patch-package": "^8.0.1",
     "process": "^0.11.10",

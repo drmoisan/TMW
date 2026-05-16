@@ -23,6 +23,9 @@ export default defineConfig({
         "eslint.config.mjs",
         ".dependency-cruiser.cjs",
         "webpack.config.js",
+        // Auto-generated, type-only API client (openapi-typescript output). It
+        // contains no executable runtime code, so coverage metrics do not apply.
+        "src/api-client/v1.ts",
       ],
       thresholds: {
         lines: 85,

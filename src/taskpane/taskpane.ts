@@ -48,7 +48,12 @@ export function renderClassifying(dom: RenderDom): void {
  */
 export function renderClassificationResult(result: ClassifyResponse, dom: RenderDom): void {
     if (dom.classification !== undefined) {
-        const pct = Math.round(result.confidence * 100);
+        // The generated ClassifyResponse types confidence as `number | string`
+        // because the backend OpenAPI schema permits string-encoded doubles
+        // (e.g. "NaN"). Coerce to a number for display arithmetic.
+        const confidence =
+            typeof result.confidence === "number" ? result.confidence : Number(result.confidence);
+        const pct = Math.round(confidence * 100);
         dom.classification.textContent = `${result.label} (${String(pct)}%)`;
     }
     if (dom.confirmBtn !== undefined) {

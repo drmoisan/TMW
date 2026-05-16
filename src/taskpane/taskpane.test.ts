@@ -279,6 +279,26 @@ describe("renderClassifying and renderClassificationResult pure functions", () =
         expect(rejectBtn.hasAttribute("disabled")).toBe(false);
     });
 
+    it("renderClassificationResult coerces a string-encoded confidence to a number", async () => {
+        // Arrange — the generated ClassifyResponse type permits a string-encoded
+        // double; renderClassificationResult must coerce it for display arithmetic.
+        installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
+        const mod = await import("./taskpane");
+        const classification = document.createElement("span");
+        const dom = {
+            status: document.getElementById("status") as HTMLElement,
+            subject: document.getElementById("selected-subject") as HTMLElement,
+            from: document.getElementById("selected-from") as HTMLElement,
+            classification,
+        };
+
+        // Act
+        mod.renderClassificationResult({ label: "General", confidence: "0.42" }, dom);
+
+        // Assert
+        expect(classification.textContent).toBe("General (42%)");
+    });
+
     it("renderClassificationResult works when optional DOM elements are absent", async () => {
         // Arrange
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
