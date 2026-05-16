@@ -117,6 +117,51 @@ jobs:
           E2E_API_BASE_URL: ${{ secrets.E2E_API_BASE_URL }}
         run: npx playwright test tests/e2e/
 
+  stage-10-benchmark-regression:
+    runs-on: windows-latest
+    needs: [stage-7-integration]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Run classifier benchmarks
+        shell: pwsh
+        run: |
+          dotnet run -c Release --project tests/TaskMaster.Benchmarks -- --filter "*ClassifierBenchmarks*" --exporters JSON --artifacts artifacts/benchmarks/run
+      - name: Enrich BDN report with P99
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          if ($null -eq $report) { throw "No BDN report-full.json produced by the run." }
+          pwsh -NoProfile -File scripts/benchmarks/enrich-bdn-report.ps1 -Path $report.FullName
+      - name: Compare against committed baseline
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          pwsh -NoProfile -File scripts/benchmarks/compare-benchmarks.ps1 -BaselinePath artifacts/benchmarks/baseline.json -CurrentPath $report.FullName -T1BenchmarkIdPattern "ClassifierBenchmarks"
+  benchmark-gate-self-validation:
+    runs-on: windows-latest
+    needs: [stage-7-integration]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Run self-validation suite (LatencyRegressionGateTests passes; NonIdempotentHandlerNegativeTests is expected to fail; both inner outcomes prove the gate fires)
+        shell: pwsh
+        run: |
+          dotnet test tests/TaskMaster.Worker.Tests -c Release --filter "Category=benchmark-gate-self-validation&FullyQualifiedName~LatencyRegressionGateTests" --nologo
+          $latencyExit = $LASTEXITCODE
+          if ($latencyExit -ne 0) { Write-Error "LatencyRegressionGateTests must pass (it asserts the comparator rejects the synthetic regression)."; exit 1 }
+
+          dotnet test tests/TaskMaster.Worker.Tests -c Release --filter "Category=benchmark-gate-self-validation&FullyQualifiedName~NonIdempotentHandlerNegativeTests" --nologo
+          $negExit = $LASTEXITCODE
+          if ($negExit -eq 0) { Write-Error "NonIdempotentHandlerNegativeTests must FAIL (proving the inherited idempotency check detects the non-idempotent handler)."; exit 1 }
+          Write-Host "benchmark-gate-self-validation: latency gate caught synthetic regression and non-idempotent handler was detected as expected."
+
   secret-scan:
     runs-on: windows-latest
     env:

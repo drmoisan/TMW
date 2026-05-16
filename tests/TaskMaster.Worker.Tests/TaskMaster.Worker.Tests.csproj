@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>false</IsPackable>
+        <RunSettingsFilePath>$(MSBuildProjectDirectory)/test.runsettings</RunSettingsFilePath>
+        <!--
+            xunit.v3 + FluentAssertions + CsCheck on a test-scaffolding project.
+            Suppress analyzer IDs that conflict with idiomatic test-class shapes:
+              CA1707  Underscores in test method identifiers are the established
+                      convention used across the existing test projects.
+              CA1515  Test classes are public so xunit.v3 can discover them.
+              CA2007  Test code does not call ConfigureAwait(false); FakeTimeProvider
+                      and xunit.v3 manage the context synchronously.
+              MA0004  Same as CA2007 (Meziantou's parallel rule).
+              MA0144  Property-based tests use derived state-store class names that
+                      may contain numeric/letter sequences not approved by MA0144.
+        -->
+        <NoWarn>$(NoWarn);CA1707;CA1515;CA2007;MA0004;MA0144;S2326</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit.runner.visualstudio" />
+        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="CsCheck" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    </ItemGroup>
+</Project>

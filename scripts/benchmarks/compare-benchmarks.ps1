@@ -1,0 +1,127 @@
+#Requires -Version 7.0
+<#
+.SYNOPSIS
+  Compares a current BenchmarkDotNet (BDN) report against a committed baseline
+  and exits non-zero when a regression exceeds configured thresholds.
+.DESCRIPTION
+  Stage 10 (benchmark regression) of the PR pipeline invokes this script with
+  the committed baseline at artifacts/benchmarks/baseline.json and the current
+  PR run's *-report-full.json. The script emits one diff row per benchmark id
+  to stdout and exits:
+
+    0  All benchmarked ids pass the thresholds.
+    1  At least one benchmark regressed beyond the thresholds.
+    2  An input file is missing or malformed.
+
+  Schema fields consumed per artifacts/benchmarks/README.md:
+    FullName                                  -> benchmark id
+    Statistics.Percentiles.P99                -> p99 latency (ns)
+    Memory.BytesAllocatedPerOperation         -> allocated bytes per op
+.PARAMETER BaselinePath
+  Path to the committed BDN baseline JSON.
+.PARAMETER CurrentPath
+  Path to the current run's BDN *-report-full.json.
+.PARAMETER T1BenchmarkIdPattern
+  Substring used to mark a benchmark id as a T1 hot path. When the FullName
+  contains this substring the p99 threshold is applied. Default: empty string
+  meaning every benchmark is considered T1 (conservative).
+.PARAMETER LatencyThresholdPercent
+  Maximum permitted p99 latency regression on T1 benchmarks. Default 5.
+.PARAMETER AllocationThresholdPercent
+  Maximum permitted allocation regression on any benchmark. Default 10.
+#>
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)][string]$BaselinePath,
+    [Parameter(Mandatory = $true)][string]$CurrentPath,
+    [string]$T1BenchmarkIdPattern = '',
+    [double]$LatencyThresholdPercent = 5.0,
+    [double]$AllocationThresholdPercent = 10.0
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Read-BenchmarkReport {
+    [CmdletBinding()]
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        [Console]::Error.WriteLine("Benchmark report not found: $Path")
+        exit 2
+    }
+    try {
+        $raw = Get-Content -LiteralPath $Path -Raw
+        $json = $raw | ConvertFrom-Json
+    }
+    catch {
+        [Console]::Error.WriteLine("Failed to parse JSON at $Path : $_")
+        exit 2
+    }
+    if ($null -eq $json.Benchmarks) {
+        [Console]::Error.WriteLine("Report at $Path has no Benchmarks array.")
+        exit 2
+    }
+    return $json.Benchmarks
+}
+
+function Get-PercentDelta {
+    [CmdletBinding()]
+    [OutputType([double])]
+    param([double]$Baseline, [double]$Current)
+
+    if ($Baseline -le 0) {
+        if ($Current -le 0) { return 0.0 }
+        # Baseline is zero/negative; any positive current is treated as +infinity
+        # but reported as a finite large number so the threshold trips deterministically.
+        return [double]::PositiveInfinity
+    }
+    return (($Current - $Baseline) / $Baseline) * 100.0
+}
+
+$baselineBenchmarks = Read-BenchmarkReport -Path $BaselinePath
+$currentBenchmarks = Read-BenchmarkReport -Path $CurrentPath
+
+# Build lookup by FullName.
+$baselineMap = @{}
+foreach ($b in $baselineBenchmarks) {
+    $baselineMap[$b.FullName] = $b
+}
+
+$anyRegression = $false
+Write-Output 'id, p99_baseline_ns, p99_current_ns, p99_delta_pct, alloc_baseline_b, alloc_current_b, alloc_delta_pct, verdict'
+
+foreach ($cur in $currentBenchmarks) {
+    $id = [string]$cur.FullName
+    if (-not $baselineMap.ContainsKey($id)) {
+        Write-Output ("{0}, NA, NA, NA, NA, NA, NA, SKIP_NO_BASELINE" -f $id)
+        continue
+    }
+    $base = $baselineMap[$id]
+
+    $p99Baseline = [double]$base.Statistics.Percentiles.P99
+    $p99Current = [double]$cur.Statistics.Percentiles.P99
+    $allocBaseline = [double]$base.Memory.BytesAllocatedPerOperation
+    $allocCurrent = [double]$cur.Memory.BytesAllocatedPerOperation
+
+    $p99Delta = Get-PercentDelta -Baseline $p99Baseline -Current $p99Current
+    $allocDelta = Get-PercentDelta -Baseline $allocBaseline -Current $allocCurrent
+
+    $isT1 = ($T1BenchmarkIdPattern -ne '') -and ($id -like "*${T1BenchmarkIdPattern}*")
+    if ($T1BenchmarkIdPattern -eq '') { $isT1 = $true }
+
+    $verdict = 'PASS'
+    if ($isT1 -and $p99Delta -gt $LatencyThresholdPercent) {
+        $verdict = 'FAIL_LATENCY'
+        $anyRegression = $true
+    }
+    if ($allocDelta -gt $AllocationThresholdPercent) {
+        $verdict = if ($verdict -eq 'PASS') { 'FAIL_ALLOC' } else { 'FAIL_LATENCY_AND_ALLOC' }
+        $anyRegression = $true
+    }
+
+    $row = "{0}, {1:F4}, {2:F4}, {3:F2}, {4:F0}, {5:F0}, {6:F2}, {7}" -f `
+        $id, $p99Baseline, $p99Current, $p99Delta, $allocBaseline, $allocCurrent, $allocDelta, $verdict
+    Write-Output $row
+}
+
+if ($anyRegression) { exit 1 } else { exit 0 }
