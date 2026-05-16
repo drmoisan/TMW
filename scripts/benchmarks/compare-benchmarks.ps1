@@ -154,11 +154,20 @@ function Invoke-CompareBenchmarksMain {
 
 # Top-level entrypoint: only execute when the script is run directly (not when dot-sourced
 # by test helpers). $MyInvocation.InvocationName is the script path when run directly.
+#
+# Invoke-CompareBenchmarksMain emits the diff rows via Write-Output and returns the
+# exit code as its final pipeline value. Collect the whole pipeline, echo the rows
+# to the host for log visibility, and pass only the integer return to `exit` — passing
+# the entire array would coerce to the first (string) element and silently yield 0.
 if ($MyInvocation.InvocationName -ne '.') {
-    exit (Invoke-CompareBenchmarksMain `
+    $output = @(Invoke-CompareBenchmarksMain `
             -BaselinePath $BaselinePath `
             -CurrentPath $CurrentPath `
             -T1BenchmarkIdPattern $T1BenchmarkIdPattern `
             -LatencyThresholdPercent $LatencyThresholdPercent `
             -AllocationThresholdPercent $AllocationThresholdPercent)
+    if ($output.Count -gt 1) {
+        $output[0..($output.Count - 2)] | ForEach-Object { Write-Host $_ }
+    }
+    exit ([int]$output[-1])
 }
