@@ -47,6 +47,8 @@ Desktop.ini
 *.user
 *.userosscache
 *.sln.docstates
+# MSBuild language-service cache, regenerated locally by `dotnet build`.
+*.lscache
 
 # Temporary artifacts
 # `artifacts/*` (rather than `artifacts/`) ignores the directory contents while
