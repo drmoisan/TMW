@@ -161,6 +161,8 @@ jobs:
           $negExit = $LASTEXITCODE
           if ($negExit -eq 0) { Write-Error "NonIdempotentHandlerNegativeTests must FAIL (proving the inherited idempotency check detects the non-idempotent handler)."; exit 1 }
           Write-Host "benchmark-gate-self-validation: latency gate caught synthetic regression and non-idempotent handler was detected as expected."
+          # The preceding dotnet test invocation is expected to exit 1 (negative test). Reset $LASTEXITCODE so the GitHub Actions pwsh step does not inherit it.
+          exit 0
 
   secret-scan:
     runs-on: windows-latest
