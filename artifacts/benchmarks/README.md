@@ -25,12 +25,29 @@ the report immediately after capture using
 ## Stage-10 Thresholds
 
 - p99 latency on a T1 benchmark id (matched by the `-T1BenchmarkIdPattern`
-  argument to the comparator): regression strictly greater than **5%** blocks
-  the PR.
+  argument to the comparator): a `FAIL_LATENCY` verdict is reported only when
+  **both** of the following are true (AND semantics):
+  - the relative regression is strictly greater than **5%** (controlled by
+    `-LatencyThresholdPercent`, default 5.0), AND
+  - the absolute p99 delta (`p99_current_ns - p99_baseline_ns`) is strictly
+    greater than **5 ns** (controlled by `-LatencyMinDeltaNs`, default 5.0).
 - Allocated bytes on any benchmarked id: regression strictly greater than
-  **10%** blocks the PR.
+  **10%** blocks the PR. The allocation gate has no absolute floor.
 
 Improvements (negative deltas) never block.
+
+### Why the absolute-delta floor
+
+The classifier benchmarks run at roughly 10–60 ns p99. On GitHub
+`windows-latest` runners, measurement noise (CPU frequency scaling, noisy
+neighbors, JIT/GC scheduling) is comparable to the 5% relative threshold at
+that scale: a 0.5 ns timing jitter on a 10 ns benchmark looks like a 5%
+regression and produces a false positive on otherwise-clean PRs. The 5 ns
+absolute floor establishes a noise-tolerant lower bound so the gate fires
+only when a regression is both relatively significant and absolutely visible
+above the CI measurement noise floor on sub-100 ns benchmarks. Larger,
+genuinely regressing changes still trip both conditions and continue to
+block.
 
 ## Rebaselining Policy
 

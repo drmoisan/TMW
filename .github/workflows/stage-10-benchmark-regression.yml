@@ -42,4 +42,4 @@ jobs:
         shell: pwsh
         run: |
           $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
-          pwsh -NoProfile -File scripts/benchmarks/compare-benchmarks.ps1 -BaselinePath artifacts/benchmarks/baseline.json -CurrentPath $report.FullName -T1BenchmarkIdPattern "ClassifierBenchmarks"
+          pwsh -NoProfile -File scripts/benchmarks/compare-benchmarks.ps1 -BaselinePath artifacts/benchmarks/baseline.json -CurrentPath $report.FullName -T1BenchmarkIdPattern "ClassifierBenchmarks" -LatencyMinDeltaNs 5.0

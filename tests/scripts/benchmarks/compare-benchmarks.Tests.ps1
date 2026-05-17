@@ -126,4 +126,78 @@ Describe 'compare-benchmarks.ps1' {
             ($output | Where-Object { "$_" -match 'FAIL_LATENCY_AND_ALLOC' }) | Should -Not -BeNullOrEmpty
         }
     }
+
+    Describe 'LatencyMinDeltaNs absolute-delta floor (AND semantics with LatencyThresholdPercent)' {
+        BeforeAll {
+            function script:New-FakeReport2 {
+                param([string]$Id, [double]$P99, [double]$AllocBytes)
+                return [pscustomobject]@{
+                    Benchmarks = @(
+                        [pscustomobject]@{
+                            FullName   = $Id
+                            Statistics = [pscustomobject]@{
+                                Percentiles = [pscustomobject]@{ P99 = $P99 }
+                            }
+                            Memory     = [pscustomobject]@{ BytesAllocatedPerOperation = $AllocBytes }
+                        }
+                    )
+                }
+            }
+        }
+
+        It 'returns PASS when relative delta trips (>5%) but absolute delta is below the 5 ns floor (default)' {
+            # Baseline 25 ns -> current 27 ns: 8% relative, but only 2 ns absolute.
+            Mock Read-BenchmarkReport {
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 25.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 27.0 -AllocBytes 1000).Benchmarks[0] }
+            }
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
+            [int]$output[-1] | Should -Be 0
+            ($output | Where-Object { "$_" -match 'FAIL_LATENCY' }) | Should -BeNullOrEmpty
+            ($output | Where-Object { "$_" -match ', PASS\s*$' }) | Should -Not -BeNullOrEmpty
+        }
+
+        It 'returns FAIL_LATENCY when both relative delta (>5%) and absolute delta (>5 ns) trip' {
+            # Baseline 125 ns -> current 135 ns: 8% relative, 10 ns absolute.
+            Mock Read-BenchmarkReport {
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 125.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 135.0 -AllocBytes 1000).Benchmarks[0] }
+            }
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
+            [int]$output[-1] | Should -Be 1
+            ($output | Where-Object { "$_" -match 'FAIL_LATENCY' -and "$_" -notmatch 'FAIL_LATENCY_AND_ALLOC' }) | Should -Not -BeNullOrEmpty
+        }
+
+        It 'returns PASS when only the absolute floor trips but the relative delta stays at or below 5%' {
+            # Baseline 10000 ns -> current 10100 ns: 1% relative, 100 ns absolute.
+            Mock Read-BenchmarkReport {
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 10000.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 10100.0 -AllocBytes 1000).Benchmarks[0] }
+            }
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
+            [int]$output[-1] | Should -Be 0
+            ($output | Where-Object { "$_" -match 'FAIL_LATENCY' }) | Should -BeNullOrEmpty
+        }
+
+        It 'uses the default LatencyMinDeltaNs of 5.0 when the caller omits it' {
+            # 8% relative, 4 ns absolute -> below the default 5 ns floor -> PASS.
+            Mock Read-BenchmarkReport {
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 50.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 54.0 -AllocBytes 1000).Benchmarks[0] }
+            }
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
+            [int]$output[-1] | Should -Be 0
+        }
+
+        It 'propagates a custom LatencyMinDeltaNs through Invoke-CompareBenchmarksMain' {
+            # 8% relative, 4 ns absolute. Default floor (5) -> PASS; lowered floor (1) -> FAIL_LATENCY.
+            Mock Read-BenchmarkReport {
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 50.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 54.0 -AllocBytes 1000).Benchmarks[0] }
+            }
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json' -LatencyMinDeltaNs 1.0)
+            [int]$output[-1] | Should -Be 1
+            ($output | Where-Object { "$_" -match 'FAIL_LATENCY' }) | Should -Not -BeNullOrEmpty
+        }
+    }
 }

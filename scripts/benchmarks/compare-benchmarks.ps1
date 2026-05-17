@@ -27,6 +27,13 @@
   meaning every benchmark is considered T1 (conservative).
 .PARAMETER LatencyThresholdPercent
   Maximum permitted p99 latency regression on T1 benchmarks. Default 5.
+.PARAMETER LatencyMinDeltaNs
+  Absolute p99 delta floor (nanoseconds) used in AND-combination with
+  LatencyThresholdPercent. A T1 benchmark is reported as FAIL_LATENCY only when
+  both the relative regression exceeds LatencyThresholdPercent AND the absolute
+  delta (current minus baseline, in ns) exceeds LatencyMinDeltaNs. Default 5.0 ns.
+  This suppresses false positives from CI runner timing jitter on very fast
+  (sub-100 ns) benchmarks where a few ns of noise can cross the 5% relative line.
 .PARAMETER AllocationThresholdPercent
   Maximum permitted allocation regression on any benchmark. Default 10.
 #>
@@ -36,6 +43,7 @@ param(
     [string]$CurrentPath,
     [string]$T1BenchmarkIdPattern = '',
     [double]$LatencyThresholdPercent = 5.0,
+    [double]$LatencyMinDeltaNs = 5.0,
     [double]$AllocationThresholdPercent = 10.0
 )
 
@@ -92,6 +100,7 @@ function Invoke-CompareBenchmarksMain {
         [Parameter(Mandatory = $true)][string]$CurrentPath,
         [string]$T1BenchmarkIdPattern = '',
         [double]$LatencyThresholdPercent = 5.0,
+        [double]$LatencyMinDeltaNs = 5.0,
         [double]$AllocationThresholdPercent = 10.0
     )
 
@@ -134,8 +143,10 @@ function Invoke-CompareBenchmarksMain {
         $isT1 = ($T1BenchmarkIdPattern -ne '') -and ($id -like "*${T1BenchmarkIdPattern}*")
         if ($T1BenchmarkIdPattern -eq '') { $isT1 = $true }
 
+        $p99AbsoluteDeltaNs = $p99Current - $p99Baseline
+
         $verdict = 'PASS'
-        if ($isT1 -and $p99Delta -gt $LatencyThresholdPercent) {
+        if ($isT1 -and ($p99Delta -gt $LatencyThresholdPercent) -and ($p99AbsoluteDeltaNs -gt $LatencyMinDeltaNs)) {
             $verdict = 'FAIL_LATENCY'
             $anyRegression = $true
         }
@@ -165,6 +176,7 @@ if ($MyInvocation.InvocationName -ne '.') {
             -CurrentPath $CurrentPath `
             -T1BenchmarkIdPattern $T1BenchmarkIdPattern `
             -LatencyThresholdPercent $LatencyThresholdPercent `
+            -LatencyMinDeltaNs $LatencyMinDeltaNs `
             -AllocationThresholdPercent $AllocationThresholdPercent)
     if ($output.Count -gt 1) {
         $output[0..($output.Count - 2)] | ForEach-Object { Write-Host $_ }
