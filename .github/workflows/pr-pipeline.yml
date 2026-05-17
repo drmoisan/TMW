@@ -137,6 +137,12 @@ jobs:
           $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
           if ($null -eq $report) { throw "No BDN report-full.json produced by the run." }
           pwsh -NoProfile -File scripts/benchmarks/enrich-bdn-report.ps1 -Path $report.FullName
+      - name: Upload BDN report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-10-benchmark-report
+          path: artifacts/benchmarks/run/results/*-report-full.json
       - name: Compare against committed baseline
         shell: pwsh
         run: |
