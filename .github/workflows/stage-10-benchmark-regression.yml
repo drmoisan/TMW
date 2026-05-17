@@ -1,0 +1,39 @@
+name: Stage 10 Benchmark Regression (standalone)
+# Standalone, dispatch-only mirror of the stage-10-benchmark-regression job in
+# pr-pipeline.yml. Use this to validate the stage on a single branch without
+# running the full PR pipeline. The steps are deliberately identical to the
+# corresponding job; if you change one, change both.
+#
+# Usage:
+#   gh workflow run stage-10-benchmark-regression.yml --ref <branch>
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage-10-benchmark-regression:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Run classifier benchmarks
+        shell: pwsh
+        run: |
+          dotnet run -c Release --project tests/TaskMaster.Benchmarks -- --filter "*ClassifierBenchmarks*" --exporters JSON --artifacts artifacts/benchmarks/run
+      - name: Enrich BDN report with P99
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          if ($null -eq $report) { throw "No BDN report-full.json produced by the run." }
+          pwsh -NoProfile -File scripts/benchmarks/enrich-bdn-report.ps1 -Path $report.FullName
+      - name: Compare against committed baseline
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          pwsh -NoProfile -File scripts/benchmarks/compare-benchmarks.ps1 -BaselinePath artifacts/benchmarks/baseline.json -CurrentPath $report.FullName -T1BenchmarkIdPattern "ClassifierBenchmarks"
