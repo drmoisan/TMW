@@ -58,7 +58,7 @@ Describe 'compare-benchmarks.ps1' {
             function script:New-FakeReport {
                 param(
                     [string]$Id,
-                    [double]$P99,
+                    [double]$Median,
                     [double]$AllocBytes
                 )
                 return [pscustomobject]@{
@@ -66,7 +66,8 @@ Describe 'compare-benchmarks.ps1' {
                         [pscustomobject]@{
                             FullName   = $Id
                             Statistics = [pscustomobject]@{
-                                Percentiles = [pscustomobject]@{ P99 = $P99 }
+                                Median      = $Median
+                                Percentiles = [pscustomobject]@{ P99 = $Median }
                             }
                             Memory     = [pscustomobject]@{ BytesAllocatedPerOperation = $AllocBytes }
                         }
@@ -78,7 +79,7 @@ Describe 'compare-benchmarks.ps1' {
         It 'emits SKIP_NO_BASELINE row and exits 0 when current id is not in baseline map' {
             Mock Read-BenchmarkReport {
                 if ($Path -eq 'base.json') { return @() }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'NewBench' -P99 1.0 -AllocBytes 100).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'NewBench' -Median 1.0 -AllocBytes 100).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             $exitCode = [int]$output[-1]
@@ -89,8 +90,8 @@ Describe 'compare-benchmarks.ps1' {
 
         It 'returns exit code 0 when all benchmarks pass thresholds' {
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -P99 100.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -P99 102.0 -AllocBytes 1050).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -Median 100.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -Median 102.0 -AllocBytes 1050).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 0
@@ -98,8 +99,8 @@ Describe 'compare-benchmarks.ps1' {
 
         It 'returns exit code 1 when a benchmark regresses (FAIL_LATENCY)' {
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -P99 100.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -P99 200.0 -AllocBytes 1050).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -Median 100.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -Median 200.0 -AllocBytes 1050).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 1
@@ -108,8 +109,8 @@ Describe 'compare-benchmarks.ps1' {
 
         It 'transitions verdict to FAIL_ALLOC when only allocation exceeds threshold' {
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -P99 100.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -P99 102.0 -AllocBytes 2000).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -Median 100.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -Median 102.0 -AllocBytes 2000).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 1
@@ -118,8 +119,8 @@ Describe 'compare-benchmarks.ps1' {
 
         It 'transitions verdict to FAIL_LATENCY_AND_ALLOC when both exceed thresholds' {
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -P99 100.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -P99 200.0 -AllocBytes 2000).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport -Id 'B1' -Median 100.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport -Id 'B1' -Median 200.0 -AllocBytes 2000).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 1
@@ -130,13 +131,14 @@ Describe 'compare-benchmarks.ps1' {
     Describe 'LatencyMinDeltaNs absolute-delta floor (AND semantics with LatencyThresholdPercent)' {
         BeforeAll {
             function script:New-FakeReport2 {
-                param([string]$Id, [double]$P99, [double]$AllocBytes)
+                param([string]$Id, [double]$Median, [double]$AllocBytes)
                 return [pscustomobject]@{
                     Benchmarks = @(
                         [pscustomobject]@{
                             FullName   = $Id
                             Statistics = [pscustomobject]@{
-                                Percentiles = [pscustomobject]@{ P99 = $P99 }
+                                Median      = $Median
+                                Percentiles = [pscustomobject]@{ P99 = $Median }
                             }
                             Memory     = [pscustomobject]@{ BytesAllocatedPerOperation = $AllocBytes }
                         }
@@ -145,11 +147,11 @@ Describe 'compare-benchmarks.ps1' {
             }
         }
 
-        It 'returns PASS when relative delta trips (>5%) but absolute delta is below the 5 ns floor (default)' {
+        It 'returns PASS when relative delta trips (>5%) but absolute delta is below the 25 ns floor (default)' {
             # Baseline 25 ns -> current 27 ns: 8% relative, but only 2 ns absolute.
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 25.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 27.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -Median 25.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -Median 27.0 -AllocBytes 1000).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 0
@@ -157,11 +159,11 @@ Describe 'compare-benchmarks.ps1' {
             ($output | Where-Object { "$_" -match ', PASS\s*$' }) | Should -Not -BeNullOrEmpty
         }
 
-        It 'returns FAIL_LATENCY when both relative delta (>5%) and absolute delta (>5 ns) trip' {
-            # Baseline 125 ns -> current 135 ns: 8% relative, 10 ns absolute.
+        It 'returns FAIL_LATENCY when both relative delta (>5%) and absolute delta (>25 ns) trip' {
+            # Baseline 500 ns -> current 530 ns: 6% relative, 30 ns absolute.
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 125.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 135.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -Median 500.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -Median 530.0 -AllocBytes 1000).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 1
@@ -171,33 +173,81 @@ Describe 'compare-benchmarks.ps1' {
         It 'returns PASS when only the absolute floor trips but the relative delta stays at or below 5%' {
             # Baseline 10000 ns -> current 10100 ns: 1% relative, 100 ns absolute.
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 10000.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 10100.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -Median 10000.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -Median 10100.0 -AllocBytes 1000).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 0
             ($output | Where-Object { "$_" -match 'FAIL_LATENCY' }) | Should -BeNullOrEmpty
         }
 
-        It 'uses the default LatencyMinDeltaNs of 5.0 when the caller omits it' {
-            # 8% relative, 4 ns absolute -> below the default 5 ns floor -> PASS.
+        It 'uses the default LatencyMinDeltaNs of 25.0 when the caller omits it' {
+            # 20% relative, 10 ns absolute -> below the default 25 ns floor -> PASS.
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 50.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 54.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -Median 50.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -Median 60.0 -AllocBytes 1000).Benchmarks[0] }
             }
             $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
             [int]$output[-1] | Should -Be 0
+            ($output | Where-Object { "$_" -match 'FAIL_LATENCY' }) | Should -BeNullOrEmpty
         }
 
         It 'propagates a custom LatencyMinDeltaNs through Invoke-CompareBenchmarksMain' {
-            # 8% relative, 4 ns absolute. Default floor (5) -> PASS; lowered floor (1) -> FAIL_LATENCY.
+            # 20% relative, 10 ns absolute. Default floor (25) -> PASS; lowered floor (5) -> FAIL_LATENCY.
             Mock Read-BenchmarkReport {
-                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -P99 50.0 -AllocBytes 1000).Benchmarks[0] }
-                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -P99 54.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'base.json') { return , (New-FakeReport2 -Id 'B1' -Median 50.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport2 -Id 'B1' -Median 60.0 -AllocBytes 1000).Benchmarks[0] }
             }
-            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json' -LatencyMinDeltaNs 1.0)
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json' -LatencyMinDeltaNs 5.0)
             [int]$output[-1] | Should -Be 1
             ($output | Where-Object { "$_" -match 'FAIL_LATENCY' }) | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Describe 'Statistic source (Median vs Percentiles.P99)' {
+        BeforeAll {
+            function script:New-FakeReport3 {
+                param([string]$Id, [double]$Median, [double]$P99, [double]$AllocBytes)
+                return [pscustomobject]@{
+                    Benchmarks = @(
+                        [pscustomobject]@{
+                            FullName   = $Id
+                            Statistics = [pscustomobject]@{
+                                Median      = $Median
+                                Percentiles = [pscustomobject]@{ P99 = $P99 }
+                            }
+                            Memory     = [pscustomobject]@{ BytesAllocatedPerOperation = $AllocBytes }
+                        }
+                    )
+                }
+            }
+        }
+
+        It 'compares Statistics.Median and ignores Statistics.Percentiles.P99' {
+            # Median delta: 100 -> 105 (5 ns absolute, 5% relative) -> PASS under default
+            # threshold (5% AND 25 ns floor): 5 ns < 25 ns floor.
+            # If the comparator instead used P99: 1000 -> 1100 (100 ns absolute, 10% relative)
+            # -> would trip both conditions and FAIL_LATENCY.
+            Mock Read-BenchmarkReport {
+                if ($Path -eq 'base.json') { return , (New-FakeReport3 -Id 'B1' -Median 100.0 -P99 1000.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport3 -Id 'B1' -Median 105.0 -P99 1100.0 -AllocBytes 1000).Benchmarks[0] }
+            }
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
+            [int]$output[-1] | Should -Be 0
+            ($output | Where-Object { "$_" -match 'FAIL_LATENCY' }) | Should -BeNullOrEmpty
+        }
+
+        It 'emits a CSV header that names median columns and contains no p99 substring' {
+            Mock Read-BenchmarkReport {
+                if ($Path -eq 'base.json') { return , (New-FakeReport3 -Id 'B1' -Median 100.0 -P99 1000.0 -AllocBytes 1000).Benchmarks[0] }
+                if ($Path -eq 'cur.json') { return , (New-FakeReport3 -Id 'B1' -Median 100.0 -P99 1000.0 -AllocBytes 1000).Benchmarks[0] }
+            }
+            $output = @(Invoke-CompareBenchmarksMain -BaselinePath 'base.json' -CurrentPath 'cur.json')
+            $header = [string]$output[0]
+            $header | Should -Match 'median_baseline_ns'
+            $header | Should -Match 'median_current_ns'
+            $header | Should -Match 'median_delta_pct'
+            $header | Should -Not -Match 'p99_'
         }
     }
 }

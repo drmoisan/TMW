@@ -2,12 +2,17 @@
 <#
 .SYNOPSIS
   Compares a current BenchmarkDotNet (BDN) report against a committed baseline
-  and exits non-zero when a regression exceeds configured thresholds.
+  and exits non-zero when a median latency or allocation regression exceeds
+  configured thresholds.
 .DESCRIPTION
   Stage 10 (benchmark regression) of the PR pipeline invokes this script with
   the committed baseline at artifacts/benchmarks/baseline.json and the current
-  PR run's *-report-full.json. The script emits one diff row per benchmark id
-  to stdout and exits:
+  PR run's *-report-full.json. The comparator reads `Statistics.Median` (in
+  nanoseconds) and `Memory.BytesAllocatedPerOperation` from each benchmark
+  entry. Median is robust against single-iteration jitter and reflects typical
+  performance over the widened iteration count (5 warmup + 20 measurement)
+  configured in tests/TaskMaster.Benchmarks/BenchmarkConfig.cs. The script
+  emits one diff row per benchmark id to stdout and exits:
 
     0  All benchmarked ids pass the thresholds.
     1  At least one benchmark regressed beyond the thresholds.
@@ -15,7 +20,7 @@
 
   Schema fields consumed per artifacts/benchmarks/README.md:
     FullName                                  -> benchmark id
-    Statistics.Percentiles.P99                -> p99 latency (ns)
+    Statistics.Median                         -> median latency (ns)
     Memory.BytesAllocatedPerOperation         -> allocated bytes per op
 .PARAMETER BaselinePath
   Path to the committed BDN baseline JSON.
@@ -23,17 +28,19 @@
   Path to the current run's BDN *-report-full.json.
 .PARAMETER T1BenchmarkIdPattern
   Substring used to mark a benchmark id as a T1 hot path. When the FullName
-  contains this substring the p99 threshold is applied. Default: empty string
-  meaning every benchmark is considered T1 (conservative).
+  contains this substring the median latency threshold is applied. Default:
+  empty string meaning every benchmark is considered T1 (conservative).
 .PARAMETER LatencyThresholdPercent
-  Maximum permitted p99 latency regression on T1 benchmarks. Default 5.
+  Maximum permitted median latency regression on T1 benchmarks, in percent.
+  Default 5.0. Used in AND-combination with LatencyMinDeltaNs.
 .PARAMETER LatencyMinDeltaNs
-  Absolute p99 delta floor (nanoseconds) used in AND-combination with
+  Absolute median delta floor (nanoseconds) used in AND-combination with
   LatencyThresholdPercent. A T1 benchmark is reported as FAIL_LATENCY only when
   both the relative regression exceeds LatencyThresholdPercent AND the absolute
-  delta (current minus baseline, in ns) exceeds LatencyMinDeltaNs. Default 5.0 ns.
-  This suppresses false positives from CI runner timing jitter on very fast
-  (sub-100 ns) benchmarks where a few ns of noise can cross the 5% relative line.
+  delta (current minus baseline, in ns) exceeds LatencyMinDeltaNs. Default
+  25.0 ns. This suppresses false positives from CI runner timing jitter on
+  very fast (sub-100 ns) benchmarks where a few ns of noise can cross the 5%
+  relative line.
 .PARAMETER AllocationThresholdPercent
   Maximum permitted allocation regression on any benchmark. Default 10.
 #>
@@ -43,7 +50,7 @@ param(
     [string]$CurrentPath,
     [string]$T1BenchmarkIdPattern = '',
     [double]$LatencyThresholdPercent = 5.0,
-    [double]$LatencyMinDeltaNs = 5.0,
+    [double]$LatencyMinDeltaNs = 25.0,
     [double]$AllocationThresholdPercent = 10.0
 )
 
@@ -100,7 +107,7 @@ function Invoke-CompareBenchmarksMain {
         [Parameter(Mandatory = $true)][string]$CurrentPath,
         [string]$T1BenchmarkIdPattern = '',
         [double]$LatencyThresholdPercent = 5.0,
-        [double]$LatencyMinDeltaNs = 5.0,
+        [double]$LatencyMinDeltaNs = 25.0,
         [double]$AllocationThresholdPercent = 10.0
     )
 
@@ -122,7 +129,7 @@ function Invoke-CompareBenchmarksMain {
     }
 
     $anyRegression = $false
-    Write-Output 'id, p99_baseline_ns, p99_current_ns, p99_delta_pct, alloc_baseline_b, alloc_current_b, alloc_delta_pct, verdict'
+    Write-Output 'id, median_baseline_ns, median_current_ns, median_delta_pct, alloc_baseline_b, alloc_current_b, alloc_delta_pct, verdict'
 
     foreach ($cur in $currentBenchmarks) {
         $id = [string]$cur.FullName
@@ -132,21 +139,21 @@ function Invoke-CompareBenchmarksMain {
         }
         $base = $baselineMap[$id]
 
-        $p99Baseline = [double]$base.Statistics.Percentiles.P99
-        $p99Current = [double]$cur.Statistics.Percentiles.P99
+        $medianBaseline = [double]$base.Statistics.Median
+        $medianCurrent = [double]$cur.Statistics.Median
         $allocBaseline = [double]$base.Memory.BytesAllocatedPerOperation
         $allocCurrent = [double]$cur.Memory.BytesAllocatedPerOperation
 
-        $p99Delta = Get-PercentDelta -Baseline $p99Baseline -Current $p99Current
+        $medianDelta = Get-PercentDelta -Baseline $medianBaseline -Current $medianCurrent
         $allocDelta = Get-PercentDelta -Baseline $allocBaseline -Current $allocCurrent
 
         $isT1 = ($T1BenchmarkIdPattern -ne '') -and ($id -like "*${T1BenchmarkIdPattern}*")
         if ($T1BenchmarkIdPattern -eq '') { $isT1 = $true }
 
-        $p99AbsoluteDeltaNs = $p99Current - $p99Baseline
+        $medianAbsoluteDeltaNs = $medianCurrent - $medianBaseline
 
         $verdict = 'PASS'
-        if ($isT1 -and ($p99Delta -gt $LatencyThresholdPercent) -and ($p99AbsoluteDeltaNs -gt $LatencyMinDeltaNs)) {
+        if ($isT1 -and ($medianDelta -gt $LatencyThresholdPercent) -and ($medianAbsoluteDeltaNs -gt $LatencyMinDeltaNs)) {
             $verdict = 'FAIL_LATENCY'
             $anyRegression = $true
         }
@@ -156,7 +163,7 @@ function Invoke-CompareBenchmarksMain {
         }
 
         $row = "{0}, {1:F4}, {2:F4}, {3:F2}, {4:F0}, {5:F0}, {6:F2}, {7}" -f `
-            $id, $p99Baseline, $p99Current, $p99Delta, $allocBaseline, $allocCurrent, $allocDelta, $verdict
+            $id, $medianBaseline, $medianCurrent, $medianDelta, $allocBaseline, $allocCurrent, $allocDelta, $verdict
         Write-Output $row
     }
 

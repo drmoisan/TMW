@@ -7,16 +7,16 @@ namespace TaskMaster.Benchmarks;
 
 /// <summary>
 /// Shared deterministic configuration for every benchmark class in this project.
-/// The configuration favors short, repeatable runs so the comparator in stage 10
-/// produces stable inputs: a single fixed-seed short-run job, the memory diagnoser
-/// to capture allocations, and the full JSON exporter so percentile statistics
-/// (used by <c>scripts/benchmarks/compare-benchmarks.ps1</c>) are emitted.
+/// Uses 5 warmup + 20 measurement iterations chosen so the gated median statistic
+/// is stable against single-iteration jitter on shared CI runners. Includes the
+/// memory diagnoser to capture allocations and the full JSON exporter so the
+/// statistics consumed by <c>scripts/benchmarks/compare-benchmarks.ps1</c> are emitted.
 /// </summary>
 public sealed class BenchmarkConfig : ManualConfig
 {
     public BenchmarkConfig()
     {
-        AddJob(Job.ShortRun.WithId("short-deterministic"));
+        AddJob(Job.Default.WithWarmupCount(5).WithIterationCount(20).WithId("stage-10-stable"));
         AddDiagnoser(MemoryDiagnoser.Default);
         AddExporter(JsonExporter.Full);
     }
