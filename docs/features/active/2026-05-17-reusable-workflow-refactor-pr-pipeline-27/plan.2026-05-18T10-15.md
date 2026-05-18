@@ -76,7 +76,7 @@ Evidence-location invariant: every artifact path below resolves under `<FEATURE>
 
 ### Phase 1 — Cross-job filesystem dependency audit (confirm spec assertion)
 
-- [ ] [P1-T1] Programmatically confirm no job in `pr-pipeline.yml` consumes another job's working-tree path or `actions/download-artifact`.
+- [x] [P1-T1] Programmatically confirm no job in `pr-pipeline.yml` consumes another job's working-tree path or `actions/download-artifact`.
   - File touched: none.
   - Verification: grep `pr-pipeline.yml` for `download-artifact`, `needs.<id>.outputs`, `actions/cache`. Expected: only `upload-artifact` in `stage-10-benchmark-regression`, no `download-artifact`, no `outputs:` cross-references.
   - Evidence: `evidence/baseline/cross-job-fs-audit.2026-05-18T10-15.md` with `Timestamp:`, `Command:`, `EXIT_CODE:`, `Output Summary:` ("no cross-job filesystem reliance found — confirms spec section 'Risks & Mitigations'" or, if a counter-example is found, halt and report STRUCTURAL IMPOSSIBILITY before continuing).
