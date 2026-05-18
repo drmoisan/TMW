@@ -1,0 +1,190 @@
+name: PR Pipeline
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tier-classification:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: pwsh -NoProfile -File .github/scripts/validate-quality-tiers.ps1
+  stage-1-format:
+    runs-on: windows-latest
+    needs: [tier-classification]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/format
+  stage-2-lint:
+    runs-on: windows-latest
+    needs: [stage-1-format]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/lint
+  stage-3-typecheck:
+    runs-on: windows-latest
+    needs: [stage-2-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/typecheck
+  stage-4-architecture:
+    runs-on: windows-latest
+    needs: [stage-3-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/architecture
+  stage-5-test:
+    runs-on: windows-latest
+    needs: [stage-4-architecture]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/test
+  stage-6-contract:
+    runs-on: ubuntu-latest
+    needs: [stage-5-test]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/contract
+      - uses: ./.github/actions/schema-contract
+  stage-7-integration:
+    runs-on: windows-latest
+    needs: [stage-6-contract]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/integration
+  stage-1-dotnet-format:
+    runs-on: windows-latest
+    needs: [tier-classification]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-format
+  stage-2-dotnet-build:
+    runs-on: windows-latest
+    needs: [stage-1-dotnet-format]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-build
+  stage-3-dotnet-typecheck:
+    runs-on: windows-latest
+    needs: [stage-2-dotnet-build]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Nullable analysis runs inside dotnet build
+        shell: pwsh
+        run: |
+          Write-Host "Nullable analysis is enforced via Directory.Build.props (<Nullable>enable</Nullable> + <TreatWarningsAsErrors>true</TreatWarningsAsErrors>); the build in stage-2-dotnet-build fails on any nullable warning. No separate typecheck command is required."
+  stage-4-dotnet-architecture:
+    runs-on: windows-latest
+    needs: [stage-3-dotnet-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-architecture
+  stage-5-dotnet-test:
+    runs-on: windows-latest
+    needs: [stage-4-dotnet-architecture]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-test
+  stage-e2e-smoke:
+    runs-on: ubuntu-latest
+    needs: [stage-7-integration]
+    if: contains(github.event.pull_request.labels.*.name, 'e2e:run')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install npm dependencies
+        shell: bash
+        run: npm ci --no-audit --no-fund
+      - name: Install Playwright Chromium
+        shell: bash
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright E2E smoke
+        shell: bash
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          E2E_API_BASE_URL: ${{ secrets.E2E_API_BASE_URL }}
+        run: npx playwright test tests/e2e/
+
+  stage-10-benchmark-regression:
+    runs-on: windows-latest
+    needs: [stage-7-integration]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Run classifier benchmarks
+        shell: pwsh
+        run: |
+          dotnet run -c Release --project tests/TaskMaster.Benchmarks -- --filter "*ClassifierBenchmarks*" --exporters JSON --artifacts artifacts/benchmarks/run
+      - name: Enrich BDN report with P99
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          if ($null -eq $report) { throw "No BDN report-full.json produced by the run." }
+          pwsh -NoProfile -File scripts/benchmarks/enrich-bdn-report.ps1 -Path $report.FullName
+      - name: Upload BDN report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-10-benchmark-report
+          path: artifacts/benchmarks/run/results/*-report-full.json
+      - name: Compare against committed baseline
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          pwsh -NoProfile -File scripts/benchmarks/compare-benchmarks.ps1 -BaselinePath artifacts/benchmarks/baseline.json -CurrentPath $report.FullName -T1BenchmarkIdPattern "ClassifierBenchmarks" -LatencyMinDeltaNs 25.0
+  benchmark-gate-self-validation:
+    runs-on: windows-latest
+    needs: [stage-7-integration]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Run self-validation suite (LatencyRegressionGateTests passes; NonIdempotentHandlerNegativeTests is expected to fail; both inner outcomes prove the gate fires)
+        shell: pwsh
+        run: |
+          dotnet test tests/TaskMaster.Worker.Tests -c Release --filter "Category=benchmark-gate-self-validation&FullyQualifiedName~LatencyRegressionGateTests" --nologo
+          $latencyExit = $LASTEXITCODE
+          if ($latencyExit -ne 0) { Write-Error "LatencyRegressionGateTests must pass (it asserts the comparator rejects the synthetic regression)."; exit 1 }
+
+          dotnet test tests/TaskMaster.Worker.Tests -c Release --filter "Category=benchmark-gate-self-validation&FullyQualifiedName~NonIdempotentHandlerNegativeTests" --nologo
+          $negExit = $LASTEXITCODE
+          if ($negExit -eq 0) { Write-Error "NonIdempotentHandlerNegativeTests must FAIL (proving the inherited idempotency check detects the non-idempotent handler)."; exit 1 }
+          Write-Host "benchmark-gate-self-validation: latency gate caught synthetic regression and non-idempotent handler was detected as expected."
+          # The preceding dotnet test invocation is expected to exit 1 (negative test). Reset $LASTEXITCODE so the GitHub Actions pwsh step does not inherit it.
+          exit 0
+
+  secret-scan:
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        shell: pwsh
+        run: |
+          $bin = & .github/scripts/install-gitleaks.ps1
+          "GITLEAKS_BIN=$bin" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Scan PR diff
+        shell: pwsh
+        run: |
+          & $env:GITLEAKS_BIN detect --no-banner --redact --config=.gitleaks.toml --log-opts="origin/${{ github.base_ref }}..HEAD"
