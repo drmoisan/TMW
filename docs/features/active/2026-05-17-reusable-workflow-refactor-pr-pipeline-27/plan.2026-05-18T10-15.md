@@ -193,7 +193,7 @@ Each task touches exactly one new file (`<= 3` production-file limit honoured tr
 
 ### Phase 3 — Refactor orchestrator `pr-pipeline.yml`
 
-- [ ] [P3-T1] Rewrite `.github/workflows/pr-pipeline.yml` to bodyless `uses:` jobs.
+- [x] [P3-T1] Rewrite `.github/workflows/pr-pipeline.yml` to bodyless `uses:` jobs.
   - File touched: `.github/workflows/pr-pipeline.yml` (1 file).
   - Required structure:
     - Top-level `name: PR Pipeline`, `on: pull_request: branches: [main]` + `workflow_dispatch:`, `permissions: contents: read` — unchanged.
