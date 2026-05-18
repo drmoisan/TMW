@@ -240,42 +240,42 @@ Each task touches exactly one new file (`<= 3` production-file limit honoured tr
 
 ### Phase 6 — Verification (full regression and dispatch plan)
 
-- [ ] [P6-T1] Post-refactor YAML parse and (if available) `actionlint` on `.github/workflows/*.yml`.
+- [x] [P6-T1] Post-refactor YAML parse and (if available) `actionlint` on `.github/workflows/*.yml`.
   - File touched: none.
   - Verification: same commands as P0-T6, run against the refactored tree. Result: every file parses; if `actionlint` is present it must report zero errors.
   - Evidence: `evidence/qa-gates/yaml-parse-postrefactor.2026-05-18T10-15.md` with `Timestamp:`, `Command:`, `EXIT_CODE:`, `Output Summary:` (file count and pass/fail map; actionlint outcome).
 
-- [ ] [P6-T2] Structural byte-identity diff of each callee's `steps:` block vs the captured baseline inline job.
+- [x] [P6-T2] Structural byte-identity diff of each callee's `steps:` block vs the captured baseline inline job.
   - File touched: none.
   - Verification: for each of the 17 callees, extract its `jobs.<id>.steps` block and diff against the corresponding block in `evidence/baseline/pr-pipeline.pre-refactor.yml`. Acceptable differences: indentation normalisation only. The `needs:` line is expected to be absent in the callee (moved to caller). The orchestrator side is verified separately: extract `jobs.<id>.needs` from refactored `pr-pipeline.yml` and confirm it matches the baseline `needs:` declaration for each job.
   - Evidence: `evidence/qa-gates/steps-byte-identity-diff.2026-05-18T10-15.md` with `Timestamp:`, `Command:`, `EXIT_CODE:`, `Output Summary:` ("17/17 callees match baseline; needs graph preserved on caller").
 
-- [ ] [P6-T3] Verify orchestrator `uses:` targets resolve.
+- [x] [P6-T3] Verify orchestrator `uses:` targets resolve.
   - File touched: none.
   - Verification: parse `pr-pipeline.yml`, enumerate all `uses:` values, assert each `./.github/workflows/_*.yml` path exists on disk.
   - Evidence: `evidence/qa-gates/uses-resolution.2026-05-18T10-15.md`.
 
-- [ ] [P6-T4] Verify `_stage-e2e-smoke.yml` declares all four Azure-related secrets and orchestrator forwards them.
+- [x] [P6-T4] Verify `_stage-e2e-smoke.yml` declares all four Azure-related secrets and orchestrator forwards them.
   - File touched: none.
   - Verification: parse `_stage-e2e-smoke.yml`; assert `on.workflow_call.secrets` map contains `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `E2E_API_BASE_URL`. Parse `pr-pipeline.yml`; assert `jobs.stage-e2e-smoke.secrets == inherit` (or an explicit map containing all four).
   - Evidence: `evidence/qa-gates/secrets-surface-verified.2026-05-18T10-15.md`.
 
-- [ ] [P6-T5] Pester regression run (unchanged pass set).
+- [x] [P6-T5] Pester regression run (unchanged pass set).
   - File touched: none.
   - Verification: rerun the same Pester invocation captured in P0-T7. Compare pass/fail counts to the baseline; the post-refactor result must be `>=` baseline pass count with no new failures.
   - Evidence: `evidence/regression-testing/pester-postrefactor.2026-05-18T10-15.md` with `Timestamp:`, `Command:`, `EXIT_CODE:`, `Output Summary:` (baseline vs post counts).
 
-- [ ] [P6-T6] Pytest regression run (unchanged pass set, or N/A note matching baseline).
+- [x] [P6-T6] Pytest regression run (unchanged pass set, or N/A note matching baseline).
   - File touched: none.
   - Verification: rerun the same pytest invocation captured in P0-T8. Pass/fail counts must match baseline.
   - Evidence: `evidence/regression-testing/pytest-postrefactor.2026-05-18T10-15.md`.
 
-- [ ] [P6-T7] PSScriptAnalyzer post-refactor run.
+- [x] [P6-T7] PSScriptAnalyzer post-refactor run.
   - File touched: none.
   - Verification: rerun P0-T9 command. Issue counts by severity must equal baseline (no new findings; refactor adds no PowerShell).
   - Evidence: `evidence/regression-testing/psscriptanalyzer-postrefactor.2026-05-18T10-15.md`.
 
-- [ ] [P6-T8] Document the post-merge dispatch-verification commands (executed by maintainer after merge).
+- [x] [P6-T8] Document the post-merge dispatch-verification commands (executed by maintainer after merge).
   - File touched: none (documentation evidence only).
   - Verification: enumerate the exact `gh` commands to be run after merge and the expected outputs:
     - `gh workflow run _stage-10-benchmark-regression.yml --ref <branch>` -> exactly one run id; one job; no `stage-7-integration` queued.
