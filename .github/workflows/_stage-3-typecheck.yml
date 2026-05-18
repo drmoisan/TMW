@@ -1,0 +1,14 @@
+name: stage-3-typecheck
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage-3-typecheck:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/typecheck

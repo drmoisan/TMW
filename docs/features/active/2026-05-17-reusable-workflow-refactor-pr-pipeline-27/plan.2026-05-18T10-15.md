@@ -89,78 +89,78 @@ For every task in this phase the toolchain loop is: write the callee file -> `Co
 
 Each task touches exactly one new file (`<= 3` production-file limit honoured trivially).
 
-- [ ] [P2-T1] Create `.github/workflows/_tier-classification.yml` from the `tier-classification` job.
+- [x] [P2-T1] Create `.github/workflows/_tier-classification.yml` from the `tier-classification` job.
   - Source job: `tier-classification` (windows-latest, no `needs:`, no `env:`, one step invoking `validate-quality-tiers.ps1`).
   - File created: `.github/workflows/_tier-classification.yml`.
   - Triggers: `on: workflow_call:` (no inputs, no secrets) and `on: workflow_dispatch:`.
   - Verification: YAML parse OK; `steps:` byte-identical to baseline inline block.
   - Evidence: `evidence/qa-gates/extract-tier-classification.2026-05-18T10-15.md` (`Timestamp:`, `Command:`, `EXIT_CODE:`, `Output Summary:` with diff summary).
 
-- [ ] [P2-T2] Create `.github/workflows/_stage-1-format.yml` from `stage-1-format`.
+- [x] [P2-T2] Create `.github/workflows/_stage-1-format.yml` from `stage-1-format`.
   - Source job: `stage-1-format` (windows-latest, single composite-action step `./.github/actions/format`).
   - File created: `.github/workflows/_stage-1-format.yml`.
   - Triggers: `workflow_call:` + `workflow_dispatch:`.
   - Verification: parse + steps-diff vs baseline.
   - Evidence: `evidence/qa-gates/extract-stage-1-format.2026-05-18T10-15.md`.
 
-- [ ] [P2-T3] Create `.github/workflows/_stage-2-lint.yml` from `stage-2-lint`.
+- [x] [P2-T3] Create `.github/workflows/_stage-2-lint.yml` from `stage-2-lint`.
   - File created: `.github/workflows/_stage-2-lint.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-2-lint.2026-05-18T10-15.md`.
 
-- [ ] [P2-T4] Create `.github/workflows/_stage-3-typecheck.yml` from `stage-3-typecheck`.
+- [x] [P2-T4] Create `.github/workflows/_stage-3-typecheck.yml` from `stage-3-typecheck`.
   - File created: `.github/workflows/_stage-3-typecheck.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-3-typecheck.2026-05-18T10-15.md`.
 
-- [ ] [P2-T5] Create `.github/workflows/_stage-4-architecture.yml` from `stage-4-architecture`.
+- [x] [P2-T5] Create `.github/workflows/_stage-4-architecture.yml` from `stage-4-architecture`.
   - File created: `.github/workflows/_stage-4-architecture.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-4-architecture.2026-05-18T10-15.md`.
 
-- [ ] [P2-T6] Create `.github/workflows/_stage-5-test.yml` from `stage-5-test`.
+- [x] [P2-T6] Create `.github/workflows/_stage-5-test.yml` from `stage-5-test`.
   - File created: `.github/workflows/_stage-5-test.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-5-test.2026-05-18T10-15.md`.
 
-- [ ] [P2-T7] Create `.github/workflows/_stage-6-contract.yml` from `stage-6-contract`.
+- [x] [P2-T7] Create `.github/workflows/_stage-6-contract.yml` from `stage-6-contract`.
   - Source job: ubuntu-latest, `actions/checkout@v4` with `fetch-depth: 0`, two composite actions (`contract`, `schema-contract`).
   - File created: `.github/workflows/_stage-6-contract.yml`.
   - Verification: parse + steps-diff (must preserve `fetch-depth: 0`).
   - Evidence: `evidence/qa-gates/extract-stage-6-contract.2026-05-18T10-15.md`.
 
-- [ ] [P2-T8] Create `.github/workflows/_stage-7-integration.yml` from `stage-7-integration`.
+- [x] [P2-T8] Create `.github/workflows/_stage-7-integration.yml` from `stage-7-integration`.
   - File created: `.github/workflows/_stage-7-integration.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-7-integration.2026-05-18T10-15.md`.
 
-- [ ] [P2-T9] Create `.github/workflows/_stage-1-dotnet-format.yml` from `stage-1-dotnet-format`.
+- [x] [P2-T9] Create `.github/workflows/_stage-1-dotnet-format.yml` from `stage-1-dotnet-format`.
   - File created: `.github/workflows/_stage-1-dotnet-format.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-1-dotnet-format.2026-05-18T10-15.md`.
 
-- [ ] [P2-T10] Create `.github/workflows/_stage-2-dotnet-build.yml` from `stage-2-dotnet-build`.
+- [x] [P2-T10] Create `.github/workflows/_stage-2-dotnet-build.yml` from `stage-2-dotnet-build`.
   - File created: `.github/workflows/_stage-2-dotnet-build.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-2-dotnet-build.2026-05-18T10-15.md`.
 
-- [ ] [P2-T11] Create `.github/workflows/_stage-3-dotnet-typecheck.yml` from `stage-3-dotnet-typecheck`.
+- [x] [P2-T11] Create `.github/workflows/_stage-3-dotnet-typecheck.yml` from `stage-3-dotnet-typecheck`.
   - Source job: contains a `name:` + inline `pwsh` `Write-Host` step explaining nullable analysis. Preserve verbatim.
   - File created: `.github/workflows/_stage-3-dotnet-typecheck.yml`.
   - Verification: parse + steps-diff (inline pwsh string byte-identical).
   - Evidence: `evidence/qa-gates/extract-stage-3-dotnet-typecheck.2026-05-18T10-15.md`.
 
-- [ ] [P2-T12] Create `.github/workflows/_stage-4-dotnet-architecture.yml` from `stage-4-dotnet-architecture`.
+- [x] [P2-T12] Create `.github/workflows/_stage-4-dotnet-architecture.yml` from `stage-4-dotnet-architecture`.
   - File created: `.github/workflows/_stage-4-dotnet-architecture.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-4-dotnet-architecture.2026-05-18T10-15.md`.
 
-- [ ] [P2-T13] Create `.github/workflows/_stage-5-dotnet-test.yml` from `stage-5-dotnet-test`.
+- [x] [P2-T13] Create `.github/workflows/_stage-5-dotnet-test.yml` from `stage-5-dotnet-test`.
   - File created: `.github/workflows/_stage-5-dotnet-test.yml`.
   - Verification: parse + steps-diff.
   - Evidence: `evidence/qa-gates/extract-stage-5-dotnet-test.2026-05-18T10-15.md`.
 
-- [ ] [P2-T14] Create `.github/workflows/_stage-e2e-smoke.yml` from `stage-e2e-smoke`.
+- [x] [P2-T14] Create `.github/workflows/_stage-e2e-smoke.yml` from `stage-e2e-smoke`.
   - Source job: ubuntu-latest, four steps (`setup-node@v4` with `cache: npm`, `npm ci`, `npx playwright install`, `npx playwright test`). Consumes secrets `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `E2E_API_BASE_URL` via `env:` mapping on the final step.
   - File created: `.github/workflows/_stage-e2e-smoke.yml`.
   - Triggers: `on: workflow_call:` MUST include a `secrets:` block declaring all four secrets as `required: true`. `on: workflow_dispatch:` also included.
@@ -168,21 +168,21 @@ Each task touches exactly one new file (`<= 3` production-file limit honoured tr
   - Verification: parse + steps-diff (env block byte-identical); inspect `workflow_call.secrets:` for the four named entries.
   - Evidence: `evidence/qa-gates/extract-stage-e2e-smoke.2026-05-18T10-15.md` (`Output Summary:` must explicitly list the four declared secrets).
 
-- [ ] [P2-T15] Create `.github/workflows/_stage-10-benchmark-regression.yml` from `stage-10-benchmark-regression`.
+- [x] [P2-T15] Create `.github/workflows/_stage-10-benchmark-regression.yml` from `stage-10-benchmark-regression`.
   - Source job: windows-latest, four steps (setup-dotnet, run benchmarks, enrich report, upload-artifact `if: always()`, compare against baseline). Preserve `if: always()` and all pwsh `run:` blocks verbatim.
   - File created: `.github/workflows/_stage-10-benchmark-regression.yml`.
   - Triggers: `workflow_call:` + `workflow_dispatch:`.
   - Verification: parse + steps-diff (upload-artifact name `stage-10-benchmark-report` and path `artifacts/benchmarks/run/results/*-report-full.json` preserved).
   - Evidence: `evidence/qa-gates/extract-stage-10-benchmark-regression.2026-05-18T10-15.md`.
 
-- [ ] [P2-T16] Create `.github/workflows/_benchmark-gate-self-validation.yml` from `benchmark-gate-self-validation`.
+- [x] [P2-T16] Create `.github/workflows/_benchmark-gate-self-validation.yml` from `benchmark-gate-self-validation`.
   - Source job: windows-latest, setup-dotnet plus the composite pwsh step containing the latency-gate pass + non-idempotent-negative test + `exit 0` reset. Preserve the multi-line `run:` block byte-identically.
   - File created: `.github/workflows/_benchmark-gate-self-validation.yml`.
   - Triggers: `workflow_call:` + `workflow_dispatch:`.
   - Verification: parse + character-exact diff of the pwsh `run:` block including the trailing `exit 0` line and the comment above it.
   - Evidence: `evidence/qa-gates/extract-benchmark-gate-self-validation.2026-05-18T10-15.md`.
 
-- [ ] [P2-T17] Create `.github/workflows/_secret-scan.yml` from `secret-scan`.
+- [x] [P2-T17] Create `.github/workflows/_secret-scan.yml` from `secret-scan`.
   - Source job: windows-latest, top-level `env: GH_TOKEN: ${{ github.token }}`, `actions/checkout@v4` with `fetch-depth: 0`, install-gitleaks pwsh step, scan PR diff pwsh step using `origin/${{ github.base_ref }}..HEAD`.
   - File created: `.github/workflows/_secret-scan.yml`.
   - Triggers: `workflow_call:` + `workflow_dispatch:`.
