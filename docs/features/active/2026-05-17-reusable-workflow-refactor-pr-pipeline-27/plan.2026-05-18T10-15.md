@@ -220,7 +220,7 @@ Each task touches exactly one new file (`<= 3` production-file limit honoured tr
 
 ### Phase 5 — Documentation
 
-- [ ] [P5-T1] Create `.github/workflows/README.md` documenting the callee/caller convention and dispatch invocations.
+- [x] [P5-T1] Create `.github/workflows/README.md` documenting the callee/caller convention and dispatch invocations.
   - File touched: `.github/workflows/README.md` (1 new file).
   - Required content:
     - Convention statement: any new gate ships as `_<name>.yml` callee with `workflow_call:` + `workflow_dispatch:`; the orchestrator only references callees via `uses:`. Document the GitHub Actions reusable-workflow nesting depth cap of 4.
@@ -230,7 +230,7 @@ Each task touches exactly one new file (`<= 3` production-file limit honoured tr
   - Verification: structural inspection of the document; presence of all 17 stage names and the branch-protection mapping.
   - Evidence: `evidence/qa-gates/readme-created.2026-05-18T10-15.md` with `Timestamp:`, `Command:`, `EXIT_CODE:`, `Output Summary:` (section list).
 
-- [ ] [P5-T2] Update `.claude/skills/orchestrate/SKILL.md` with the callee/caller convention rule.
+- [x] [P5-T2] Update `.claude/skills/orchestrate/SKILL.md` with the callee/caller convention rule.
   - File touched: `.claude/skills/orchestrate/SKILL.md` (1 file).
   - Required content: a short subsection (under an existing "Conventions" heading, or a new "GitHub Actions Reusable Workflows" subsection) stating: every new CI gate is a `_<name>.yml` callee with `workflow_call:` + `workflow_dispatch:`; orchestrators contain no inline `steps:`; cross-job filesystem reliance must use explicit `upload-artifact`/`download-artifact`; reusable-workflow nesting depth cap is 4.
   - Verification: grep for the new subsection text after edit.
