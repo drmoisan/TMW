@@ -53,16 +53,16 @@ GitHub Actions reusable workflows (`on: workflow_call`) solve this directly. Eac
 
 ## Acceptance Criteria
 
-- [ ] AC1: Every job currently defined inline in `pr-pipeline.yml` is extracted to its own `_*.yml` reusable workflow file.
-- [ ] AC2: Each `_*.yml` declares both `on: workflow_call:` and `on: workflow_dispatch:`.
-- [ ] AC3: `pr-pipeline.yml` contains no inline `steps:`; every job is a `uses: ./.github/workflows/_*.yml` block with appropriate `needs:`, `if:`, and `secrets:` declarations.
-- [ ] AC4: Step content (commands, environment, `shell:`, `runs-on:`) is byte-identical to the pre-refactor inline definitions; diffs limited to relocation and the `workflow_call:`/`workflow_dispatch:` triggers.
-- [ ] AC5: `gh workflow run _stage-10-benchmark-regression.yml --ref <branch>` runs only that stage against the branch tip; no other stages are queued.
-- [ ] AC6: A PR-pipeline run on a representative branch shows the same pass/fail outcome as the pre-refactor pipeline for each stage. No new failure modes introduced by the relocation.
-- [ ] AC7: The two standalone duplicate workflows (`stage-10-benchmark-regression.yml`, `benchmark-gate-self-validation.yml`) are deleted in the same change.
-- [ ] AC8: Branch-protection rule names are updated to match the new `<caller-job-name> / <callee-job-name>` display format. The old names are removed from the rule. Documented in the PR description.
-- [ ] AC9: Each Azure-secret-consuming callee (currently only `_stage-e2e-smoke.yml`) declares its `secrets:` explicitly and the caller passes `secrets: inherit` or per-secret mappings. No silent secret-loss regression.
-- [ ] AC10: `.github/workflows/README.md` exists and documents the callee/caller convention, the rule that any new gate ships as a `_*.yml` callee (not inline steps), per-stage `gh workflow run` invocations, and the branch-protection rename procedure.
+- [x] AC1: Every job currently defined inline in `pr-pipeline.yml` is extracted to its own `_*.yml` reusable workflow file.
+- [x] AC2: Each `_*.yml` declares both `on: workflow_call:` and `on: workflow_dispatch:`.
+- [x] AC3: `pr-pipeline.yml` contains no inline `steps:`; every job is a `uses: ./.github/workflows/_*.yml` block with appropriate `needs:`, `if:`, and `secrets:` declarations.
+- [x] AC4: Step content (commands, environment, `shell:`, `runs-on:`) is byte-identical to the pre-refactor inline definitions; diffs limited to relocation and the `workflow_call:`/`workflow_dispatch:` triggers.
+- [x] AC5: `gh workflow run _stage-10-benchmark-regression.yml --ref <branch>` runs only that stage against the branch tip; no other stages are queued.
+- [x] AC6: A PR-pipeline run on a representative branch shows the same pass/fail outcome as the pre-refactor pipeline for each stage. No new failure modes introduced by the relocation.
+- [x] AC7: The two standalone duplicate workflows (`stage-10-benchmark-regression.yml`, `benchmark-gate-self-validation.yml`) are deleted in the same change.
+- [x] AC8: Branch-protection rule names are updated to match the new `<caller-job-name> / <callee-job-name>` display format. The old names are removed from the rule. Documented in the PR description.
+- [x] AC9: Each Azure-secret-consuming callee (currently only `_stage-e2e-smoke.yml`) declares its `secrets:` explicitly and the caller passes `secrets: inherit` or per-secret mappings. No silent secret-loss regression.
+- [x] AC10: `.github/workflows/README.md` exists and documents the callee/caller convention, the rule that any new gate ships as a `_*.yml` callee (not inline steps), per-stage `gh workflow run` invocations, and the branch-protection rename procedure.
 
 ## Non-Goals
 

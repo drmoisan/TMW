@@ -290,43 +290,43 @@ Each task touches exactly one new file (`<= 3` production-file limit honoured tr
 
 One task per AC1–AC10 from `user-story.md`. Each task references the evidence artifact that proves the AC.
 
-- [ ] [P7-T1] AC1 verified: every inline job in pre-refactor `pr-pipeline.yml` has a corresponding `_*.yml` callee.
+- [x] [P7-T1] AC1 verified: every inline job in pre-refactor `pr-pipeline.yml` has a corresponding `_*.yml` callee.
   - Verification: cross-reference `evidence/baseline/job-inventory.2026-05-18T10-15.md` (17 jobs) with files created in P2-T1..P2-T17 (17 callees).
   - Evidence: `evidence/qa-gates/ac1-extraction-complete.2026-05-18T10-15.md`.
 
-- [ ] [P7-T2] AC2 verified: each `_*.yml` declares both `workflow_call:` and `workflow_dispatch:`.
+- [x] [P7-T2] AC2 verified: each `_*.yml` declares both `workflow_call:` and `workflow_dispatch:`.
   - Verification: parse each callee; assert both keys present under `on:`.
   - Evidence: `evidence/qa-gates/ac2-triggers-present.2026-05-18T10-15.md`.
 
-- [ ] [P7-T3] AC3 verified: `pr-pipeline.yml` has no inline `steps:`; every job is a `uses:` block with `needs:`, `if:`, `secrets:` as applicable.
+- [x] [P7-T3] AC3 verified: `pr-pipeline.yml` has no inline `steps:`; every job is a `uses:` block with `needs:`, `if:`, `secrets:` as applicable.
   - Verification: result from P3-T1 + P6-T3.
   - Evidence: `evidence/qa-gates/ac3-orchestrator-bodyless.2026-05-18T10-15.md`.
 
-- [ ] [P7-T4] AC4 verified: step content is byte-identical to pre-refactor inline definitions.
+- [x] [P7-T4] AC4 verified: step content is byte-identical to pre-refactor inline definitions.
   - Verification: result from P6-T2.
   - Evidence: `evidence/qa-gates/ac4-byte-identity.2026-05-18T10-15.md`.
 
-- [ ] [P7-T5] AC5 documented: `gh workflow run _stage-10-benchmark-regression.yml --ref <branch>` runs only that stage.
+- [x] [P7-T5] AC5 documented: `gh workflow run _stage-10-benchmark-regression.yml --ref <branch>` runs only that stage.
   - Verification: post-merge dispatch — command and expected outcome documented in P6-T8.
   - Evidence: `evidence/qa-gates/ac5-isolated-dispatch-plan.2026-05-18T10-15.md` referencing P6-T8 (actual run id captured post-merge).
 
-- [ ] [P7-T6] AC6 documented: representative-branch PR shows identical pass/fail outcome to pre-refactor.
+- [x] [P7-T6] AC6 documented: representative-branch PR shows identical pass/fail outcome to pre-refactor.
   - Verification: post-merge — captured by the maintainer on the first representative PR; documented plan in P6-T8.
   - Evidence: `evidence/qa-gates/ac6-representative-pr-plan.2026-05-18T10-15.md` referencing P6-T8.
 
-- [ ] [P7-T7] AC7 verified: the two duplicate mirror files are deleted.
+- [x] [P7-T7] AC7 verified: the two duplicate mirror files are deleted.
   - Verification: results from P4-T1 and P4-T2; both files absent from `.github/workflows/`.
   - Evidence: `evidence/qa-gates/ac7-mirrors-deleted.2026-05-18T10-15.md`.
 
-- [ ] [P7-T8] AC8 documented: branch-protection rename procedure is captured in `.github/workflows/README.md` and the PR description.
+- [x] [P7-T8] AC8 documented: branch-protection rename procedure is captured in `.github/workflows/README.md` and the PR description.
   - Verification: presence of the rename procedure section in `README.md` (from P5-T1) and a placeholder note that the PR description must include the same mapping.
   - Evidence: `evidence/qa-gates/ac8-branch-protection-procedure.2026-05-18T10-15.md`.
 
-- [ ] [P7-T9] AC9 verified: `_stage-e2e-smoke.yml` declares its four secrets and the caller forwards them.
+- [x] [P7-T9] AC9 verified: `_stage-e2e-smoke.yml` declares its four secrets and the caller forwards them.
   - Verification: result from P6-T4.
   - Evidence: `evidence/qa-gates/ac9-secrets-surface.2026-05-18T10-15.md`.
 
-- [ ] [P7-T10] AC10 verified: `.github/workflows/README.md` exists with convention, dispatch invocations, branch-protection rename, and secrets forwarding.
+- [x] [P7-T10] AC10 verified: `.github/workflows/README.md` exists with convention, dispatch invocations, branch-protection rename, and secrets forwarding.
   - Verification: result from P5-T1.
   - Evidence: `evidence/qa-gates/ac10-readme-complete.2026-05-18T10-15.md`.
 
