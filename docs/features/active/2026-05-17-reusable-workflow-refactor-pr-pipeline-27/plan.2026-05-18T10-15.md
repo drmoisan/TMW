@@ -206,12 +206,12 @@ Each task touches exactly one new file (`<= 3` production-file limit honoured tr
 
 ### Phase 4 — Delete duplicate mirrors
 
-- [ ] [P4-T1] Delete `.github/workflows/stage-10-benchmark-regression.yml`.
+- [x] [P4-T1] Delete `.github/workflows/stage-10-benchmark-regression.yml`.
   - File touched: `.github/workflows/stage-10-benchmark-regression.yml` (deletion).
   - Verification: file no longer exists; sha256 recorded in `evidence/baseline/duplicate-mirrors.sha256.md` matches `evidence/baseline/stage-10-benchmark-regression.pre-delete.yml` (provenance preserved).
   - Evidence: `evidence/qa-gates/delete-stage-10-mirror.2026-05-18T10-15.md` with `Timestamp:`, `Command:` (`git rm .github/workflows/stage-10-benchmark-regression.yml`), `EXIT_CODE:`, `Output Summary:`.
 
-- [ ] [P4-T2] Delete `.github/workflows/benchmark-gate-self-validation.yml`.
+- [x] [P4-T2] Delete `.github/workflows/benchmark-gate-self-validation.yml`.
   - File touched: `.github/workflows/benchmark-gate-self-validation.yml` (deletion).
   - Verification: file no longer exists; baseline copy preserved.
   - Evidence: `evidence/qa-gates/delete-self-validation-mirror.2026-05-18T10-15.md`.
