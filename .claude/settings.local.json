@@ -1,7 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(gh issue *)",
+      "Bash(dotnet build *)",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(dotnet package *)",
+      "Bash(dotnet restore *)",
+      "Bash(dotnet sln *)",
+      "Bash(find ~/.nuget/packages/jsonschema.net/ -name \"*.dll\" 2>/dev/null | head -5)",
+      "Bash(dotnet nuget *)",
+      "Bash(dotnet test *)",
+      "Bash(dotnet run *)",
+      "Bash(dotnet csharpier *)",
+      "Bash(dir \"C:\\\\Users\\\\DanMoisan\\\\repos\\\\TMW\\\\.claude\\\\worktrees\\\\youthful-banzai-a1dff3\\\\schemas\\\\v1\")",
+      "Bash(gh pr *)"
     ]
   }
 }
