@@ -1,0 +1,57 @@
+name: Benchmark Baseline Refresh
+# Manually triggered workflow that re-captures the benchmark baseline on the
+# same runner class used by stage-10-benchmark-regression (windows-latest).
+#
+# Why this exists: the committed artifacts/benchmarks/baseline.json was captured
+# on a developer workstation. Stage-10 runs on windows-latest, whose CPU is
+# slower and noisier. The 5% p99 latency threshold cannot survive that host
+# mismatch and trips on every PR. Refreshing the baseline on the same runner
+# class removes the false positive.
+#
+# How to use:
+#   1. Trigger this workflow from the Actions tab (workflow_dispatch).
+#   2. Download the "benchmark-baseline" artifact when the run completes.
+#   3. Replace artifacts/benchmarks/baseline.json with the extracted file.
+#   4. Open a PR with that single-file change. Stage-10 will then compare
+#      windows-latest current vs. windows-latest baseline.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-baseline:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Run classifier benchmarks
+        shell: pwsh
+        run: |
+          dotnet run -c Release --project tests/TaskMaster.Benchmarks -- --filter "*ClassifierBenchmarks*" --exporters JSON --artifacts artifacts/benchmarks/run
+      - name: Enrich BDN report with P99
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          if ($null -eq $report) { throw "No BDN report-full.json produced by the run." }
+          pwsh -NoProfile -File scripts/benchmarks/enrich-bdn-report.ps1 -Path $report.FullName
+      - name: Stage refreshed baseline
+        shell: pwsh
+        run: |
+          $report = Get-ChildItem artifacts/benchmarks/run/results -Filter "*-report-full.json" | Select-Object -First 1
+          if ($null -eq $report) { throw "No BDN report-full.json produced by the run." }
+          New-Item -ItemType Directory -Path artifacts/benchmarks/baseline-refresh -Force | Out-Null
+          Copy-Item -LiteralPath $report.FullName -Destination artifacts/benchmarks/baseline-refresh/baseline.json -Force
+          Write-Host "Refreshed baseline staged at artifacts/benchmarks/baseline-refresh/baseline.json"
+      - name: Upload refreshed baseline artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-baseline
+          path: artifacts/benchmarks/baseline-refresh/baseline.json
+          if-no-files-found: error
+          retention-days: 14

@@ -103,6 +103,30 @@ projects:
       reflects test-infrastructure role; the production code under test (KeywordClassifier) is
       tiered separately as T1 under TaskMaster.Classifier.
 
+  # New project added by Issue #23 (idempotency-and-benchmark-infra / Prompt G1).
+  - name: TaskMaster.Benchmarks
+    path: tests/TaskMaster.Benchmarks
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): BenchmarkDotNet project exercising classifier hot paths
+      (Prompt D2) and a disabled placeholder for the delta-reconciliation hot path
+      (Prompt G2). Drives pre-merge stage-10 benchmark regression gate but contains
+      no production code under test; tier reflects pure benchmark/test-infrastructure
+      role.
+
+  - name: TaskMaster.Worker.Tests
+    path: tests/TaskMaster.Worker.Tests
+    language: csharp
+    tier: t4
+    rationale: |
+      Test scaffolding (T4): xunit.v3 + CsCheck + FluentAssertions test project
+      hosting the SubscriptionHandlerTestBase, the idempotency property fixture,
+      and the delta-reconciliation property tests required by Prompt G1. Inherits
+      the idempotency property check on derived handler test classes so the gate
+      lands ahead of Prompt G2's handler code. Tier reflects pure test-infrastructure
+      role.
+
   # New project added by Issue #15 (establish-behavior-correctness-test-infra).
   - name: TaskMaster.PlaceholderGolden.Tests
     path: tests/TaskMaster.PlaceholderGolden.Tests
