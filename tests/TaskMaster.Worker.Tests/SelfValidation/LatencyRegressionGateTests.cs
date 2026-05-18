@@ -61,7 +61,7 @@ public sealed class LatencyRegressionGateTests
             .ExitCode.Should()
             .NotBe(
                 0,
-                "comparator must fail on a synthetic +10% p99 regression against a T1 benchmark id"
+                "comparator must fail on a synthetic median latency regression against a T1 benchmark id that exceeds both the 5% relative threshold and the absolute-delta floor"
             );
     }
 
