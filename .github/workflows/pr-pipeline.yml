@@ -13,15 +13,15 @@ jobs:
 
   stage-1-format:
     needs: [tier-classification]
-    uses: ./.github/workflows/_stage-1-format.yml
+    uses: ./.github/workflows/_stage-1-format-prettier.yml
 
   stage-2-lint:
     needs: [stage-1-format]
-    uses: ./.github/workflows/_stage-2-lint.yml
+    uses: ./.github/workflows/_stage-2-lint-eslint.yml
 
   stage-3-typecheck:
     needs: [stage-2-lint]
-    uses: ./.github/workflows/_stage-3-typecheck.yml
+    uses: ./.github/workflows/_stage-3-typecheck-tsc.yml
 
   stage-4-architecture:
     needs: [stage-3-typecheck]
@@ -29,7 +29,7 @@ jobs:
 
   stage-5-test:
     needs: [stage-4-architecture]
-    uses: ./.github/workflows/_stage-5-test.yml
+    uses: ./.github/workflows/_stage-5-test-vitest.yml
 
   stage-6-contract:
     needs: [stage-5-test]
@@ -37,7 +37,7 @@ jobs:
 
   stage-7-integration:
     needs: [stage-6-contract]
-    uses: ./.github/workflows/_stage-7-integration.yml
+    uses: ./.github/workflows/_stage-7-integration-vitest.yml
 
   stage-1-dotnet-format:
     needs: [tier-classification]

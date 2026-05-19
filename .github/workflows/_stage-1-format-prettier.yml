@@ -1,4 +1,4 @@
-name: stage-2-lint
+name: stage-1-format-prettier
 on:
   workflow_call:
   workflow_dispatch:
@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  stage-2-lint:
+  stage-1-format-prettier:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/lint
+      - uses: ./.github/actions/format

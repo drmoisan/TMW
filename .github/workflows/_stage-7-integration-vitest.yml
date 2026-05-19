@@ -1,4 +1,4 @@
-name: stage-5-test
+name: stage-7-integration-vitest
 on:
   workflow_call:
   workflow_dispatch:
@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  stage-5-test:
+  stage-7-integration-vitest:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/test
+      - uses: ./.github/actions/integration

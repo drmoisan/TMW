@@ -1,4 +1,4 @@
-name: stage-3-typecheck
+name: stage-2-lint-eslint
 on:
   workflow_call:
   workflow_dispatch:
@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  stage-3-typecheck:
+  stage-2-lint-eslint:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/typecheck
+      - uses: ./.github/actions/lint

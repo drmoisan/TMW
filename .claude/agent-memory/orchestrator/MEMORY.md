@@ -1,8 +1,4 @@
-- [VS Code extension location](project_extension_location.md) — the extension lives at `extensions/drm-copilot/`, not at the repo root.
-- [Verify package.json before vsce work](feedback_vsce_verify_package_location.md) — in multi-package repos, never assume the repo root is the publishable extension; locate it first.
-- [Repo root is source of truth for codex bundle](feedback_repo_root_is_source_of_truth.md) — when repo `.codex/`, `.agents/`, `AGENTS.md` differ from bundled copies, update the bundle to match.
-- [Published MCP server identity](project_published_mcp_server.md) — published as `@danmoisan/drm-copilot-mcp`; tool prefix is `mcp__drm-copilot__`; side-loaded extension is no longer the MCP source.
-- [Sync bundled mirrors after runtime edits](feedback_bundle_sync_after_runtime_edit.md) — every runtime file under .claude/.codex/.agents/.github has a bundled mirror enforced by python contract tests; run pytest+pester before reporting completion.
 - [Run prd-feature before atomic-planner](feedback_spec_userstory_before_planning.md) — always produce spec.md and user-story.md via prd-feature before delegating to atomic-planner; never skip from issue.md straight to plan.md.
 - [Verify MCP promotion before manual gh](feedback_verify_mcp_promotion_before_manual.md) — do not assume drm-copilot MCP promotion is unavailable based on a prior checkpoint; surface the gap and ask before falling back to manual `gh issue create`.
 - [Use pr-author skill for all PR bodies](feedback_pr_author_skill_required.md) — always apply the pr-author skill from refreshed PR context artifacts; never manually compose the PR body inline.
+- [TMW has no bundled workflow mirrors](project_no_bundled_workflow_mirrors.md) — `.github/workflows/` is the single source of truth; no `.codex/` or `.agents/` mirror enforced by contract tests.

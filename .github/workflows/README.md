@@ -23,13 +23,13 @@ Callees (one per gate):
 | # | Callee | Purpose |
 |---|---|---|
 | 1 | `_tier-classification.yml` | Validates `quality-tiers.yml` covers every project |
-| 2 | `_stage-1-format.yml` | Prettier format check (JS/TS/JSON/YAML/MD); see also `_stage-1-dotnet-format.yml` for C# (CSharpier) |
-| 3 | `_stage-2-lint.yml` | Cross-language lint |
-| 4 | `_stage-3-typecheck.yml` | Cross-language type-check |
+| 2 | `_stage-1-format-prettier.yml` | Prettier format check (JS/TS/JSON/YAML/MD); see also `_stage-1-dotnet-format.yml` for C# (CSharpier) |
+| 3 | `_stage-2-lint-eslint.yml` | ESLint v9 flat config with typescript-eslint (TS/JS only) |
+| 4 | `_stage-3-typecheck-tsc.yml` | `tsc --noEmit` (TS only); .NET nullable analysis runs inside `_stage-3-dotnet-typecheck.yml` |
 | 5 | `_stage-4-architecture.yml` | Architecture-boundary checks |
-| 6 | `_stage-5-test.yml` | Cross-language unit tests |
+| 6 | `_stage-5-test-vitest.yml` | Vitest with V8 coverage (TS only); .NET unit tests run in `_stage-5-dotnet-test.yml` |
 | 7 | `_stage-6-contract.yml` | Contract / schema diff (needs full history, `fetch-depth: 0`) |
-| 8 | `_stage-7-integration.yml` | Cross-language integration tests |
+| 8 | `_stage-7-integration-vitest.yml` | Vitest integration placeholder (TS only; currently no-op until integration tests exist) |
 | 9 | `_stage-1-dotnet-format.yml` | .NET format |
 | 10 | `_stage-2-dotnet-build.yml` | .NET build |
 | 11 | `_stage-3-dotnet-typecheck.yml` | .NET nullable analysis explainer (real check runs inside the build) |
@@ -48,13 +48,13 @@ Use these to run an individual stage in isolation, for example to retry a flaky 
 
 ```
 gh workflow run _tier-classification.yml             --ref <branch>
-gh workflow run _stage-1-format.yml                  --ref <branch>
-gh workflow run _stage-2-lint.yml                    --ref <branch>
-gh workflow run _stage-3-typecheck.yml               --ref <branch>
+gh workflow run _stage-1-format-prettier.yml         --ref <branch>
+gh workflow run _stage-2-lint-eslint.yml             --ref <branch>
+gh workflow run _stage-3-typecheck-tsc.yml           --ref <branch>
 gh workflow run _stage-4-architecture.yml            --ref <branch>
-gh workflow run _stage-5-test.yml                    --ref <branch>
+gh workflow run _stage-5-test-vitest.yml             --ref <branch>
 gh workflow run _stage-6-contract.yml                --ref <branch>
-gh workflow run _stage-7-integration.yml             --ref <branch>
+gh workflow run _stage-7-integration-vitest.yml      --ref <branch>
 gh workflow run _stage-1-dotnet-format.yml           --ref <branch>
 gh workflow run _stage-2-dotnet-build.yml            --ref <branch>
 gh workflow run _stage-3-dotnet-typecheck.yml        --ref <branch>
@@ -81,13 +81,13 @@ Mapping (left = pre-refactor name to remove; right = post-refactor name to add):
 | Remove (old) | Add (new) |
 |---|---|
 | `tier-classification` | `tier-classification / tier-classification` |
-| `stage-1-format` | `stage-1-format / stage-1-format` |
-| `stage-2-lint` | `stage-2-lint / stage-2-lint` |
-| `stage-3-typecheck` | `stage-3-typecheck / stage-3-typecheck` |
+| `stage-1-format` | `stage-1-format / stage-1-format-prettier` |
+| `stage-2-lint` | `stage-2-lint / stage-2-lint-eslint` |
+| `stage-3-typecheck` | `stage-3-typecheck / stage-3-typecheck-tsc` |
 | `stage-4-architecture` | `stage-4-architecture / stage-4-architecture` |
-| `stage-5-test` | `stage-5-test / stage-5-test` |
+| `stage-5-test` | `stage-5-test / stage-5-test-vitest` |
 | `stage-6-contract` | `stage-6-contract / stage-6-contract` |
-| `stage-7-integration` | `stage-7-integration / stage-7-integration` |
+| `stage-7-integration` | `stage-7-integration / stage-7-integration-vitest` |
 | `stage-1-dotnet-format` | `stage-1-dotnet-format / stage-1-dotnet-format` |
 | `stage-2-dotnet-build` | `stage-2-dotnet-build / stage-2-dotnet-build` |
 | `stage-3-dotnet-typecheck` | `stage-3-dotnet-typecheck / stage-3-dotnet-typecheck` |
