@@ -1,4 +1,4 @@
-name: stage-1-format
+name: stage-5-test-vitest
 on:
   workflow_call:
   workflow_dispatch:
@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  stage-1-format:
+  stage-5-test-vitest:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/format
+      - uses: ./.github/actions/test

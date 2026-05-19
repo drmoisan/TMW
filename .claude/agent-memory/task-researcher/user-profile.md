@@ -5,7 +5,7 @@ metadata:
   type: user
 ---
 
-Dan Moisan (dmoisan@realgoodfoods.com) is the owner of the TMW repository (github.com/drmoisan/TMW).
+Dan Moisan (drmoisan@gmail.com) is the owner of the TMW repository (github.com/drmoisan/TMW).
 
 The project is a Microsoft Outlook add-in built with Office.js on the frontend and a .NET 10 / ASP.NET Core backend. The overall architecture is "No-COM" (no Outlook PIA/VSTO/desktop automation). The backend is minimal API (not controller-based).
 
