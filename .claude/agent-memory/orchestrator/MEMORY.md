@@ -2,3 +2,4 @@
 - [Verify MCP promotion before manual gh](feedback_verify_mcp_promotion_before_manual.md) — do not assume drm-copilot MCP promotion is unavailable based on a prior checkpoint; surface the gap and ask before falling back to manual `gh issue create`.
 - [Use pr-author skill for all PR bodies](feedback_pr_author_skill_required.md) — always apply the pr-author skill from refreshed PR context artifacts; never manually compose the PR body inline.
 - [TMW has no bundled workflow mirrors](project_no_bundled_workflow_mirrors.md) — `.github/workflows/` is the single source of truth; no `.codex/` or `.agents/` mirror enforced by contract tests.
+- [Do not re-confirm registered decisions](feedback_no_confirm_registered_decisions.md) — never pause orchestration to ask the user to confirm an action already in memory, checkpoint, or skill contract; execute it.
