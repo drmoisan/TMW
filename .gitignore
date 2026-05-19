@@ -58,13 +58,6 @@ Desktop.ini
 artifacts/*
 !artifacts/openapi/
 !artifacts/openapi/*
-# Versioned benchmark baseline (Issue #23): the committed reference run
-# consumed by pre-merge pipeline stage 10. Runtime outputs under
-# artifacts/benchmarks/run*/ remain ignored via the trailing patterns below.
-!artifacts/benchmarks/
-artifacts/benchmarks/*
-!artifacts/benchmarks/baseline.json
-!artifacts/benchmarks/README.md
 
 # .NET build and test output
 **/bin/

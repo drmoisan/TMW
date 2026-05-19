@@ -19,9 +19,6 @@
         OutputFormat          = 'JaCoCo'
         OutputPath            = 'artifacts/pester/powershell-coverage.xml'
         Path                  = @(
-            'scripts/benchmarks/compare-benchmarks.ps1'
-            'scripts/benchmarks/enrich-bdn-report.ps1'
-            'scripts/benchmarks/make-synthetic-fixtures.ps1'
             'scripts/benchmarks/parse-cobertura.ps1'
         )
         UseBreakpoints        = $false

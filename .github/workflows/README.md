@@ -36,14 +36,11 @@ Callees (one per gate):
 | 12 | `_stage-4-dotnet-architecture.yml` | .NET architecture boundaries |
 | 13 | `_stage-5-dotnet-test.yml` | .NET unit tests |
 | 14 | `_stage-e2e-smoke.yml` | Playwright E2E smoke (requires four Azure secrets — see below) |
-| 15 | `_stage-10-benchmark-regression.yml` | BenchmarkDotNet classifier benchmarks + regression compare |
-| 16 | `_benchmark-gate-self-validation.yml` | Validates the latency-regression gate itself |
-| 17 | `_secret-scan.yml` | Gitleaks PR-diff scan |
+| 15 | `_secret-scan.yml` | Gitleaks PR-diff scan |
 
 Other workflows:
 
 - `pre-merge-pipeline.yml` — pre-merge orchestration (out of scope for this refactor).
-- `benchmark-baseline-refresh.yml` — manual benchmark baseline refresh (out of scope).
 
 ## Dispatch invocations (per-stage)
 
@@ -64,8 +61,6 @@ gh workflow run _stage-3-dotnet-typecheck.yml        --ref <branch>
 gh workflow run _stage-4-dotnet-architecture.yml     --ref <branch>
 gh workflow run _stage-5-dotnet-test.yml             --ref <branch>
 gh workflow run _stage-e2e-smoke.yml                 --ref <branch>
-gh workflow run _stage-10-benchmark-regression.yml   --ref <branch>
-gh workflow run _benchmark-gate-self-validation.yml  --ref <branch>
 gh workflow run _secret-scan.yml                     --ref <branch>
 ```
 
@@ -99,8 +94,6 @@ Mapping (left = pre-refactor name to remove; right = post-refactor name to add):
 | `stage-4-dotnet-architecture` | `stage-4-dotnet-architecture / stage-4-dotnet-architecture` |
 | `stage-5-dotnet-test` | `stage-5-dotnet-test / stage-5-dotnet-test` |
 | `stage-e2e-smoke` | `stage-e2e-smoke / stage-e2e-smoke` |
-| `stage-10-benchmark-regression` | `stage-10-benchmark-regression / stage-10-benchmark-regression` |
-| `benchmark-gate-self-validation` | `benchmark-gate-self-validation / benchmark-gate-self-validation` |
 | `secret-scan` | `secret-scan / secret-scan` |
 
 Procedure (admin only):

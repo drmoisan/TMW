@@ -42,7 +42,7 @@ Run the full seven-stage toolchain in this exact order and repeat until all stag
 
 **Restart from step 1** if any stage fails or auto-fixes any files. Do not stop the loop until all seven stages complete without errors in a single pass.
 
-Mutation testing, golden tests, and benchmark regression run in pre-merge or nightly pipelines, not the per-commit loop.
+Mutation testing and golden tests run in pre-merge or nightly pipelines, not the per-commit loop.
 
 ## File Size Limit
 

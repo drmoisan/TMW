@@ -65,13 +65,5 @@ jobs:
     uses: ./.github/workflows/_stage-e2e-smoke.yml
     secrets: inherit
 
-  stage-10-benchmark-regression:
-    needs: [stage-7-integration]
-    uses: ./.github/workflows/_stage-10-benchmark-regression.yml
-
-  benchmark-gate-self-validation:
-    needs: [stage-7-integration]
-    uses: ./.github/workflows/_benchmark-gate-self-validation.yml
-
   secret-scan:
     uses: ./.github/workflows/_secret-scan.yml

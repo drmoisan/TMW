@@ -30,6 +30,7 @@ $script:GitHubApiVersion = '2026-03-10'
 
 function Get-RequiredStatusCheckContextList {
     [CmdletBinding()]
+    [OutputType([object[]])]
     param()
 
     return @(
@@ -46,6 +47,7 @@ function Get-RequiredStatusCheckContextList {
 
 function Get-RepositoryMergeSettingsFieldList {
     [CmdletBinding()]
+    [OutputType([object[]])]
     param()
 
     return @(
@@ -144,6 +146,7 @@ function Invoke-GitHubApiRequest {
 
 function Get-ManagedRepositoryRulesetId {
     [CmdletBinding()]
+    [OutputType([int], [object])]
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyCollection()]
@@ -166,6 +169,7 @@ function Get-ManagedRepositoryRulesetId {
 
 function Invoke-RepositoryGovernanceRulesetSync {
     [CmdletBinding(SupportsShouldProcess = $true)]
+    [OutputType([int])]
     param(
         [Parameter(Mandatory = $true)]
         [string]$Owner,

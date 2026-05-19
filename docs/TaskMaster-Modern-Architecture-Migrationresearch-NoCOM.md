@@ -1017,7 +1017,7 @@ Read first:
 
 Required outcome:
 
-- BenchmarkDotNet referenced from a dedicated `*.Benchmarks` project; baseline runs are recorded in `artifacts/benchmarks/baseline.json`.
+- BenchmarkDotNet referenced from a dedicated `*.Benchmarks` project.
 - Pre-merge pipeline stage 10 (benchmark regression) compares each PR's results to the baseline; p99 latency regression > 5% on T1 hot paths or allocation regression > 10% blocks the PR.
 - An idempotency test fixture is provided that runs the same Graph-subscription notification through the worker N times and asserts the post-state matches a single-execution post-state, using `FakeTimeProvider` and a deterministic message-id seed.
 - Property tests for delta-reconciliation cover out-of-order, duplicate, and missing-event sequences.

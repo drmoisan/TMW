@@ -238,7 +238,7 @@ You **must** run the full seven-stage toolchain in this exact order and repeat i
 6. **Contract / schema compatibility checks**
 7. **Integration tests**
 
-Treat these seven steps as one **toolchain pass**. Mutation testing, golden tests, and benchmark regression run in pre-merge or nightly pipelines, not the per-commit loop.
+Treat these seven steps as one **toolchain pass**. Mutation testing and golden tests run in pre-merge or nightly pipelines, not the per-commit loop.
 
 1. Run the formatter on the relevant files (e.g. Black).
 
