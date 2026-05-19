@@ -23,7 +23,7 @@ Callees (one per gate):
 | # | Callee | Purpose |
 |---|---|---|
 | 1 | `_tier-classification.yml` | Validates `quality-tiers.yml` covers every project |
-| 2 | `_stage-1-format.yml` | Cross-language format check |
+| 2 | `_stage-1-format.yml` | Prettier format check (JS/TS/JSON/YAML/MD); see also `_stage-1-dotnet-format.yml` for C# (CSharpier) |
 | 3 | `_stage-2-lint.yml` | Cross-language lint |
 | 4 | `_stage-3-typecheck.yml` | Cross-language type-check |
 | 5 | `_stage-4-architecture.yml` | Architecture-boundary checks |
