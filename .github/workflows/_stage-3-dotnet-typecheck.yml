@@ -1,0 +1,17 @@
+name: stage-3-dotnet-typecheck
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage-3-dotnet-typecheck:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Nullable analysis runs inside dotnet build
+        shell: pwsh
+        run: |
+          Write-Host "Nullable analysis is enforced via Directory.Build.props (<Nullable>enable</Nullable> + <TreatWarningsAsErrors>true</TreatWarningsAsErrors>); the build in stage-2-dotnet-build fails on any nullable warning. No separate typecheck command is required."

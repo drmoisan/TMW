@@ -1,0 +1,14 @@
+name: stage-5-dotnet-test
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage-5-dotnet-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-test

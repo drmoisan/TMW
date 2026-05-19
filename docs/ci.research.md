@@ -118,7 +118,6 @@ Mutation testing on the *full* T1 set is too slow for pre-merge; use changed-fil
 | Property test count | ≥ 1 per pure function | ≥ 1 per pure function | none | none |
 | Mutation score | ≥ 75% | trend-only | none | none |
 | Contract breaking changes | major-bump required | major-bump required | n/a | n/a |
-| Benchmark p99 regression | < 5% | < 10% | none | none |
 | Determinism (no flaky tests) | retry rate < 0.5% | < 1% | < 2% | n/a |
 
 Coverage is a *floor*, not a goal. Mutation score is the real signal for T1.

@@ -1,0 +1,15 @@
+name: tier-classification
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tier-classification:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: pwsh -NoProfile -File .github/scripts/validate-quality-tiers.ps1

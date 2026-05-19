@@ -51,6 +51,10 @@ Permitted `artifacts/`-rooted sub-paths (non-evidence orchestration use only):
 
 All other `artifacts/` sub-paths (e.g., `artifacts/baselines/`, `artifacts/qa/`, `artifacts/coverage/`, `artifacts/evidence/`) are FORBIDDEN for evidence output and will be blocked by the `enforce-evidence-locations.ps1` PreToolUse hook.
 
+## GitHub Actions Reusable Workflows
+
+Every new CI gate in this repository ships as a callable reusable workflow named `_<name>.yml` that declares both `on: workflow_call:` and `on: workflow_dispatch:`. Orchestrator workflows (for example `pr-pipeline.yml`) reference these callees via `uses: ./.github/workflows/_<name>.yml` and contain no inline `steps:` of their own. Cross-job filesystem reliance is not implicit; any job that needs to share files with another job must use explicit `actions/upload-artifact` + `actions/download-artifact`. The GitHub Actions reusable-workflow nesting depth cap is 4; this repository uses one level of nesting and does not introduce additional levels without an explicit design review. See `.github/workflows/README.md` for the full per-stage dispatch and branch-protection rename procedure.
+
 ## Completion Requirements
 
 The orchestrator must not report completion until:

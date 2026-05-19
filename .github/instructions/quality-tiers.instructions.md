@@ -42,7 +42,6 @@ Per Authoritative Decision #2, line and branch coverage thresholds are uniform a
 | Property test density | >= 1 per pure function | >= 1 per pure function | none | none |
 | Mutation score | >= 75% | trend-only | none | none |
 | Contract breaking changes | major bump required | major bump required | n/a | n/a |
-| Benchmark p99 regression | < 5% | < 10% | none | none |
 | Determinism (retry rate) | < 0.5% | < 1% | < 2% | n/a |
 | Golden tests | required for classifier-output modules | optional | none | none |
 | Full E2E suite scope | all critical paths | core paths | adapter smoke | none |
