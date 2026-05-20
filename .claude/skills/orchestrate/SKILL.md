@@ -105,16 +105,75 @@ Every delegation prompt to `atomic-planner`, `atomic-executor`, and `feature-rev
 
 If a subagent artifact references a different issue number, the orchestrator rejects it, requests correction, and records the discrepancy under `artifact_errors` in the checkpoint.
 
+## Step S9 — CI Green Gate
+
+`S9_ci_green` runs after `S8_create_pr` and before any DONE transition. It is the structural guarantee that the orchestrator observes what GitHub Actions produces against the live PR head SHA before writing DONE. S9 applies to every feature, not only features that modify CI paths.
+
+S9 procedure:
+
+1. Resolve the live PR head SHA for the feature branch (`gh pr view --json headRefOid` or equivalent).
+2. Invoke `gh pr checks --required --json bucket,name,state,link,workflow` (or an equivalent JSON-emitting command) against that head SHA. `gh` is the only sanctioned channel for querying GitHub Actions state.
+3. Parse the JSON via `scripts/orchestration/Invoke-CiGateParser.ps1`, which emits the `ci_gate` object defined below and derives `ci_gate.conclusion` as `success` when all required checks pass, `failure` when any required check failed, and `pending` when any required check is still in progress.
+4. Poll with a bounded interval and a documented total timeout while `conclusion == "pending"`. When the timeout is exhausted, set `step9_status: "failed_remediation_required"` and enter the remediation-loop CI-failure handling below with a timeout log.
+5. Write the `ci_gate` object and `last_verified_ci_sha` to the checkpoint, and set `step9_status` to `passed` only when `ci_gate.conclusion == "success"` AND `ci_gate.head_sha` equals the current PR head SHA.
+
+DONE is not written while `step9_status` is anything other than `passed`.
+
+## Checkpoint Schema — CI Gate Fields
+
+The orchestrator checkpoint (`artifacts/orchestration/orchestrator-state.json`) is extended with:
+
+- a top-level `ci_gate` object containing:
+  - `head_sha` — the PR head SHA that the required checks were observed against.
+  - `pr_pipeline_run_id` — the GitHub Actions run id for the PR Pipeline.
+  - `pr_pipeline_run_url` — the URL of that run.
+  - `conclusion` — one of `success`, `failure`, `pending`.
+  - `verified_at` — ISO-8601 timestamp of when S9 recorded the result.
+- a top-level `last_verified_ci_sha` — the most recent head SHA for which S9 recorded a result.
+- a top-level `step9_status` — an enumeration with at minimum the values `pending`, `passed`, `failed_remediation_required`, and `blocked_ci_loop_limit`.
+
+Illustrative shape:
+
+```jsonc
+{
+  "completed_steps": ["...", "S8_create_pr", "S9_ci_green"],
+  "step9_status": "pending|passed|failed_remediation_required|blocked_ci_loop_limit",
+  "ci_gate": {
+    "head_sha": "<sha>",
+    "pr_pipeline_run_id": "<id>",
+    "pr_pipeline_run_url": "<url>",
+    "conclusion": "success",
+    "verified_at": "<iso8601>"
+  },
+  "last_verified_ci_sha": "<sha>"
+}
+```
+
+### Backward compatibility
+
+A checkpoint that predates this schema and has no `ci_gate` object (or no `step9_status`) is treated as `step9_status: "pending"`. Missing CI-gate fields are never interpreted as `passed`; the gate fails closed. The orchestrator runs S9 to populate the fields before any DONE transition.
+
+## Remediation Loop — CI-Failure Handling
+
+When S9 records `step9_status: "failed_remediation_required"` (a failed required check or an exhausted poll timeout):
+
+1. The failed-check log from `gh run view <run-id> --log-failed` (or the timeout log) is written as `remediation-inputs.<timestamp>.md` in the active feature folder.
+2. The failure is converted to a synthetic finding with severity `Blocking` that identifies the failing check by name and the failing job by URL.
+3. The existing R1-R5 remediation loop processes that finding exactly as it processes a local blocking finding. No new loop is introduced.
+4. The `remediation_pass` counter is shared with local-finding passes; the cap is 3.
+5. On the third CI-failure pass without resolution, the orchestrator records `step9_status: "blocked_ci_loop_limit"`, does not write DONE, and halts. No further automation is attempted.
+
 ## PR Creation Gate
 
-The orchestrator must not create a PR, push a branch for PR purposes, or report work complete until all four conditions are simultaneously true:
+The orchestrator must not create a PR, push a branch for PR purposes, or report work complete until all five conditions are simultaneously true:
 
 1. `blocking_findings_resolved: true` — the most recent `feature-review` produced zero blocking findings.
 2. The AC verification artifact (`p14-acceptance-criteria-checkoff.md` or equivalent) confirms all acceptance criteria pass.
 3. The mandatory toolchain passed in its most recent run on the branch (no linting/type-check/test failures).
-4. The checkpoint `next_step` is `S8_create_pr`.
+4. The checkpoint `next_step` is `S8_create_pr` (precondition to entering S9).
+5. `ci_gate.conclusion == "success"` AND `ci_gate.head_sha == current head SHA of the PR branch`. DONE is not written while either sub-condition is false.
 
-This gate is non-negotiable. Each condition is independently verified before PR creation proceeds.
+This gate is non-negotiable. Each condition is independently verified before PR creation proceeds. Conditions 1-4 are unchanged from the prior contract; condition 5 is additive.
 
 ## Step 6 Delegation — Prohibited Prompt Language
 

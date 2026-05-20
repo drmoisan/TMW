@@ -3,3 +3,4 @@
 - [Use pr-author skill for all PR bodies](feedback_pr_author_skill_required.md) — always apply the pr-author skill from refreshed PR context artifacts; never manually compose the PR body inline.
 - [TMW has no bundled workflow mirrors](project_no_bundled_workflow_mirrors.md) — `.github/workflows/` is the single source of truth; no `.codex/` or `.agents/` mirror enforced by contract tests.
 - [Do not re-confirm registered decisions](feedback_no_confirm_registered_decisions.md) — never pause orchestration to ask the user to confirm an action already in memory, checkpoint, or skill contract; execute it.
+- [Full-bug mode has no user story](feedback_full_bug_no_user_story.md) — for full-bug work mode, produce only feature-document.md and spec.md; do not include user-story.md.
