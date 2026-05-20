@@ -73,7 +73,7 @@ Bundled-mirror resync:
 
 - [x] AC14: The full local mandatory toolchain loop (formatting, linting, type checking, architecture-boundary tests, unit tests, contract/schema checks, integration tests) passes in a single pass on the change branch.
 
-- [ ] AC15: The PR Pipeline run against the change branch head SHA reports `success` for all required checks. The `ci_gate` checkpoint object on this very feature records the green run before DONE is written, demonstrating the new gate operating on itself.
+- [x] AC15: The PR Pipeline run against the change branch head SHA reports `success` for all required checks. The `ci_gate` checkpoint object on this very feature records the green run before DONE is written, demonstrating the new gate operating on itself. Verified: PR #36, PR Pipeline run 26137666988 against head SHA 355c6c45b04b35ee0fc2dab755476ad0e7f3e65c completed with conclusion `success` (14 checks pass, 1 skipped, 0 fail). Invoke-CiGateParser.ps1 derived `conclusion: success`; Test-ModifiedWorkflowNeedsGreenRun.ps1 returned `IsBlocking: false` with green-run evidence present.
 
 ## Non-Goals
 
