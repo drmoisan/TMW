@@ -23,6 +23,8 @@
     "lint": "office-addin-lint check",
     "lint:fix": "office-addin-lint fix",
     "lint:openapi": "spectral lint artifacts/openapi/current.json --ruleset .spectral.yaml",
+    "mobile:start": "pwsh -NoProfile -File scripts/powershell/Start-MobileConnectivity.ps1",
+    "mobile:stop": "pwsh -NoProfile -File scripts/powershell/Stop-MobileConnectivity.ps1",
     "prettier": "office-addin-lint prettier",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
