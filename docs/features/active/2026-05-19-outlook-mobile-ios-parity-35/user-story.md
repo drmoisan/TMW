@@ -103,11 +103,11 @@ Outlook iOS provides no remote DevTools and cannot be emulated by CI; each item 
 by hand on a physical device, with evidence stored under
 `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/<kind>/`.
 
-- [ ] The add-in appears in the Outlook iOS message "More options" menu after sideload-and-
+- [x] The add-in appears in the Outlook iOS message "More options" menu after sideload-and-
       sync. **Evidence:** dated screenshot (`evidence/screenshots/`).
-- [ ] The task pane renders usably on an iPhone viewport. **Evidence:** dated device
+- [x] The task pane renders usably on an iPhone viewport. **Evidence:** dated device
       screenshot (`evidence/screenshots/`).
-- [ ] `Office.EventType.ItemChanged` fires on message navigation and re-renders context.
+- [x] `Office.EventType.ItemChanged` fires on message navigation and re-renders context.
       **Evidence:** dated before/after screenshots or a recorded session
       (`evidence/screenshots/` or `evidence/recordings/`).
 - [ ] The classifier backend is reachable over HTTPS from the device and a classification

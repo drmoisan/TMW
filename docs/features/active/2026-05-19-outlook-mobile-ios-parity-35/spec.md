@@ -202,14 +202,14 @@ Each names the required evidence artifact, written to
 `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/<kind>/` per the
 evidence-and-timestamp conventions.
 
-- [ ] After sideloading `manifest.xml` via Outlook on the web and syncing to the iOS device,
+- [x] After sideloading `manifest.xml` via Outlook on the web and syncing to the iOS device,
       the TaskMaster add-in appears in the message "More options" (three-dot) menu in Outlook
       iOS read mode. **Evidence:** dated screenshot of the More-options menu showing the
       add-in entry (`evidence/screenshots/`).
-- [ ] The task pane renders usably on an iPhone viewport (full-screen, no clipped or
+- [x] The task pane renders usably on an iPhone viewport (full-screen, no clipped or
       unreachable controls; header footprint acceptable). **Evidence:** dated screenshot of
       the rendered task pane on the device (`evidence/screenshots/`).
-- [ ] The `Office.EventType.ItemChanged` handler fires on message navigation in iOS and
+- [x] The `Office.EventType.ItemChanged` handler fires on message navigation in iOS and
       re-renders the selected-message context (subject/from). **Evidence:** dated screenshots
       before/after navigation, or a recorded device session, showing context updating
       (`evidence/screenshots/` or `evidence/recordings/`).
