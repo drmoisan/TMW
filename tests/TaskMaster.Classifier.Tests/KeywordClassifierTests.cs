@@ -148,17 +148,12 @@ public sealed class KeywordClassifierTests
     [Fact]
     public void Classify_AnyValidSnapshot_ConfidenceInRange()
     {
-        Gen.Select(
-                Gen.String[1, 50],
-                Gen.String[1, 50],
-                (messageId, subject) => MailMessageSnapshot.Create(messageId, subject, null)
-            )
-            .Sample(snapshot =>
-            {
-                var result = _sut.Classify(snapshot);
-                result.Confidence.Should().BeGreaterThanOrEqualTo(0.0);
-                result.Confidence.Should().BeLessThanOrEqualTo(1.0);
-            });
+        MailMessageSnapshotGen.Arbitrary.Sample(snapshot =>
+        {
+            var result = _sut.Classify(snapshot);
+            result.Confidence.Should().BeGreaterThanOrEqualTo(0.0);
+            result.Confidence.Should().BeLessThanOrEqualTo(1.0);
+        });
     }
 
     /// <summary>

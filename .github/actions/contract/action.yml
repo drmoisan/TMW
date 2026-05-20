@@ -39,6 +39,10 @@ runs:
       shell: bash
       run: npm ci --no-audit --no-fund
 
+    - name: Validate add-in only manifest.xml schema
+      shell: bash
+      run: npm run validate:xml
+
     - name: Spectral lint OpenAPI document
       shell: bash
       run: npm run lint:openapi

@@ -224,6 +224,49 @@ describe("requireElement helper", () => {
     });
 });
 
+describe("closeTaskpane guarded host call", () => {
+    beforeEach(() => {
+        vi.resetModules();
+        installShellDom();
+    });
+
+    afterEach(() => {
+        vi.resetAllMocks();
+    });
+
+    it("calls Office.context.ui.closeContainer when the host supports it", async () => {
+        // Arrange
+        const closeContainer = vi.fn();
+        installOffice({
+            context: {
+                mailbox: { item: null, addHandlerAsync: vi.fn() },
+                ui: { closeContainer },
+            } as unknown as { mailbox: OfficeMailboxStub },
+        });
+        const mod = await import("./taskpane");
+
+        // Act
+        mod.closeTaskpane();
+
+        // Assert
+        expect(closeContainer).toHaveBeenCalledTimes(1);
+    });
+
+    it("is a no-op when Office.context.ui.closeContainer is unavailable", async () => {
+        // Arrange — context.ui exists but lacks closeContainer
+        installOffice({
+            context: {
+                mailbox: { item: null, addHandlerAsync: vi.fn() },
+                ui: {},
+            } as unknown as { mailbox: OfficeMailboxStub },
+        });
+        const mod = await import("./taskpane");
+
+        // Act + Assert
+        expect(() => mod.closeTaskpane()).not.toThrow();
+    });
+});
+
 describe("renderClassifying and renderClassificationResult pure functions", () => {
     beforeEach(() => {
         vi.resetModules();

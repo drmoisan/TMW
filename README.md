@@ -74,7 +74,46 @@ troubleshooting, is in [`docs/quality-gates.md`](docs/quality-gates.md).
 | `npm run start` | Side-load the add-in into the configured Office host. |
 | `npm run stop` | Stop a running side-load session. |
 | `npm run validate` | Validate `manifest.json`. |
+| `npm run validate:xml` | Validate `manifest.xml`. |
+| `npm run mobile:start` | Start the local static server and Microsoft Dev Tunnel host used for Outlook Mobile iOS verification. |
+| `npm run mobile:stop` | Stop the mobile connectivity processes recorded by `mobile:start`. |
 | `npm run signin` / `npm run signout` | Manage the dev M365 account used by `office-addin-dev-settings`. |
+
+## Outlook Mobile iOS validation
+
+Issue #35 verified the add-in on Outlook for iOS using a production webpack
+bundle served through a Microsoft Dev Tunnel endpoint with publicly trusted TLS.
+The evidence is recorded under
+[`docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/notes`](docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/notes).
+
+For on-device validation, build the bundle with `webpack.config.js` `urlProd`
+temporarily set to the current Dev Tunnel URL, then run:
+
+```powershell
+npm run build
+npm run mobile:start
+```
+
+`mobile:start` serves `dist/` through `http-server` on port 3000 and hosts the
+`taskmaster-ios` Microsoft Dev Tunnel. It does not edit `webpack.config.js` or
+run the build. After validation, stop the background processes with:
+
+```powershell
+npm run mobile:stop
+```
+
+The verified iOS flow sideloads the built `dist/manifest.xml` through Outlook on
+the web, waits for the add-in to sync to Outlook on the iPhone, opens a message,
+and launches TaskMaster from the message "More options" menu. The 2026-05-20
+evidence confirms that the pane opens full-screen on iPhone, renders the
+selected message Subject/From context using Office.js read APIs, exposes the
+Close button wired to `Office.context.ui.closeContainer()`, and re-renders when
+`Office.EventType.ItemChanged` fires during message navigation.
+
+The Classify / Confirm / Reject controls are present, but the classify and
+feedback workflow is not currently wired in product code on any platform.
+Mobile parity for issue #35 therefore excludes classification success; that gap
+is tracked separately as GitHub issue #37.
 
 ## Testing
 
