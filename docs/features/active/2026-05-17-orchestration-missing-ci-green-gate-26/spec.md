@@ -5,7 +5,7 @@
 - **Owner:** drmoisan
 - **Last Updated:** 2026-05-19
 - **Status:** Implemented
-- **Version:** 0.1
+- **Version:** 0.2
 - **Work Mode:** full-bug
 
 ## Intent & Outcomes
@@ -43,7 +43,7 @@ New files:
 - New Pester test files covering both new scripts.
 
 Bundled-mirror resync:
-- For every `.claude/` file edited or added, regenerate the corresponding bundled copies under `.codex/`, `.agents/`, and `.github/` so mirror-contract tests pass.
+- For every edited `.claude/skills/**` file that already has a bundled mirror in this repo, keep the mirror byte-identical. The mirrors that exist in this repo are `.agents/skills/` and `.github/skills/`; there is no `.codex/` skills or rules mirror tree and no mirror-contract test suite. New `.claude/rules/*.md` files have no mirror target.
 
 ## Acceptance Criteria
 
@@ -71,8 +71,6 @@ Bundled-mirror resync:
 
 - [x] AC12: Pester unit tests exist for the script in AC11. Tests cover at minimum: rejection of `ProcessorName == "Unknown processor"` (negative); rejection of missing sibling `baseline.provenance.json` (negative); acceptance of a runner-captured baseline with valid provenance (positive).
 
-- [x] AC13: Every modified or added file under `.claude/` has a synchronized bundled mirror under `.codex/`, `.agents/`, and `.github/`. The python + pester mirror-contract tests pass.
-
 - [x] AC14: The full local mandatory toolchain loop (formatting, linting, type checking, architecture-boundary tests, unit tests, contract/schema checks, integration tests) passes in a single pass on the change branch.
 
 - [ ] AC15: The PR Pipeline run against the change branch head SHA reports `success` for all required checks. The `ci_gate` checkpoint object on this very feature records the green run before DONE is written, demonstrating the new gate operating on itself.
@@ -89,7 +87,7 @@ Bundled-mirror resync:
 ## Dependencies / Touchpoints
 
 - `.claude/skills/orchestrate/SKILL.md` and `.claude/skills/feature-review-workflow/SKILL.md` are the primary skill files. Edits must remain backward-compatible with any in-flight orchestrator state files that predate the schema change (treat missing `ci_gate` as `pending`).
-- Bundled-mirror sync skill and the python + pester contract tests that enforce mirror parity.
+- Bundled-mirror sync for the `.agents/skills/` and `.github/skills/` mirrors that exist in this repo. This repo does not enforce mirror parity via python/pester contract tests.
 - `gh` CLI availability in the orchestration runtime. S9 assumes `gh auth status` succeeds and `gh pr checks --required --json` is available.
 - Reproduction case: PR #30 (`feature/idempotency-and-benchmark-infra-23`). Used for evidence, not as a touchpoint to modify.
 
