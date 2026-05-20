@@ -1,0 +1,1 @@
+- [Bash tool uses POSIX not PowerShell](feedback_bash_tool_shell.md) — Bash tool runs /usr/bin/bash; use tail/grep/unset/VAR=val even though env says win32
