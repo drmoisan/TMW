@@ -34,6 +34,57 @@ body {
     text-align: center;
 }
 
+.tm-header img {
+    max-width: 100%;
+    height: auto;
+}
+
+#classification-panel .ms-Button {
+    margin: 4px 4px 0 0;
+}
+
 strong {
     font-weight: bold;
+}
+
+/*
+ * Narrow-viewport (mobile full-screen, e.g. iPhone SE at 375px) adjustments.
+ * Reduce the header footprint so the classify/confirm/reject controls remain
+ * visible without scrolling past an oversized header, and allow action buttons
+ * to wrap instead of clipping at the right edge.
+ */
+@media (max-width: 480px) {
+    .tm-header {
+        padding-top: 24px;
+        padding-bottom: 16px;
+    }
+
+    .tm-header img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .tm-header > h1 {
+        font-size: 20px;
+        margin: 8px 0 0 0;
+    }
+
+    .tm-main {
+        padding: 8px 12px;
+    }
+
+    #classification-panel {
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    }
+
+    #classification-panel .ms-Button {
+        -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+    }
 }

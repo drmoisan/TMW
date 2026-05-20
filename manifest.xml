@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
+  xsi:type="MailApp">
+  <Id>30b94e88-12f6-4624-a27c-f20b94e5bb44</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>TaskMaster</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="TaskMaster for Outlook" />
+  <Description DefaultValue="TaskMaster task pane for Outlook that tracks selected-message context for triage workflows." />
+  <IconUrl DefaultValue="https://localhost:3000/assets/icon-64.png" />
+  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-128.png" />
+  <SupportUrl DefaultValue="https://taskmaster.local" />
+  <AppDomains>
+    <AppDomain>https://localhost:3000</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Mailbox" />
+  </Hosts>
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.5" />
+    </Sets>
+  </Requirements>
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://localhost:3000/taskpane.html" />
+        <RequestedHeight>250</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+  <Permissions>ReadItem</Permissions>
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
+  </Rule>
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
+      <Requirements>
+        <bt:Sets DefaultMinVersion="1.5">
+          <bt:Set Name="Mailbox" />
+        </bt:Sets>
+      </Requirements>
+      <Hosts>
+        <Host xsi:type="MailHost">
+          <DesktopFormFactor>
+            <FunctionFile resid="Taskpane.Url" />
+            <ExtensionPoint xsi:type="MessageReadCommandSurface">
+              <OfficeTab id="TabDefault">
+                <Group id="msgReadGroup">
+                  <Label resid="GroupLabel" />
+                  <Control xsi:type="Button" id="msgReadOpenPaneButton">
+                    <Label resid="TaskpaneButton.Label" />
+                    <Supertip>
+                      <Title resid="TaskpaneButton.Label" />
+                      <Description resid="TaskpaneButton.Tooltip" />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="Icon.16x16" />
+                      <bt:Image size="32" resid="Icon.32x32" />
+                      <bt:Image size="80" resid="Icon.80x80" />
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <SourceLocation resid="Taskpane.Url" />
+                    </Action>
+                  </Control>
+                </Group>
+              </OfficeTab>
+            </ExtensionPoint>
+          </DesktopFormFactor>
+          <MobileFormFactor>
+            <ExtensionPoint xsi:type="MobileMessageReadCommandSurface">
+              <Group id="mobileMsgReadGroup">
+                <Label resid="GroupLabel" />
+                <Control xsi:type="MobileButton" id="mobileMsgReadOpenPaneButton">
+                  <Label resid="TaskpaneButton.Label" />
+                  <Icon xsi:type="bt:MobileIconList">
+                    <bt:Image size="25" scale="1" resid="Icon.Mobile.25x25" />
+                    <bt:Image size="25" scale="2" resid="Icon.Mobile.25x25@2x" />
+                    <bt:Image size="25" scale="3" resid="Icon.Mobile.25x25@3x" />
+                    <bt:Image size="32" scale="1" resid="Icon.Mobile.32x32" />
+                    <bt:Image size="32" scale="2" resid="Icon.Mobile.32x32@2x" />
+                    <bt:Image size="32" scale="3" resid="Icon.Mobile.32x32@3x" />
+                    <bt:Image size="48" scale="1" resid="Icon.Mobile.48x48" />
+                    <bt:Image size="48" scale="2" resid="Icon.Mobile.48x48@2x" />
+                    <bt:Image size="48" scale="3" resid="Icon.Mobile.48x48@3x" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+            </ExtensionPoint>
+          </MobileFormFactor>
+        </Host>
+      </Hosts>
+      <Resources>
+        <bt:Images>
+          <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/icon-16.png" />
+          <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/icon-32.png" />
+          <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/icon-80.png" />
+          <bt:Image id="Icon.Mobile.25x25" DefaultValue="https://localhost:3000/assets/icon-25.png" />
+          <bt:Image id="Icon.Mobile.25x25@2x" DefaultValue="https://localhost:3000/assets/icon-25@2x.png" />
+          <bt:Image id="Icon.Mobile.25x25@3x" DefaultValue="https://localhost:3000/assets/icon-25@3x.png" />
+          <bt:Image id="Icon.Mobile.32x32" DefaultValue="https://localhost:3000/assets/icon-32-mobile.png" />
+          <bt:Image id="Icon.Mobile.32x32@2x" DefaultValue="https://localhost:3000/assets/icon-32-mobile@2x.png" />
+          <bt:Image id="Icon.Mobile.32x32@3x" DefaultValue="https://localhost:3000/assets/icon-32-mobile@3x.png" />
+          <bt:Image id="Icon.Mobile.48x48" DefaultValue="https://localhost:3000/assets/icon-48.png" />
+          <bt:Image id="Icon.Mobile.48x48@2x" DefaultValue="https://localhost:3000/assets/icon-48@2x.png" />
+          <bt:Image id="Icon.Mobile.48x48@3x" DefaultValue="https://localhost:3000/assets/icon-48@3x.png" />
+        </bt:Images>
+        <bt:Urls>
+          <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html" />
+        </bt:Urls>
+        <bt:ShortStrings>
+          <bt:String id="GroupLabel" DefaultValue="TaskMaster" />
+          <bt:String id="TaskpaneButton.Label" DefaultValue="Open TaskMaster" />
+        </bt:ShortStrings>
+        <bt:LongStrings>
+          <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open the TaskMaster pane to view selected-message context." />
+        </bt:LongStrings>
+      </Resources>
+    </VersionOverrides>
+  </VersionOverrides>
+</OfficeApp>

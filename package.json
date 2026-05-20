@@ -32,6 +32,7 @@
     "start": "office-addin-debugging start manifest.json",
     "stop": "office-addin-debugging stop manifest.json",
     "validate": "office-addin-manifest validate manifest.json",
+    "validate:xml": "office-addin-manifest validate manifest.xml",
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {

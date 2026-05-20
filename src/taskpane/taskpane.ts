@@ -103,6 +103,25 @@ function getRenderDom(): RenderDom {
     };
 }
 
+/**
+ * Closes the task-pane container when running on a host that supports it
+ * (e.g. Outlook mobile full-screen pane). Guarded so it is a no-op when
+ * `Office.context.ui.closeContainer` is unavailable on the current host.
+ */
+export function closeTaskpane(): void {
+    const ui = Office.context.ui as { closeContainer?: () => void } | undefined;
+    if (ui !== undefined && typeof ui.closeContainer === "function") {
+        ui.closeContainer();
+    }
+}
+
+function wireCloseButton(): void {
+    const closeBtn = document.getElementById("close-btn");
+    if (closeBtn !== null) {
+        closeBtn.addEventListener("click", closeTaskpane);
+    }
+}
+
 export function onItemChanged(): void {
     const item = Office.context.mailbox.item as RenderableItem | null | undefined;
     const dom = getRenderDom();
@@ -118,6 +137,7 @@ void Office.onReady((info) => {
         requireElement("sideload-msg").style.display = "none";
         requireElement("app-body").style.display = "flex";
         Office.context.mailbox.addHandlerAsync(Office.EventType.ItemChanged, onItemChanged);
+        wireCloseButton();
         onItemChanged();
     }
 });
