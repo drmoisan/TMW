@@ -235,27 +235,28 @@ final QA loop can pass; otherwise the outcome is remediation-required, not PASS.
 > physical iOS device and produces dated evidence. These tasks are NOT executed by the
 > automated executor and MUST NOT be marked complete on the basis of CI output.
 
-- [ ] [P6-T1] Provision an HTTPS staging/production endpoint with a trusted (non-self-signed) TLS certificate reachable by the iOS device, set `urlProd` in `webpack.config.js` to that endpoint, build, and host the bundle
+- [x] [P6-T1] Provision an HTTPS staging/production endpoint with a trusted (non-self-signed) TLS certificate reachable by the iOS device, set `urlProd` in `webpack.config.js` to that endpoint, build, and host the bundle
   - File target (build-time): `webpack.config.js` `urlProd` (set to the real trusted-TLS endpoint; replaces the placeholder `https://www.contoso.com/`)
   - Evidence: `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/notes/hosting-endpoint.md`
   - Artifact MUST contain: `Timestamp:`, the HTTPS endpoint URL, the TLS trust basis (issuer/that it is not self-signed), and confirmation the bundle (`taskpane.html`, `taskpane.js`, `assets/*`, `manifest.xml`) is reachable over HTTPS
   - Acceptance: a trusted-TLS HTTPS endpoint serving the bundle is documented (maps to spec "HTTPS hosting / deployment for device reachability"; precondition for P6-T2..T5)
 
-- [ ] [P6-T2] Sideload `manifest.xml` via Outlook on the web, sync to the iOS device, and confirm the add-in appears in the message "More options" (three-dot) menu in read mode
+- [x] [P6-T2] Sideload `manifest.xml` via Outlook on the web, sync to the iOS device, and confirm the add-in appears in the message "More options" (three-dot) menu in read mode
   - Evidence: `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/screenshots/more-options-menu.<timestamp>.png` plus a note artifact `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/notes/sideload.<timestamp>.md` recording the sideload procedure and account used
   - Acceptance: dated screenshot shows the TaskMaster entry in the iOS More-options menu (maps to spec/user-story manual AC "appears in the Outlook iOS message More options menu")
 
-- [ ] [P6-T3] Verify the task pane renders usably on the iPhone viewport (full-screen, no clipped/unreachable controls, acceptable header footprint)
+- [x] [P6-T3] Verify the task pane renders usably on the iPhone viewport (full-screen, no clipped/unreachable controls, acceptable header footprint)
   - Evidence: `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/screenshots/taskpane-render.<timestamp>.png`
   - Acceptance: dated device screenshot shows the rendered pane with all controls reachable (maps to spec/user-story manual AC "renders usably on an iPhone viewport")
 
-- [ ] [P6-T4] Verify `Office.EventType.ItemChanged` fires on message navigation and re-renders selected-message context (subject/from)
+- [x] [P6-T4] Verify `Office.EventType.ItemChanged` fires on message navigation and re-renders selected-message context (subject/from)
   - Evidence: dated before/after screenshots `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/screenshots/itemchanged-before.<timestamp>.png` and `itemchanged-after.<timestamp>.png` (or a recording under `evidence/recordings/`)
   - Acceptance: evidence shows subject/from updating after navigating between two messages (maps to spec/user-story manual AC "ItemChanged fires on message navigation and re-renders context")
 
-- [ ] [P6-T5] Verify the classifier backend is reachable over HTTPS from the device and a classification succeeds (label/confidence shown)
-  - Evidence: dated screenshot `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/screenshots/classification-success.<timestamp>.png` plus `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/notes/classifier-endpoint.<timestamp>.md` recording the HTTPS endpoint used
-  - Acceptance: screenshot shows a successful classification (label + confidence) on the device; note records the HTTPS endpoint (maps to spec/user-story manual AC "classifier backend reachable over HTTPS … a classification succeeds")
+- [~] [P6-T5] N/A — Verify the classifier backend is reachable over HTTPS from the device and a classification succeeds (label/confidence shown)
+  - Status: N/A (user decision 2026-05-20, "Option A"). The classify/feedback workflow is not wired into the product on ANY platform — `classify-btn` has no click handler, `ClassifierClient` is never instantiated in product code, and no bearer token is obtained (see `src/taskpane/taskpane.ts`, `src/taskpane/taskpane.html`). Tapping Classify is inert on desktop and mobile alike, so mobile parity holds and this AC cannot be satisfied within issue #35's mobile-enablement scope. The gap is tracked separately as GitHub issue #37 (wire-classify-feedback-workflow).
+  - Evidence: `docs/features/active/2026-05-19-outlook-mobile-ios-parity-35/evidence/notes/sideload-and-render.2026-05-20T09-45.md` (records the wiring gap and the N/A rationale)
+  - Acceptance: recorded N/A with rationale and a tracking issue (#37); not counted as a failing/unverified AC.
 
 ---
 
