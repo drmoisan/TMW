@@ -47,6 +47,10 @@
     Optional seam returning the resolved devtunnel executable path. Defaults to
     Resolve-DevTunnelPath. Injected by tests for determinism.
 
+.PARAMETER ResolveNpxAction
+    Optional seam returning the resolved npx launcher path. Defaults to
+    Resolve-NpxPath. Injected by tests for determinism.
+
 .PARAMETER WriteStateAction
     Optional seam that persists the state object to disk. Defaults to
     Write-ConnectivityState. Injected by tests for determinism.
@@ -82,6 +86,9 @@ param(
 
     [Parameter(Mandatory = $false)]
     [scriptblock]$ResolveDevTunnelAction = { Resolve-DevTunnelPath },
+
+    [Parameter(Mandatory = $false)]
+    [scriptblock]$ResolveNpxAction = { Resolve-NpxPath },
 
     [Parameter(Mandatory = $false)]
     [scriptblock]$WriteStateAction = { param([string]$Path, [object]$State) Write-ConnectivityState -Path $Path -State $State },
@@ -121,6 +128,42 @@ function Resolve-DevTunnelPath {
     }
 
     throw "Resolve-DevTunnelPath: could not resolve the 'devtunnel' executable. Checked PATH, the WinGet Links shim, and the WinGet Packages path. Install Dev Tunnels (winget install Microsoft.devtunnel) or add devtunnel to PATH."
+}
+
+function Resolve-NpxPath {
+    <#
+    .SYNOPSIS
+        Resolves the npx launcher to a Windows-launchable target. Seam for tests.
+    .DESCRIPTION
+        On Windows, 'npx' resolves to several files in the Node install directory:
+        an extension-less bash script, 'npx.cmd', and 'npx.ps1'. PowerShell command
+        precedence selects 'npx.ps1' (an ExternalScript) for the bare name, and .PS1
+        is not in PATHEXT, so Start-Process -FilePath 'npx' cannot construct a
+        launchable process. This resolver returns a path Start-Process can launch:
+        it prefers 'npx.cmd', then falls back to any 'npx' Application whose
+        extension is launchable (.cmd/.exe/.bat). Resolution fails with a clear
+        error when none resolve.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    $launchableExtensions = @('.cmd', '.exe', '.bat')
+
+    $cmdShim = Get-Command -Name 'npx.cmd' -CommandType Application -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if ($null -ne $cmdShim) {
+        return $cmdShim.Source
+    }
+
+    $launchable = Get-Command -Name 'npx' -CommandType Application -ErrorAction SilentlyContinue |
+        Where-Object { $launchableExtensions -contains [System.IO.Path]::GetExtension($_.Source).ToLowerInvariant() } |
+            Select-Object -First 1
+    if ($null -ne $launchable) {
+        return $launchable.Source
+    }
+
+    throw "Resolve-NpxPath: could not resolve a launchable 'npx' executable. Checked 'npx.cmd' and PATH 'npx' Applications with a .cmd/.exe/.bat extension. Install Node.js (which provides npx.cmd) or add a launchable npx to PATH."
 }
 
 function Invoke-StartProcess {
@@ -197,6 +240,9 @@ function Start-MobileConnectivity {
         [scriptblock]$ResolveDevTunnelAction,
 
         [Parameter(Mandatory = $true)]
+        [scriptblock]$ResolveNpxAction,
+
+        [Parameter(Mandatory = $true)]
         [scriptblock]$WriteStateAction,
 
         [Parameter(Mandatory = $true)]
@@ -204,6 +250,7 @@ function Start-MobileConnectivity {
     )
 
     $devTunnelPath = & $ResolveDevTunnelAction
+    $npxPath = & $ResolveNpxAction
 
     $httpServerArgs = @('http-server', $DistPath, '-p', [string]$Port, '-c-1', '--cors')
     $devTunnelArgs = @('host', $TunnelId)
@@ -212,7 +259,7 @@ function Start-MobileConnectivity {
     $devTunnelProcessId = 0
 
     if ($PSCmdlet.ShouldProcess("http-server $DistPath -p $Port -c-1 --cors", 'Start static HTTP server')) {
-        $httpServerProcessId = [int](& $StartProcessAction 'npx' $httpServerArgs)
+        $httpServerProcessId = [int](& $StartProcessAction $npxPath $httpServerArgs)
     }
 
     if ($PSCmdlet.ShouldProcess("devtunnel host $TunnelId", 'Start Dev Tunnel host')) {
@@ -256,7 +303,9 @@ if ($MyInvocation.InvocationName -ne '.') {
         -StateFilePath $StateFilePath `
         -StartProcessAction $StartProcessAction `
         -ResolveDevTunnelAction $ResolveDevTunnelAction `
+        -ResolveNpxAction $ResolveNpxAction `
         -WriteStateAction $WriteStateAction `
         -NowProvider $NowProvider `
         -WhatIf:$WhatIfPreference
 }
+
