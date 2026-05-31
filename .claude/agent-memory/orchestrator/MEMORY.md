@@ -5,3 +5,4 @@
 - [Do not re-confirm registered decisions](feedback_no_confirm_registered_decisions.md) — never pause orchestration to ask the user to confirm an action already in memory, checkpoint, or skill contract; execute it.
 - [Full-bug mode has no user story](feedback_full_bug_no_user_story.md) — for full-bug work mode, produce only feature-document.md and spec.md; do not include user-story.md.
 - [Remediation loop strict handoff](remediation-loop-strict-handoff.md) — remediation is a closed atomic-planner -> atomic-executor -> feature-review loop; never call typed-engineer workers directly; five artifacts per cycle.
+- [Validate ShellExecute launchers on real host](feedback_validate_shellexecute_launchers_on_real_host.md) — seam-mocked PS tests can't catch Start-Process ShellExecute bugs; dot-source and run the real resolver before declaring success.

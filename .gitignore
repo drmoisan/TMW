@@ -6,6 +6,7 @@ dist/
 build/
 out/
 coverage/
+coverage.xml
 .nyc_output/
 
 # Logs
