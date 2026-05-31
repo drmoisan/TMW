@@ -22,7 +22,8 @@ Describe 'Start-MobileConnectivity.ps1' {
             param(
                 [int]$HttpPid = 1001,
                 [int]$TunnelPid = 2002,
-                [string]$DevTunnelPath = 'C:\fake\devtunnel.exe'
+                [string]$DevTunnelPath = 'C:\fake\devtunnel.exe',
+                [string]$NpxPath = 'C:\fake\npx.cmd'
             )
             # Capture container so assertions can inspect what the seams received.
             # The configured pids/path are stored on the container so the closures
@@ -33,14 +34,16 @@ Describe 'Start-MobileConnectivity.ps1' {
                 HttpPid       = $HttpPid
                 TunnelPid     = $TunnelPid
                 DevTunnelPath = $DevTunnelPath
+                NpxPath       = $NpxPath
             }
             $startAction = {
                 param([string]$FilePath, [string[]]$ArgumentList)
                 $captured.StartCalls.Add([pscustomobject]@{ FilePath = $FilePath; ArgumentList = $ArgumentList })
-                if ($FilePath -eq 'npx') { return $captured.HttpPid }
+                if ($FilePath -eq $captured.NpxPath) { return $captured.HttpPid }
                 return $captured.TunnelPid
             }.GetNewClosure()
             $resolveAction = { $captured.DevTunnelPath }.GetNewClosure()
+            $resolveNpxAction = { $captured.NpxPath }.GetNewClosure()
             $writeAction = {
                 param([string]$Path, [object]$State)
                 $captured.WriteCalls.Add([pscustomobject]@{ Path = $Path; State = $State })
@@ -54,6 +57,7 @@ Describe 'Start-MobileConnectivity.ps1' {
                 Captured               = $captured
                 StartProcessAction     = $startAction
                 ResolveDevTunnelAction = $resolveAction
+                ResolveNpxAction       = $resolveNpxAction
                 WriteStateAction       = $writeAction
                 NowProvider            = $nowProvider
             }
@@ -72,6 +76,7 @@ Describe 'Start-MobileConnectivity.ps1' {
                 -StateFilePath $statePath `
                 -StartProcessAction $seams.StartProcessAction `
                 -ResolveDevTunnelAction $seams.ResolveDevTunnelAction `
+                -ResolveNpxAction $seams.ResolveNpxAction `
                 -WriteStateAction $seams.WriteStateAction `
                 -NowProvider $seams.NowProvider
 
@@ -85,9 +90,9 @@ Describe 'Start-MobileConnectivity.ps1' {
             $result.StartedAt | Should -Be $script:FixedNow.ToString('o')
         }
 
-        It 'invokes http-server via npx and devtunnel via the resolved path' {
+        It 'invokes http-server via the resolved npx path and devtunnel via the resolved path' {
             # Arrange
-            $seams = New-StartSeamSet -DevTunnelPath 'C:\resolved\devtunnel.exe'
+            $seams = New-StartSeamSet -DevTunnelPath 'C:\resolved\devtunnel.exe' -NpxPath 'C:\resolved\npx.cmd'
 
             # Act
             & $script:ScriptPath `
@@ -95,13 +100,14 @@ Describe 'Start-MobileConnectivity.ps1' {
                 -StateFilePath 'state://x.json' `
                 -StartProcessAction $seams.StartProcessAction `
                 -ResolveDevTunnelAction $seams.ResolveDevTunnelAction `
+                -ResolveNpxAction $seams.ResolveNpxAction `
                 -WriteStateAction $seams.WriteStateAction `
                 -NowProvider $seams.NowProvider | Out-Null
 
             # Assert
             $seams.Captured.StartCalls.Count | Should -Be 2
             $httpCall = $seams.Captured.StartCalls[0]
-            $httpCall.FilePath | Should -Be 'npx'
+            $httpCall.FilePath | Should -Be 'C:\resolved\npx.cmd'
             $httpCall.ArgumentList | Should -Be @('http-server', 'build', '-p', '4100', '-c-1', '--cors')
             $tunnelCall = $seams.Captured.StartCalls[1]
             $tunnelCall.FilePath | Should -Be 'C:\resolved\devtunnel.exe'
@@ -119,6 +125,7 @@ Describe 'Start-MobileConnectivity.ps1' {
                 -StateFilePath $statePath `
                 -StartProcessAction $seams.StartProcessAction `
                 -ResolveDevTunnelAction $seams.ResolveDevTunnelAction `
+                -ResolveNpxAction $seams.ResolveNpxAction `
                 -WriteStateAction $seams.WriteStateAction `
                 -NowProvider $seams.NowProvider | Out-Null
 
@@ -141,6 +148,7 @@ Describe 'Start-MobileConnectivity.ps1' {
                 -StateFilePath 'state://whatif.json' `
                 -StartProcessAction $seams.StartProcessAction `
                 -ResolveDevTunnelAction $seams.ResolveDevTunnelAction `
+                -ResolveNpxAction $seams.ResolveNpxAction `
                 -WriteStateAction $seams.WriteStateAction `
                 -NowProvider $seams.NowProvider `
                 -WhatIf
@@ -165,6 +173,7 @@ Describe 'Start-MobileConnectivity.ps1' {
                     -StateFilePath 'state://err.json' `
                     -StartProcessAction $seams.StartProcessAction `
                     -ResolveDevTunnelAction $failingResolve `
+                    -ResolveNpxAction $seams.ResolveNpxAction `
                     -WriteStateAction $seams.WriteStateAction `
                     -NowProvider $seams.NowProvider } |
                 Should -Throw -ExpectedMessage "*could not resolve the 'devtunnel' executable*"
@@ -212,6 +221,59 @@ Describe 'Start-MobileConnectivity.ps1' {
 
             # Act / Assert
             { Resolve-DevTunnelPath } | Should -Throw -ExpectedMessage "*could not resolve the 'devtunnel' executable*"
+        }
+    }
+
+    Context 'seam internals: Resolve-NpxPath' {
+        BeforeAll {
+            # Dot-source into an isolated scope so the internal seam functions are
+            # callable directly. The auto-invoke guard only runs the function when
+            # the script is NOT dot-sourced.
+            . $script:ScriptPath -ErrorAction Stop
+        }
+
+        It 'prefers the npx.cmd shim when it resolves' {
+            # Arrange: mock the framework cmdlet, never a real executable. The
+            # 'npx.cmd' lookup returns a launchable .cmd shim.
+            Mock Get-Command { [pscustomobject]@{ Source = 'C:\Program Files\nodejs\npx.cmd' } } -ParameterFilter {
+                $Name -eq 'npx.cmd'
+            }
+
+            # Act
+            $resolved = Resolve-NpxPath
+
+            # Assert
+            $resolved | Should -Be 'C:\Program Files\nodejs\npx.cmd'
+        }
+
+        It 'falls back to a launchable npx Application when npx.cmd does not resolve' {
+            # Arrange: npx.cmd lookup yields nothing; the bare 'npx' lookup yields
+            # both a launchable .cmd and a non-launchable .ps1. Only the .cmd is kept.
+            Mock Get-Command { $null } -ParameterFilter { $Name -eq 'npx.cmd' }
+            Mock Get-Command {
+                @(
+                    [pscustomobject]@{ Source = 'C:\Program Files\nodejs\npx.ps1' },
+                    [pscustomobject]@{ Source = 'C:\Program Files\nodejs\npx.cmd' }
+                )
+            } -ParameterFilter { $Name -eq 'npx' }
+
+            # Act
+            $resolved = Resolve-NpxPath
+
+            # Assert
+            $resolved | Should -Be 'C:\Program Files\nodejs\npx.cmd'
+        }
+
+        It 'throws a clear error when no launchable npx resolves' {
+            # Arrange: npx.cmd yields nothing; bare 'npx' yields only a
+            # non-launchable .ps1, which is filtered out.
+            Mock Get-Command { $null } -ParameterFilter { $Name -eq 'npx.cmd' }
+            Mock Get-Command {
+                [pscustomobject]@{ Source = 'C:\Program Files\nodejs\npx.ps1' }
+            } -ParameterFilter { $Name -eq 'npx' }
+
+            # Act / Assert
+            { Resolve-NpxPath } | Should -Throw -ExpectedMessage "*could not resolve a launchable 'npx' executable*"
         }
     }
 
