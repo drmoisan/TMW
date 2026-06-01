@@ -15,6 +15,10 @@
     "lastModifiedAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "archiveRootDriveItemId": {
+      "type": ["string", "null"],
+      "description": "OneDrive drive-item id of the iFile Archive root chosen by the user (Issue #43, OD-6). Optional; null until first-use selection."
     }
   },
   "additionalProperties": false

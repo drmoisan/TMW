@@ -16,6 +16,7 @@
         Domain + this Graph SDK type only. See plan.md Open Question 1 for rationale.
         -->
         <PackageReference Include="Microsoft.Graph" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using TaskMaster.Application.IFile;
 
 namespace TaskMaster.Application;
 
@@ -8,11 +9,17 @@ namespace TaskMaster.Application;
 public static class ApplicationServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers all Application-layer services: <see cref="ICommandBus"/> → <see cref="ServiceProviderCommandBus"/> (Scoped).
+    /// Registers all Application-layer services:
+    /// <list type="bullet">
+    ///   <item><see cref="ICommandBus"/> → <see cref="ServiceProviderCommandBus"/> (Scoped)</item>
+    ///   <item><see cref="ICommandHandler{TCommand}"/> for <see cref="FileMessageCommand"/> →
+    ///   <see cref="FileMessageCommandHandler"/> (Scoped)</item>
+    /// </list>
     /// </summary>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<ICommandBus, ServiceProviderCommandBus>();
+        services.AddScoped<ICommandHandler<FileMessageCommand>, FileMessageCommandHandler>();
         return services;
     }
 }

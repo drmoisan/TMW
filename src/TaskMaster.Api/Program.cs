@@ -1,7 +1,9 @@
 using System.Reflection;
+using System.Security.Claims;
 using Microsoft.Identity.Web;
 using TaskMaster.Api;
 using TaskMaster.Application;
+using TaskMaster.Application.IFile;
 using TaskMaster.Classifier;
 using TaskMaster.Infrastructure;
 
@@ -128,6 +130,70 @@ app.MapPost(
             + "Returns 204 No Content on success."
     )
     .Produces(StatusCodes.Status204NoContent)
+    .RequireAuthorization();
+
+app.MapGet(
+        "/api/ifile/folders",
+        async (IFolderTreeReader reader, CancellationToken ct) =>
+        {
+            var folders = await reader.GetFoldersAsync(ct).ConfigureAwait(false);
+            var leaves = folders
+                .Where(f => f.ChildFolderCount == 0)
+                .Select(f => new FolderListItem(f.Id, f.DisplayName, f.Path))
+                .ToList();
+            return Results.Ok(new FolderListResponse(leaves));
+        }
+    )
+    .WithName("IFileFolders")
+    .WithDescription(
+        "Returns the flat list of mailbox leaf folders for the iFile search container. "
+            + "The client loads this once per container open and filters in-memory per keystroke."
+    )
+    .Produces<FolderListResponse>(StatusCodes.Status200OK)
+    .RequireAuthorization();
+
+app.MapPost(
+        "/api/ifile/file",
+        async (
+            FileMessageEndpointRequest req,
+            ICommandBus bus,
+            ClaimsPrincipal user,
+            CancellationToken ct
+        ) =>
+        {
+            if (
+                string.IsNullOrWhiteSpace(req.MessageRestId)
+                || string.IsNullOrWhiteSpace(req.DestinationFolderId)
+            )
+            {
+                return Results.UnprocessableEntity();
+            }
+
+            var userId =
+                user.FindFirstValue("oid")
+                ?? user.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? "unknown";
+            var command = new FileMessageCommand(
+                req.MessageRestId,
+                req.DestinationFolderId,
+                req.ArchiveRootDriveItemId,
+                userId
+            );
+            await bus.DispatchAsync(command, ct).ConfigureAwait(false);
+            var result = await command.ResultSink.Task.ConfigureAwait(false);
+            return Results.Ok(
+                new FileMessageEndpointResponse(IFileOutcome.ToWire(result.Outcome), result.Error)
+            );
+        }
+    )
+    .WithName("IFileFile")
+    .WithDescription(
+        "Files the opened message: resolves/creates the mirrored OneDrive folder, uploads "
+            + "non-inline file attachments, then moves the message (attachments-first, move-last). "
+            + "Returns 422 when the message id or destination folder id is missing."
+    )
+    .Produces<FileMessageEndpointResponse>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status422UnprocessableEntity)
     .RequireAuthorization();
 
 await app.RunAsync().ConfigureAwait(false);

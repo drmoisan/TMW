@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TaskMaster.Application;
+using TaskMaster.Application.IFile;
+using TaskMaster.Infrastructure.IFile;
 
 namespace TaskMaster.Infrastructure;
 
@@ -33,6 +35,14 @@ public static class InfrastructureServiceCollectionExtensions
             TimeProvider.System
         ));
         services.AddScoped<IGraphClientFactory, GraphClientFactory>();
+
+        // iFile Graph/OneDrive adapters (Issue #43). Each implements a Phase 2 Application
+        // interface only; no business orchestration lives in the adapter layer.
+        services.AddScoped<IFolderTreeReader, GraphFolderTreeReader>();
+        services.AddScoped<IMessageMover, GraphMessageMover>();
+        services.AddScoped<IAttachmentSource, GraphAttachmentSource>();
+        services.AddScoped<IOneDriveFolderWriter, GraphOneDriveFolderWriter>();
+
         services
             .AddOptions<UserSettingsFileOptions>()
             .Bind(configuration.GetSection("UserSettings"));

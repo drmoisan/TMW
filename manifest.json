@@ -27,13 +27,14 @@
     },
     "accentColor": "#230201",
     "validDomains": [
-        "localhost"
+        "localhost",
+        "https://www.contoso.com"
     ],
     "authorization": {
         "permissions": {
             "resourceSpecific": [
                 {
-                    "name": "MailboxItem.Read.User",
+                    "name": "MailboxItem.ReadWrite.User",
                     "type": "Delegated"
                 }
             ]
@@ -78,6 +79,30 @@
                     ]
                 },
                 {
+                    "requirements": {
+                        "capabilities": [
+                            {
+                                "name": "Mailbox",
+                                "minVersion": "1.5"
+                            }
+                        ]
+                    },
+                    "id": "IFileRuntime",
+                    "type": "general",
+                    "code": {
+                        "page": "https://localhost:3000/ifile.html"
+                    },
+                    "lifetime": "short",
+                    "actions": [
+                        {
+                            "id": "IFileRuntimeShow",
+                            "type": "openPage",
+                            "pinnable": true,
+                            "view": "dashboard"
+                        }
+                    ]
+                },
+                {
                     "id": "CommandsRuntime",
                     "type": "general",
                     "code": {
@@ -114,6 +139,30 @@
                                         }
                                     ],
                                     "controls": [
+                                        {
+                                            "id": "msgReadIFileButton",
+                                            "type": "button",
+                                            "label": "iFile",
+                                            "icons": [
+                                                {
+                                                    "size": 16,
+                                                    "url": "https://localhost:3000/assets/icon-16.png"
+                                                },
+                                                {
+                                                    "size": 32,
+                                                    "url": "https://localhost:3000/assets/icon-32.png"
+                                                },
+                                                {
+                                                    "size": 80,
+                                                    "url": "https://localhost:3000/assets/icon-80.png"
+                                                }
+                                            ],
+                                            "supertip": {
+                                                "title": "iFile",
+                                                "description": "File the opened message to a folder and mirror its attachments to OneDrive."
+                                            },
+                                            "actionId": "IFileRuntimeShow"
+                                        },
                                         {
                                             "id": "msgReadOpenPaneButton",
                                             "type": "button",

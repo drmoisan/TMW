@@ -26,6 +26,11 @@ export default defineConfig({
         // Auto-generated, type-only API client (openapi-typescript output). It
         // contains no executable runtime code, so coverage metrics do not apply.
         "src/api-client/v1.ts",
+        // iFile host-bootstrap entry: Office.onReady wiring + Office.auth/diagnostics glue that
+        // runs only inside the Outlook host. Its testable behavior lives in the shared
+        // host-neutral modules (ifile-controller, host-presentation, message-id-resolver) and the
+        // host-wiring modules (dialog-host, inline-host), which are unit/contract tested.
+        "src/taskpane/ifile/ifile.ts",
       ],
       thresholds: {
         lines: 85,

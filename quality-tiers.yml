@@ -16,6 +16,20 @@ projects:
       Scaffold-tier (T4): build wiring, manifest, and bootstrap only. Will be re-tiered
       when domain modules and classifier engines are introduced (Prompt B1+).
 
+      iFile pure host-neutral modules (Issue #43, T2 — OD-10): the modules under
+      src/taskpane/ifile/ that are pure host-neutral logic — wildcard-matcher.ts,
+      result-list-composer.ts, search-result-ordering.ts, folder-path-builder.ts,
+      folder-search.ts, folder-result.ts (the FolderResult input contract),
+      message-id-resolver.ts, and host-presentation.ts — carry T2 obligations: at least
+      one fast-check property-based test per pure function, uniform coverage (line >= 85%,
+      branch >= 75%), and the dependency-cruiser "ifile-pure-modules-no-host-deps" rule
+      keeping them free of Office.js / Microsoft Graph SDK / the generated API client.
+      They live in the single root TypeScript package (path "."), so they are represented
+      by this scaffold entry rather than a separate package.json directory; the T2 rigor is
+      documented here per quality-tiers.md and enforced by the per-module tests and the
+      architecture-boundary rule. The host-wiring modules (dialog-host.ts, inline-host.ts,
+      ifile-api-client.ts) remain T3 adapter glue around Office.js and the generated client.
+
   # .NET foundation projects added by Issue #7 (Prompt C1).
   - name: TaskMaster.Domain
     path: src/TaskMaster.Domain
@@ -59,6 +73,15 @@ projects:
       Core application layer (T2). Contains command bus, IUserSettingsRepository contract,
       IGraphClientFactory interface, and DI wiring. Bugs here cause feature regressions.
       Property-based tests required for all pure functions per T2 policy.
+
+      iFile filing command (Issue #43, OD-10): the IFile/ folder adds the server-side filing
+      command (FileMessageCommand/FileMessageCommandHandler), the Graph/OneDrive adapter
+      interfaces (IFolderTreeReader, IMessageMover, IAttachmentSource, IOneDriveFolderWriter),
+      and the pure helpers (OutlookToOneDrivePath, AttachmentFilter, ArchiveRootResolver). These
+      are classified T2 — a misfile is recoverable (a message can be moved again and attachments
+      relocated), so the failure mode is a feature regression, not silent data loss (T1). The
+      pure functions (OutlookToOneDrivePath, AttachmentFilter, ArchiveRootResolver) carry the
+      T2 >= 1 property-based-test-per-pure-function obligation (CsCheck) and uniform coverage.
   - name: TaskMaster.Infrastructure
     path: src/TaskMaster.Infrastructure
     language: csharp
@@ -67,6 +90,12 @@ projects:
       Infrastructure adapter layer (T3). Contains JsonFileUserSettingsRepository,
       InMemoryUserSettingsRepository, GraphClientFactory, and IFileWriter seam.
       Adapter-glue around file I/O and Microsoft Graph SDK.
+
+      iFile Graph/OneDrive adapters (Issue #43): the IFile/ folder adds GraphFolderTreeReader,
+      GraphMessageMover, GraphAttachmentSource, and GraphOneDriveFolderWriter, each implementing
+      a single TaskMaster.Application.IFile interface over the Microsoft Graph SDK with no
+      business orchestration. They remain T3 adapter glue around the Graph SDK the team does not
+      own; the T2-classified filing orchestration lives in TaskMaster.Application.
   - name: TaskMaster.Application.Tests
     path: tests/TaskMaster.Application.Tests
     language: csharp
