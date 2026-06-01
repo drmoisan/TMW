@@ -16,7 +16,7 @@ This directory contains the CI workflows for the repository. Every gate is struc
 
 Orchestrator:
 
-- `pr-pipeline.yml` — chains every gate below in PR runs (`pull_request` to `main`) and is also `workflow_dispatch`-able.
+- `pr-pipeline.yml` — runs every gate below in PR runs (`pull_request` to `main`) and is also `workflow_dispatch`-able. After the `tier-classification` root gate completes, the independent gate stages **fan out and run concurrently** rather than in two serial per-language lanes; every non-root stage declares `needs: [tier-classification]` (plus any justified genuine dependency). This lowers total pipeline wall-clock time. The accepted tradeoff is the loss of per-lane fail-fast economy — when an early gate (for example format) fails, later stages in the same language no longer short-circuit and instead run concurrently — which increases concurrent runner-minute consumption. Wall-clock time is prioritized over runner-minute savings. Job keys and required status-check contexts are unchanged by this `needs:`-graph-only change.
 
 Callees (one per gate):
 
@@ -75,6 +75,10 @@ gh workflow run pr-pipeline.yml --ref <branch>
 ## Branch-protection rename procedure
 
 Branch protection on `main` references required status-check names. After this refactor, the names that show up in the GitHub status API change from the pre-refactor flat names to the reusable-workflow nested form `<caller-job-name> / <callee-job-name>`. An admin must update branch protection accordingly.
+
+> **Verified status-check contexts.** The nested `<caller-job-name> / <callee-job-name>` form in the "Add (new)" column below is what GitHub actually reports for reusable-workflow jobs. This was confirmed against a live `pr-pipeline.yml` run (the checks reported by `gh pr checks` are `tier-classification / tier-classification`, `stage-1-format / stage-1-format-prettier`, and so on). The nested names are authoritative; branch-protection required contexts must match them exactly.
+>
+> **Known discrepancy — `apply-branch-protection.ps1` is stale.** The helper `.github/scripts/apply-branch-protection.ps1` (`Get-RequiredStatusCheckContextList`) still encodes the older flat names and only covers the TypeScript-lane subset (`tier-classification`, `stage-1-format`, `stage-2-lint`, `stage-3-typecheck`, `stage-4-architecture`, `stage-5-test`, `stage-6-contract`, `stage-7-integration`). Those flat names do not match the contexts GitHub now reports, so applying the ruleset with that list would require contexts that never report a result. Until the script (and its Pester test `tests/powershell/apply-branch-protection.Tests.ps1`) are reconciled to the full nested set in the table below, apply the required-check configuration manually via the admin procedure that follows. Reconciling the script is a separate code change tracked outside this documentation note.
 
 Mapping (left = pre-refactor name to remove; right = post-refactor name to add):
 
