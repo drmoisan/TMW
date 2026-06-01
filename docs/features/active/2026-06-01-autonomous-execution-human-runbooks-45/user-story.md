@@ -51,13 +51,13 @@ The orchestrator workflow must achieve all actions agentically with no human int
 
 > Authoritative acceptance criteria are maintained in `spec.md` (AC-1 through AC-12). Every #45 acceptance criterion is CI-verifiable; #45 is pure workflow infrastructure with no Outlook UI, so it has no manual criterion. The criteria below are the user-facing restatements for the two personas and map onto the spec ACs.
 
-- [ ] The orchestrate skill defines the autonomous-execution mandate, the three responses, the detection points (pre-kickoff and research-stage-at-latest), and the exception-runbook requirement. (maps to spec AC-1)
-- [ ] The orchestrator-state schema models declared unachievable requirements and permitted exceptions, each referencing a runbook artifact path; malformed exceptions (permitted without a runbook) are rejected; absent `human_interaction` remains valid. (maps to spec AC-2, AC-3, AC-4)
-- [ ] A human-exception-runbook artifact format is defined (Cue, Prerequisites, Step-by-step Instructions, Verification, Source and Citation) with the MCP-first / web-second sourcing rule and a canonical location under the active feature folder. (maps to spec AC-10)
-- [ ] A self-contained example/reference runbook ships with the skill and conforms to the contract (all five required sections plus dated citations), keeping the runbook-format criterion CI-verifiable within #45. (maps to spec AC-12)
-- [ ] The research-stage contract requires an explicit automation-feasibility / human-interaction assessment; the task-researcher hook enforces its presence when applicable. (maps to spec AC-9)
-- [ ] The orchestrator completion gate blocks DONE while a requirement is unresolved, a halt is present, or a permitted exception lacks an existing runbook artifact. (maps to spec AC-5, AC-6, AC-7, AC-8)
-- [ ] All new/changed PowerShell hooks have Pester tests and pass the format → analyze → test toolchain. (maps to spec AC-11)
+- [x] The orchestrate skill defines the autonomous-execution mandate, the three responses, the detection points (pre-kickoff and research-stage-at-latest), and the exception-runbook requirement. (maps to spec AC-1)
+- [x] The orchestrator-state schema models declared unachievable requirements and permitted exceptions, each referencing a runbook artifact path; malformed exceptions (permitted without a runbook) are rejected; absent `human_interaction` remains valid. (maps to spec AC-2, AC-3, AC-4)
+- [x] A human-exception-runbook artifact format is defined (Cue, Prerequisites, Step-by-step Instructions, Verification, Source and Citation) with the MCP-first / web-second sourcing rule and a canonical location under the active feature folder. (maps to spec AC-10)
+- [x] A self-contained example/reference runbook ships with the skill and conforms to the contract (all five required sections plus dated citations), keeping the runbook-format criterion CI-verifiable within #45. (maps to spec AC-12)
+- [x] The research-stage contract requires an explicit automation-feasibility / human-interaction assessment; the task-researcher hook enforces its presence when applicable. (maps to spec AC-9)
+- [x] The orchestrator completion gate blocks DONE while a requirement is unresolved, a halt is present, or a permitted exception lacks an existing runbook artifact. (maps to spec AC-5, AC-6, AC-7, AC-8)
+- [x] All new/changed PowerShell hooks have Pester tests and pass the format → analyze → test toolchain. (maps to spec AC-11)
 
 > **Delivered on PR #44 (out of scope for #45's branch).** The mechanism is applied to iFile (#43) on PR #44, not within #45: two runbooks for the genuinely human-gated items (admin consent, on-device iOS verification) and iFile's `human_interaction` exception declaration are produced there using #45's skill contract, with current UI steps sourced via MCP/web (not training data); the automatable items are classified as scope-change and are not runbook steps. The iFile feature folder exists only on the iFile branch / PR #44, so these artifacts cannot be authored within #45 and are not #45 acceptance criteria.
 
