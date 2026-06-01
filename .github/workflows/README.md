@@ -16,7 +16,7 @@ This directory contains the CI workflows for the repository. Every gate is struc
 
 Orchestrator:
 
-- `pr-pipeline.yml` — chains every gate below in PR runs (`pull_request` to `main`) and is also `workflow_dispatch`-able.
+- `pr-pipeline.yml` — runs every gate below in PR runs (`pull_request` to `main`) and is also `workflow_dispatch`-able. After the `tier-classification` root gate completes, the independent gate stages **fan out and run concurrently** rather than in two serial per-language lanes; every non-root stage declares `needs: [tier-classification]` (plus any justified genuine dependency). This lowers total pipeline wall-clock time. The accepted tradeoff is the loss of per-lane fail-fast economy — when an early gate (for example format) fails, later stages in the same language no longer short-circuit and instead run concurrently — which increases concurrent runner-minute consumption. Wall-clock time is prioritized over runner-minute savings. Job keys and required status-check contexts are unchanged by this `needs:`-graph-only change.
 
 Callees (one per gate):
 

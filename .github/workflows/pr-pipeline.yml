@@ -16,27 +16,27 @@ jobs:
     uses: ./.github/workflows/_stage-1-format-prettier.yml
 
   stage-2-lint:
-    needs: [stage-1-format]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-2-lint-eslint.yml
 
   stage-3-typecheck:
-    needs: [stage-2-lint]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-3-typecheck-tsc.yml
 
   stage-4-architecture:
-    needs: [stage-3-typecheck]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-4-architecture.yml
 
   stage-5-test:
-    needs: [stage-4-architecture]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-5-test-vitest.yml
 
   stage-6-contract:
-    needs: [stage-5-test]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-6-contract.yml
 
   stage-7-integration:
-    needs: [stage-6-contract]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-7-integration-vitest.yml
 
   stage-1-dotnet-format:
@@ -44,23 +44,23 @@ jobs:
     uses: ./.github/workflows/_stage-1-dotnet-format.yml
 
   stage-2-dotnet-build:
-    needs: [stage-1-dotnet-format]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-2-dotnet-build.yml
 
   stage-3-dotnet-typecheck:
-    needs: [stage-2-dotnet-build]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-3-dotnet-typecheck.yml
 
   stage-4-dotnet-architecture:
-    needs: [stage-3-dotnet-typecheck]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-4-dotnet-architecture.yml
 
   stage-5-dotnet-test:
-    needs: [stage-4-dotnet-architecture]
+    needs: [tier-classification]
     uses: ./.github/workflows/_stage-5-dotnet-test.yml
 
   stage-e2e-smoke:
-    needs: [stage-7-integration]
+    needs: [tier-classification]
     if: contains(github.event.pull_request.labels.*.name, 'e2e:run')
     uses: ./.github/workflows/_stage-e2e-smoke.yml
     secrets: inherit
