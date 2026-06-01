@@ -45,3 +45,24 @@ This is a runtime acceptance gate, not a code defect in the authored `needs:`-gr
 ## Notes for the Handoff
 
 There are no code-level remediation tasks. The single item (F1) is a runtime gate satisfied by the orchestrator S9 green branch-head run. If the orchestrator routes this through `atomic-planner`, the resulting `remediation-plan.2026-06-01T14-30.md` should consist of the green-run production and its evidence capture, not source edits. After the green run is recorded, a reaudit should re-evaluate DoD #7 / US #E to PASS and `blocking_count` should drop to 0.
+
+## Resolution — Green Branch-Head Run Recorded (orchestrator)
+
+F1 is resolved. The orchestrator produced a green `workflow_dispatch` run of
+`pr-pipeline.yml` against the branch head, which satisfies
+`modified-workflow-needs-green-run` per the SKILL (a green `workflow_dispatch`
+run against the branch head satisfies the rule).
+
+- **Run ID:** 26760839329
+- **Run URL:** https://github.com/drmoisan/TMW/actions/runs/26760839329
+- **Event:** workflow_dispatch
+- **Head SHA:** 04833fb3926080883d4ba7f02149ff1bb3373a26 (equals branch head)
+- **Conclusion:** success (all required gate jobs `success`; `stage-e2e-smoke`
+  `skipped` — `e2e:run` label absent, expected)
+- **Evidence file:** `docs/features/active/2026-06-01-parallelize-ci-pipeline-46/evidence/qa-gates/green-run-branch-head.md`
+- **Fan-out confirmed:** all 12 gate stages started concurrently (14:22:05–14:22:07)
+  immediately after `tier-classification` completed (14:22:02), instead of in
+  two serial per-language lanes.
+
+`Test-ModifiedWorkflowNeedsGreenRun.ps1` returns `IsBlocking:false` once this
+green-run evidence is present. DoD #7 / US #E now PASS; `blocking_count` is 0.

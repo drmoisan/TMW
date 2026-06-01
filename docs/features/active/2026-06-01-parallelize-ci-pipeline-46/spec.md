@@ -238,7 +238,7 @@ runtime green run.
 - [x] No new callee, no inline `steps:` in the orchestrator, nesting stays at
       one level.
 - [x] `actionlint` / YAML validity passes for `pr-pipeline.yml`.
-- [ ] Green `pr-pipeline.yml` run produced against the branch head (S9 /
+- [x] Green `pr-pipeline.yml` run produced against the branch head (S9 /
       `modified-workflow-needs-green-run`), with concurrent post-root scheduling
       visible in the run timeline.
 - [x] `.github/workflows/README.md` updated to describe the fan-out topology and

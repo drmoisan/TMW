@@ -55,7 +55,7 @@ tradeoff is accepted.
       `stage-6-contract`, `stage-7-integration`).
 - [x] `secret-scan` continues to run unconditionally; `stage-e2e-smoke` remains
       label-gated on `e2e:run`.
-- [ ] A green `pr-pipeline.yml` run against the branch head is produced, with the
+- [x] A green `pr-pipeline.yml` run against the branch head is produced, with the
       run timeline showing the gate stages starting concurrently after
       `tier-classification` rather than serially.
 - [x] `tests/powershell/apply-branch-protection.Tests.ps1` continues to pass
