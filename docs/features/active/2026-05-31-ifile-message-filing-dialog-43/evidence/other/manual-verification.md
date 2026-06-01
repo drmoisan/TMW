@@ -8,6 +8,20 @@ code and all CI-verifiable portions are complete and green (see `evidence/qa-gat
 below MUST be exercised on real Outlook clients before the feature is considered fully verified.
 No device evidence is fabricated; each criterion carries a `PENDING-DEVICE` marker until run.
 
+## Human-interaction exceptions (autonomous-execution mandate, issue #45)
+
+Under the autonomous-execution mandate, the manual items below are declared as permitted
+exceptions with human-execution runbooks (response: `exception`). Execute the runbooks to clear
+the `PENDING-DEVICE` / `PENDING-TENANT` markers:
+
+- **HI-1 (AC-19):** Entra delegated-scope grant + admin consent — see
+  `../../runbooks/entra-admin-consent.runbook.md`.
+- **HI-2 (AC-2, AC-3, AC-11, AC-12, AC-13, AC-20, AC-21, AC-24):** Outlook on-device verification
+  (desktop + iOS) — see `../../runbooks/outlook-on-device-verification.runbook.md`.
+
+The automatable items (Graph permission *declarations* via `az ad app permission add`; production
+manifest-domain substitution) are handled as scope-change/build steps, not runbook steps.
+
 ## Hosts/devices under test (to be filled in on verification)
 
 - Outlook desktop (Windows or Mac) build/version: _PENDING-DEVICE_

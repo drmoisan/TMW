@@ -31,6 +31,25 @@
     "S9_ci_green"
   ],
   "next_step": "blocked_on_manual_device_tenant_verification",
+  "human_interaction": {
+    "requirements": [
+      {
+        "id": "HI-1",
+        "description": "Grant tenant admin consent for the Microsoft Graph delegated scopes Mail.ReadWrite, Files.ReadWrite, Mail.ReadBasic (no scripted Global Admin credential available in CI).",
+        "discovered_at_stage": "S3_research",
+        "response": "exception",
+        "runbook_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/runbooks/entra-admin-consent.runbook.md"
+      },
+      {
+        "id": "HI-2",
+        "description": "Visually verify iFile rendering and end-to-end filing on real Outlook desktop and iOS clients (AC-2,3,11,12,13,20,21,24); no programmatic on-device rendering-assertion path exists.",
+        "discovered_at_stage": "S3_research",
+        "response": "exception",
+        "runbook_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/runbooks/outlook-on-device-verification.runbook.md"
+      }
+    ],
+    "note": "Declared retroactively under the autonomous-execution mandate (issue #45). Automatable items (Graph permission declarations, manifest-domain substitution) are scope-change/build steps, not exceptions."
+  },
   "pr_number": 44,
   "pr_url": "https://github.com/drmoisan/TMW/pull/44",
   "pr_author_receipt": "artifacts/pr_body_43.receipt.json",
