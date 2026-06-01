@@ -29,10 +29,64 @@
         }
       },
       "additionalProperties": true
+    },
+    "human_interaction": {
+      "type": "object",
+      "description": "Records every unautomatable (human-interaction) requirement and its resolved response. Present whenever at least one human-interaction requirement has been detected.",
+      "required": ["requirements"],
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "description": "Each detected unautomatable requirement and exactly one resolved response.",
+          "items": { "$ref": "#/$defs/humanInteractionRequirement" }
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true,
   "$defs": {
+    "humanInteractionRequirement": {
+      "type": "object",
+      "required": ["id", "description", "discovered_at_stage", "response"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier for the human-interaction requirement."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the unautomatable dependency."
+        },
+        "discovered_at_stage": {
+          "type": "string",
+          "description": "Workflow stage at which the requirement was detected (for example 'pre-kickoff' or 'research')."
+        },
+        "response": {
+          "type": "string",
+          "enum": ["scope_change", "exception", "halt"],
+          "description": "Exactly one resolved response per requirement."
+        },
+        "runbook_path": {
+          "type": "string",
+          "description": "Repo-root-relative path to the human-exception runbook. Required and non-empty when response == 'exception'."
+        }
+      },
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "description": "Exception-requires-runbook invariant: response == 'exception' requires a non-empty runbook_path.",
+          "if": {
+            "properties": { "response": { "const": "exception" } },
+            "required": ["response"]
+          },
+          "then": {
+            "properties": { "runbook_path": { "type": "string", "minLength": 1 } },
+            "required": ["runbook_path"]
+          }
+        }
+      ]
+    },
     "cycle": {
       "type": "object",
       "required": [

@@ -1,0 +1,22 @@
+{
+  "objective": "Fixture: existing-shape checkpoint with no human_interaction key (AC-4 backward compatibility).",
+  "completed_steps": ["S0", "S1"],
+  "next_step": "S2",
+  "last_updated": "2026-06-01T14-22",
+  "remediation_loop": {
+    "current_cycle": 1,
+    "cycles": [
+      {
+        "entry_timestamp": "2026-06-01T14-00",
+        "exit_timestamp": null,
+        "inputs_path": "remediation-inputs.2026-06-01T14-00.md",
+        "plan_path": "remediation-plan.2026-06-01T14-00.md",
+        "preflight": { "iterations": 1, "final_status": "clear" },
+        "execution_status": "in_progress",
+        "audit_paths": { "code_review": null, "feature_audit": null, "policy_audit": null },
+        "blocking_count": null,
+        "exit_condition_met": null
+      }
+    ]
+  }
+}

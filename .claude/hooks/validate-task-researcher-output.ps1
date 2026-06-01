@@ -83,6 +83,69 @@ function Test-IsValidResearchFileName {
     )
 }
 
+function Test-AutomationFeasibilitySection {
+    <#
+    .SYNOPSIS
+        Enforces the '## Automation Feasibility' section for applicable
+        autonomous-execution research artifacts.
+    .DESCRIPTION
+        Returns a hashtable with keys:
+          - Ok:      $true when the artifact is not applicable, or it is
+                     applicable and contains the '## Automation Feasibility'
+                     section.
+          - Message: rejection message; $null on success.
+
+        Detection is narrow (OD-45-7): the section is required only when the
+        research filename or the agent output contains an autonomous-execution
+        token (for example 'autonomous-execution' or 'human-interaction').
+        Non-matching research artifacts pass unaffected.
+
+        ReadFileContent is an injectable scriptblock so tests can supply the
+        research file body without writing temporary files. It defaults to
+        Get-Content -Raw.
+    #>
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $ResearchFilePath,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string] $AgentOutput,
+
+        [Parameter(Mandatory = $false)]
+        [scriptblock] $ReadFileContent = { param($Path) Get-Content -LiteralPath $Path -Raw -ErrorAction Stop }
+    )
+
+    $detectionPattern = 'autonomous-execution|human-interaction'
+    $fileName = [System.IO.Path]::GetFileName(($ResearchFilePath -replace '\\', '/'))
+
+    $isApplicable = ([regex]::IsMatch($fileName, $detectionPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)) -or
+    ([regex]::IsMatch($AgentOutput, $detectionPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase))
+
+    if (-not $isApplicable) {
+        return @{ Ok = $true; Message = $null }
+    }
+
+    $content = & $ReadFileContent $ResearchFilePath
+    if ([string]::IsNullOrWhiteSpace($content)) {
+        return @{ Ok = $false; Message = "task-researcher hook: autonomous-execution research artifact '$ResearchFilePath' is empty; it must include an '## Automation Feasibility' section." }
+    }
+
+    $hasSection = [regex]::IsMatch(
+        $content,
+        '(?m)^\s{0,3}#{2,}\s+Automation\s+Feasibility\s*$',
+        [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+
+    if (-not $hasSection) {
+        return @{ Ok = $false; Message = "task-researcher hook: autonomous-execution research artifact '$ResearchFilePath' is missing the required '## Automation Feasibility' section." }
+    }
+
+    return @{ Ok = $true; Message = $null }
+}
+
 function Invoke-TaskResearcherOutputValidation {
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -126,6 +189,11 @@ function Invoke-TaskResearcherOutputValidation {
         return @{ Ok = $false; Message = "task-researcher hook: researcher advertised research-path '$researchPath' but no file exists at that location." }
     }
 
+    $feasibilityResult = Test-AutomationFeasibilitySection -ResearchFilePath $researchPath -AgentOutput $agentOutput
+    if (-not $feasibilityResult.Ok) {
+        return @{ Ok = $false; Message = $feasibilityResult.Message }
+    }
+
     return @{ Ok = $true; Message = $null }
 }
 
@@ -140,3 +208,4 @@ if (-not $result.Ok) {
 }
 
 exit 0
+

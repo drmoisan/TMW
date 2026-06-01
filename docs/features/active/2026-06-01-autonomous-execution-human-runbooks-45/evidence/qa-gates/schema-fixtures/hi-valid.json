@@ -1,0 +1,23 @@
+{
+  "objective": "Fixture: well-formed human_interaction instance (AC-2).",
+  "completed_steps": ["S0"],
+  "next_step": "S1",
+  "last_updated": "2026-06-01T14-22",
+  "human_interaction": {
+    "requirements": [
+      {
+        "id": "hi-001",
+        "description": "Global-Administrator admin consent for the Entra application.",
+        "discovered_at_stage": "research",
+        "response": "exception",
+        "runbook_path": "docs/features/active/2026-06-01-autonomous-execution-human-runbooks-45/runbooks/example.runbook.md"
+      },
+      {
+        "id": "hi-002",
+        "description": "Replace a portal click with an az CLI step.",
+        "discovered_at_stage": "pre-kickoff",
+        "response": "scope_change"
+      }
+    ]
+  }
+}
