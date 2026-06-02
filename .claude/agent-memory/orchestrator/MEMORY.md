@@ -7,3 +7,5 @@
 - [Remediation loop strict handoff](remediation-loop-strict-handoff.md) — remediation is a closed atomic-planner -> atomic-executor -> feature-review loop; never call typed-engineer workers directly; five artifacts per cycle.
 - [Validate ShellExecute launchers on real host](feedback_validate_shellexecute_launchers_on_real_host.md) — seam-mocked PS tests can't catch Start-Process ShellExecute bugs; dot-source and run the real resolver before declaring success.
 - [No required checks configured on main](project_no_required_checks_configured.md) — gh pr checks --required returns empty on TMW (2026-06-01); S9 must derive ci_gate from the full PR Pipeline run.
+- [Refresh product UI instructions](feedback_refresh_product_ui_instructions.md) — for instructions naming third-party UI paths (Outlook/M365), verify against latest docs via research; don't trust training data.
+- [Autonomous execution, no manual steps](feedback_autonomous_execution_no_manual_steps.md) — workflows must be fully agentic; unautomatable steps need an early-declared exception + human runbook, scope change, or halt.

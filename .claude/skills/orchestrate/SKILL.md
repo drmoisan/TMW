@@ -24,6 +24,36 @@ On every invocation, the main session must:
 2. If a valid checkpoint exists with a matching objective, resume from the recorded `next_step`.
 3. If no checkpoint exists or the objective is new, begin the orchestration lifecycle from the start.
 
+## Autonomous-Execution Mandate
+
+The orchestrator must achieve all actions agentically with no human interaction; full autonomy is a hard requirement. A silent manual blocker discovered at the end of a workflow is a defect, not an acceptable outcome. Every unautomatable (human-interaction) requirement must be detected early, resolved by exactly one of three permitted responses, and recorded in orchestrator state.
+
+### Detection points
+
+- Unautomatable requirements are enumerated as mandatory-unachievable requirements **before kickoff** wherever they are knowable up front.
+- Where research is needed to discover them, they MUST be surfaced **no later than the research stage**.
+- Research that touches third-party UIs (for example the Azure portal / Entra admin center, Outlook desktop or mobile, the Microsoft 365 admin center) MUST include an explicit automation-feasibility / human-interaction assessment recorded under an `## Automation Feasibility` section in the research artifact.
+
+### Three permitted responses
+
+When a step cannot be performed without a human, the orchestrator chooses exactly one response per requirement and records it in orchestrator state under `human_interaction.requirements[]`:
+
+1. **`scope_change`** — change the scope to remove the manual dependency (for example, replace a portal click with an `az` CLI step that runs unattended).
+2. **`exception`** — permit an exception. This requires emitting a human-exception runbook (see below). The exception is unresolved until its runbook file exists on disk.
+3. **`halt`** — halt until further instruction. A `halt` blocks DONE while present. A `halt` is recoverable: a later checkpoint update that resolves the requirement (to `scope_change` or a runbook-backed `exception`, or clears the halt) lifts the block.
+
+### Exception-runbook requirement
+
+On a permitted `exception`, the orchestrator emits a human-readable runbook at `<FEATURE>/runbooks/<name>.runbook.md` and records its repo-root-relative path in `human_interaction.requirements[].runbook_path`. The runbook contract — canonical path, the five required sections (Cue, Prerequisites, Step-by-step Instructions, Verification, Source and Citation), and the MCP-first / web-second sourcing rule — is defined authoritatively in `.claude/skills/human-exception-runbook/SKILL.md`.
+
+### Enforcement points
+
+The mandate is enforced mechanically, so DONE cannot be written while a human-interaction requirement is unresolved:
+
+- **Schema.** `.claude/schemas/orchestrator-state.schema.json` defines the top-level `human_interaction.requirements[]` object (required `id`, `description`, `discovered_at_stage`, and `response` enum `scope_change` | `exception` | `halt`) and the exception-requires-runbook invariant (`response == "exception"` requires a non-empty `runbook_path`). The root remains `additionalProperties: true`, so existing checkpoints without `human_interaction` stay valid.
+- **Completion gate.** `Test-HumanInteractionShape` in `.claude/hooks/validate-orchestrator-output.ps1` blocks DONE when a requirement has no resolved `response`, a `response` outside the enum, any `response == "halt"`, or an `exception` whose `runbook_path` is missing/empty or whose file does not exist. An absent `human_interaction` key passes.
+- **Research gate.** `Test-AutomationFeasibilitySection` in `.claude/hooks/validate-task-researcher-output.ps1` requires the `## Automation Feasibility` section for applicable autonomous-execution research artifacts and blocks otherwise; non-applicable research is unaffected.
+
 ## Delegation Model
 
 After reading `artifacts/orchestration/orchestrator-state.json`, the main session delegates work exclusively through configured workers:

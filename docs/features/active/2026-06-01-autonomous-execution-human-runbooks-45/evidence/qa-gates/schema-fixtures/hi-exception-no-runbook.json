@@ -1,0 +1,16 @@
+{
+  "objective": "Fixture: malformed exception with no runbook_path (AC-3 negative).",
+  "completed_steps": ["S0"],
+  "next_step": "S1",
+  "last_updated": "2026-06-01T14-22",
+  "human_interaction": {
+    "requirements": [
+      {
+        "id": "hi-001",
+        "description": "Permitted exception that omits the required runbook_path.",
+        "discovered_at_stage": "research",
+        "response": "exception"
+      }
+    ]
+  }
+}

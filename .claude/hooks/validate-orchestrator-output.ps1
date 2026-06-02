@@ -130,6 +130,89 @@ function Test-RemediationLoopShape {
     return @{ Ok = $true; Message = $null }
 }
 
+function Test-HumanInteractionShape {
+    <#
+    .SYNOPSIS
+        Validates the optional human_interaction sub-object against the schema
+        at .claude/schemas/orchestrator-state.schema.json, enforcing the
+        autonomous-execution mandate at the completion gate.
+    .DESCRIPTION
+        Returns a hashtable with keys:
+          - Ok:      $true if the field is absent or every requirement is resolved.
+          - Message: rejection message naming the first unresolved requirement; $null on success.
+        A null human_interaction (absent key) passes the gate. When present,
+        the requirements array is inspected and DONE is blocked when, in order:
+          - requirements is missing or non-array.
+          - any requirement has a missing/blank response.
+          - any requirement has a response outside the enum
+            (scope_change | exception | halt).
+          - any requirement has response == 'halt'.
+          - any requirement has response == 'exception' with a missing/empty
+            runbook_path, or a runbook_path whose file does not exist on disk
+            (existence is checked through the injected FileExistsCheck seam).
+        FileExistsCheck is an injectable scriptblock so tests can exercise the
+        existence branch without writing temporary files. It defaults to
+        Test-Path -PathType Leaf.
+    #>
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowNull()]
+        $HumanInteraction,
+
+        [Parameter(Mandatory = $false)]
+        [scriptblock] $FileExistsCheck = { param($Path) Test-Path -LiteralPath $Path -PathType Leaf }
+    )
+
+    if ($null -eq $HumanInteraction) {
+        return @{ Ok = $true; Message = $null }
+    }
+
+    $hiProps = @($HumanInteraction.PSObject.Properties.Name)
+    if ($hiProps -notcontains 'requirements') {
+        return @{ Ok = $false; Message = "orchestrator hook: 'human_interaction' is present but 'requirements' array is missing." }
+    }
+
+    $requirements = @($HumanInteraction.requirements)
+    $allowedResponses = @('scope_change', 'exception', 'halt')
+
+    for ($i = 0; $i -lt $requirements.Count; $i++) {
+        $req = $requirements[$i]
+        $reqProps = @($req.PSObject.Properties.Name)
+
+        $response = $null
+        if ($reqProps -contains 'response') { $response = [string]$req.response }
+
+        if ([string]::IsNullOrWhiteSpace($response)) {
+            return @{ Ok = $false; Message = "orchestrator hook: 'human_interaction.requirements[$i]' has no resolved 'response'. Every unautomatable requirement must resolve to one of: scope_change, exception, halt." }
+        }
+
+        if ($allowedResponses -notcontains $response) {
+            return @{ Ok = $false; Message = "orchestrator hook: 'human_interaction.requirements[$i]' has 'response' value '$response' outside the allowed set (scope_change, exception, halt)." }
+        }
+
+        if ($response -eq 'halt') {
+            return @{ Ok = $false; Message = "orchestrator hook: 'human_interaction.requirements[$i]' has 'response' == 'halt'; DONE is blocked while a halt is present." }
+        }
+
+        if ($response -eq 'exception') {
+            $runbookPath = $null
+            if ($reqProps -contains 'runbook_path') { $runbookPath = [string]$req.runbook_path }
+
+            if ([string]::IsNullOrWhiteSpace($runbookPath)) {
+                return @{ Ok = $false; Message = "orchestrator hook: 'human_interaction.requirements[$i]' has 'response' == 'exception' but no non-empty 'runbook_path'. A permitted exception requires a runbook." }
+            }
+
+            if (-not (& $FileExistsCheck $runbookPath)) {
+                return @{ Ok = $false; Message = "orchestrator hook: 'human_interaction.requirements[$i]' references runbook_path '$runbookPath' but no file exists at that location." }
+            }
+        }
+    }
+
+    return @{ Ok = $true; Message = $null }
+}
+
 function Invoke-OrchestratorOutputValidation {
     <#
     .SYNOPSIS
@@ -204,6 +287,15 @@ function Invoke-OrchestratorOutputValidation {
     $loopResult = Test-RemediationLoopShape -RemediationLoop $remediationLoop
     if (-not $loopResult.Ok) {
         return @{ Ok = $false; Message = $loopResult.Message }
+    }
+
+    $humanInteraction = $null
+    if ($checkpointProps -contains 'human_interaction') {
+        $humanInteraction = $checkpoint.human_interaction
+    }
+    $hiResult = Test-HumanInteractionShape -HumanInteraction $humanInteraction
+    if (-not $hiResult.Ok) {
+        return @{ Ok = $false; Message = $hiResult.Message }
     }
 
     return @{ Ok = $true; Message = $null }
