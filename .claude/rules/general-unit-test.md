@@ -27,6 +27,23 @@ Every unit test must satisfy all five of these properties:
 - Coverage is a supporting metric, not the sole quality gate. Untested critical behavior is not acceptable even if the overall percentage looks good.
 - Configure coverage tooling to exclude test files (e.g., `tests/`) so metrics reflect application code, not tests.
 
+## Coverage Exclusion Policy
+
+No production file may be excluded from coverage measurement. Every production source file is in the denominator of the coverage metric, regardless of whether its lines are reachable in the test environment.
+
+The correct response to a file that contains untestable lines is to refactor it — extract all logic into host-neutral, testable modules and leave only the thinnest possible wiring in the host-bound entry point. The entry point's uncovered lines then represent a real and visible cost in the coverage metric, which creates ongoing pressure to keep those files minimal.
+
+**Permitted `exclude` entries** (non-production paths only):
+- Build output directories: `dist/**`, `lib/**`, `lib-amd/**`.
+- Test files and test infrastructure: `**/*.test.ts`, `tests/**`, `src/test-support/**`.
+- Config files that are not production code: `vitest.config.ts`, `eslint.config.mjs`, `.dependency-cruiser.cjs`, `webpack.config.js`.
+- `node_modules/**`.
+
+**Prohibited `exclude` entries:**
+- Any path under `src/` that contains production runtime code, regardless of whether it is auto-generated, host-bound, or difficult to test.
+
+**Enforcement:** Feature-review agents must treat any `exclude` entry that matches a production source path as a **Blocking** finding.
+
 ## Scenario Completeness
 
 For each unit or behavior, tests must cover:
@@ -54,6 +71,12 @@ Assertions must produce clear, actionable failure messages.
 - Use mocks, stubs, or fakes to isolate the unit under test when code interacts with external systems.
 - **Creation and use of temporary files in tests is strictly prohibited.**
 - Tests must not rely on mutable global state or external configuration that can change between runs.
+
+## Test File Location
+
+Test files must live in a `tests/` directory tree that mirrors the production source structure. The test for `src/foo/bar.ts` belongs at `tests/foo/bar.test.ts`; the test for `scripts/powershell/Foo.ps1` belongs at `tests/scripts/powershell/Foo.Tests.ps1`. Language-specific rules may add further naming conventions (framework suffix, file extension) on top of this universal layout requirement.
+
+Colocation — placing test files alongside production source files in `src/` or equivalent — is not permitted. An agent that creates or moves a test file into the production source tree has violated this rule.
 
 ## Documentation
 

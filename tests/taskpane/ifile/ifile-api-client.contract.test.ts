@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { components, operations } from "../../api-client/v1";
-import type { FileMessageRequest } from "./ifile-api-client";
+import type { components, operations } from "../../../src/api-client/v1";
+import type { FileMessageRequest } from "../../../src/taskpane/ifile/ifile-api-client";
 
 describe("ifile-api-client filing-endpoint contract", () => {
     it("request body type equals the generated /api/ifile/file operation request type", () => {

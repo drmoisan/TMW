@@ -5,8 +5,8 @@
 import { describe } from "vitest";
 import { test } from "@fast-check/vitest";
 import * as fc from "fast-check";
-import { buildPath } from "./folder-path-builder";
-import type { MailFolder } from "./folder-result";
+import { buildPath } from "../../../src/taskpane/ifile/folder-path-builder";
+import type { MailFolder } from "../../../src/taskpane/ifile/folder-result";
 
 /**
  * Generates a linear folder chain of a given depth (root -> child -> ...),

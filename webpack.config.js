@@ -1,11 +1,14 @@
 /* eslint-disable no-undef */
 
+const webpack = require("webpack");
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const urlDev = "https://localhost:3000/";
-const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
+// Production static-asset base URL. Override via ADDIN_URL_PROD env var for mobile Dev Tunnel
+// builds, e.g.: $env:ADDIN_URL_PROD = "https://taskmaster-ios.<cluster>.devtunnels.ms/"
+const urlProd = process.env.ADDIN_URL_PROD ?? "https://www.contoso.com/";
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -52,6 +55,14 @@ module.exports = async (env, options) => {
       ],
     },
     plugins: [
+      // Inject the API base URL at build time. Desktop dev builds use the default
+      // (localhost:3000 / webpack dev-server). Mobile builds supply the Dev Tunnel URL via
+      // the API_BASE_URL env var, e.g.: $env:API_BASE_URL = "https://taskmaster-api.<cluster>.devtunnels.ms"
+      new webpack.DefinePlugin({
+        __API_BASE_URL__: JSON.stringify(
+          process.env.API_BASE_URL ?? "https://localhost:3000"
+        ),
+      }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",

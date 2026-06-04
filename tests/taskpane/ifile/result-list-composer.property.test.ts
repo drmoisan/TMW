@@ -5,8 +5,8 @@
 import { describe } from "vitest";
 import { test } from "@fast-check/vitest";
 import * as fc from "fast-check";
-import { compose } from "./result-list-composer";
-import type { FolderResult, FolderResultSource } from "./folder-result";
+import { compose } from "../../../src/taskpane/ifile/result-list-composer";
+import type { FolderResult, FolderResultSource } from "../../../src/taskpane/ifile/folder-result";
 
 function arbResult(source: FolderResultSource): fc.Arbitrary<FolderResult> {
     return fc.record({

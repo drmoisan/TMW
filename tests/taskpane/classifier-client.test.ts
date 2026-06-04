@@ -8,13 +8,13 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { test } from "@fast-check/vitest";
 import * as fc from "fast-check";
 import { http, HttpResponse } from "msw";
-import { server } from "../test-support/msw-server";
+import { server } from "../../src/test-support/msw-server";
 import {
     ClassifierClient,
     normalizeClassifyRequest,
     parseClassifyResponse,
     type ClassifyRequest,
-} from "./classifier-client";
+} from "../../src/taskpane/classifier-client";
 
 const BASE_URL = "http://localhost";
 const TOKEN = "test-bearer-token";

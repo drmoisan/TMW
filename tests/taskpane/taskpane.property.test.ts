@@ -11,7 +11,7 @@
 import { beforeAll, describe } from "vitest";
 import { test } from "@fast-check/vitest";
 import * as fc from "fast-check";
-import type { normalizeTitle as NormalizeTitle } from "./taskpane";
+import type { normalizeTitle as NormalizeTitle } from "../../src/taskpane/taskpane";
 
 // normalizeTitle is resolved via dynamic import after the Office mock is in place.
 let normalizeTitle: typeof NormalizeTitle;
@@ -23,7 +23,7 @@ beforeAll(async () => {
         EventType: { ItemChanged: "olkItemSelectedChanged" },
         context: { mailbox: { item: null, addHandlerAsync: () => undefined } },
     };
-    const mod = await import("./taskpane");
+    const mod = await import("../../src/taskpane/taskpane");
     normalizeTitle = mod.normalizeTitle;
 });
 

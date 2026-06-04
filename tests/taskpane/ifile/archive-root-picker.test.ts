@@ -10,8 +10,8 @@ import {
     isArchiveRootRequired,
     resolveArchiveRoot,
     ARCHIVE_ROOT_REQUIRED,
-} from "./archive-root-picker";
-import type { FileMessageResponse } from "./ifile-api-client";
+} from "../../../src/taskpane/ifile/archive-root-picker";
+import type { FileMessageResponse } from "../../../src/taskpane/ifile/ifile-api-client";
 
 describe("archive-root picker", () => {
     it("detects the archiveRootRequired outcome", () => {

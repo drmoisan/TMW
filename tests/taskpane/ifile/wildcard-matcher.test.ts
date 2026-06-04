@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { match } from "./wildcard-matcher";
+import { match } from "../../../src/taskpane/ifile/wildcard-matcher";
 
 describe("wildcard match — positive matches", () => {
     it("matches a literal equal pattern and target", () => {
@@ -59,7 +59,7 @@ describe("wildcard match — NFC equivalence", () => {
     it("treats decomposed and precomposed forms as equal after NFC", () => {
         // "é" precomposed (U+00E9) vs decomposed "e" + combining acute (U+0301).
         const precomposed = "Café";
-        const decomposed = "Café";
+        const decomposed = "Café";
         expect(match(precomposed, decomposed)).toBe(true);
         expect(match(decomposed, precomposed)).toBe(true);
     });

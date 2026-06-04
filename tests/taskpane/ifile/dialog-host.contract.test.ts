@@ -11,7 +11,7 @@ import {
     parseSelectionMessage,
     postSelectionToParent,
     type DialogSelectionMessage,
-} from "./dialog-host";
+} from "../../../src/taskpane/ifile/dialog-host";
 
 interface FakeDialog {
     addEventHandler: (eventType: string, handler: (arg: { message: string }) => void) => void;

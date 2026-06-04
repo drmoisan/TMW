@@ -30,7 +30,7 @@ describe("commands module", () => {
 
     it("imports without throwing and registers no Office.actions.associate calls", async () => {
         // Act
-        await expect(import("./commands")).resolves.toBeDefined();
+        await expect(import("../../src/commands/commands")).resolves.toBeDefined();
 
         // Assert
         expect(associateSpy).toHaveBeenCalledTimes(0);

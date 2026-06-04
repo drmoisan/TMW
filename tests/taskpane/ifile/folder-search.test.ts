@@ -6,8 +6,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { searchLeafFolders, toLeafResults } from "./folder-search";
-import type { FolderResult, MailFolder } from "./folder-result";
+import { searchLeafFolders, toLeafResults } from "../../../src/taskpane/ifile/folder-search";
+import type { FolderResult, MailFolder } from "../../../src/taskpane/ifile/folder-result";
 
 function leaf(name: string, path: string): FolderResult {
     return { folderId: `id-${path}`, displayName: name, path, source: "search" };

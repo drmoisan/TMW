@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { compose } from "./result-list-composer";
-import type { FolderResult } from "./folder-result";
+import { compose } from "../../../src/taskpane/ifile/result-list-composer";
+import type { FolderResult } from "../../../src/taskpane/ifile/folder-result";
 
 function result(source: FolderResult["source"], name: string): FolderResult {
     return { folderId: `id-${name}`, displayName: name, path: name, source };

@@ -16,8 +16,10 @@ import { selectPresentation } from "./host-presentation";
 import { mountInline } from "./inline-host";
 import { postSelectionToParent } from "./dialog-host";
 
-/** Base URL of the backend API. Same origin as the add-in host page. */
-const API_BASE_URL = "https://localhost:3000";
+// Injected by webpack DefinePlugin at build time. Default: https://localhost:3000 (desktop dev
+// server). Set API_BASE_URL env var before running 'npm run build' to override for mobile builds.
+declare const __API_BASE_URL__: string;
+const API_BASE_URL = __API_BASE_URL__;
 
 void Office.onReady((info) => {
     if (info.host !== Office.HostType.Outlook) {

@@ -4,9 +4,9 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { mountInline, renderResults } from "./inline-host";
-import { IFileController } from "./ifile-controller";
-import type { FolderResult } from "./folder-result";
+import { mountInline, renderResults } from "../../../src/taskpane/ifile/inline-host";
+import { IFileController } from "../../../src/taskpane/ifile/ifile-controller";
+import type { FolderResult } from "../../../src/taskpane/ifile/folder-result";
 
 function leaf(name: string, path: string): FolderResult {
     return { folderId: `id-${path}`, displayName: name, path, source: "search" };

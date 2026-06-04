@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { buildPath } from "./folder-path-builder";
-import type { MailFolder } from "./folder-result";
+import { buildPath } from "../../../src/taskpane/ifile/folder-path-builder";
+import type { MailFolder } from "../../../src/taskpane/ifile/folder-result";
 
 function folder(
     id: string,

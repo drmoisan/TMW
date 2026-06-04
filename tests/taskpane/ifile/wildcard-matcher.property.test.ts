@@ -8,7 +8,7 @@
 import { describe } from "vitest";
 import { test } from "@fast-check/vitest";
 import * as fc from "fast-check";
-import { match } from "./wildcard-matcher";
+import { match } from "../../../src/taskpane/ifile/wildcard-matcher";
 
 /**
  * Generates strings that contain no glob metacharacters or backslashes, so the

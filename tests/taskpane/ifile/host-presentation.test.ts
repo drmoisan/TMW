@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { selectPresentation } from "./host-presentation";
-import { MOBILE_HOST_NAME } from "./message-id-resolver";
+import { selectPresentation } from "../../../src/taskpane/ifile/host-presentation";
+import { MOBILE_HOST_NAME } from "../../../src/taskpane/ifile/message-id-resolver";
 
 describe("selectPresentation", () => {
     it("selects inline for Outlook mobile", () => {

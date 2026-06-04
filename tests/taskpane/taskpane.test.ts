@@ -54,7 +54,7 @@ describe("renderItem / renderEmpty pure functions", () => {
     it("renderItem writes subject and sender into supplied DOM elements", async () => {
         // Arrange
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
         const dom = {
             status: document.getElementById("status") as HTMLElement,
             subject: document.getElementById("selected-subject") as HTMLElement,
@@ -78,7 +78,7 @@ describe("renderItem / renderEmpty pure functions", () => {
     it("renderItem renders an empty string for a missing subject without throwing", async () => {
         // Arrange
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
         const dom = {
             status: document.getElementById("status") as HTMLElement,
             subject: document.getElementById("selected-subject") as HTMLElement,
@@ -94,7 +94,7 @@ describe("renderItem / renderEmpty pure functions", () => {
     it("renderEmpty clears subject/from and sets a placeholder status", async () => {
         // Arrange
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
         const dom = {
             status: document.getElementById("status") as HTMLElement,
             subject: document.getElementById("selected-subject") as HTMLElement,
@@ -131,7 +131,7 @@ describe("onItemChanged dispatch", () => {
             },
             context: { mailbox: { item: null, addHandlerAsync: vi.fn() } },
         });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
 
         // Act
         mod.onItemChanged();
@@ -166,7 +166,7 @@ describe("Office.onReady subscription wiring", () => {
         });
 
         // Act
-        await import("./taskpane");
+        await import("../../src/taskpane/taskpane");
 
         // Assert
         expect(addHandlerAsync).toHaveBeenCalledTimes(1);
@@ -186,7 +186,7 @@ describe("Office.onReady subscription wiring", () => {
         };
         installOffice({ context: { mailbox } });
 
-        await import("./taskpane");
+        await import("../../src/taskpane/taskpane");
         expect(document.getElementById("selected-subject")?.textContent).toBe("First");
 
         // Act: capture the handler passed to addHandlerAsync, update the item, invoke handler
@@ -220,7 +220,7 @@ describe("requireElement helper", () => {
         });
 
         // Act + Assert
-        await expect(import("./taskpane")).rejects.toThrow(/Required element/);
+        await expect(import("../../src/taskpane/taskpane")).rejects.toThrow(/Required element/);
     });
 });
 
@@ -243,7 +243,7 @@ describe("closeTaskpane guarded host call", () => {
                 ui: { closeContainer },
             } as unknown as { mailbox: OfficeMailboxStub },
         });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
 
         // Act
         mod.closeTaskpane();
@@ -260,7 +260,7 @@ describe("closeTaskpane guarded host call", () => {
                 ui: {},
             } as unknown as { mailbox: OfficeMailboxStub },
         });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
 
         // Act + Assert
         expect(() => mod.closeTaskpane()).not.toThrow();
@@ -280,7 +280,7 @@ describe("renderClassifying and renderClassificationResult pure functions", () =
     it("renderClassifying sets status text to Classifying...", async () => {
         // Arrange
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
         const status = document.getElementById("status") as HTMLElement;
         const dom = {
             status,
@@ -298,7 +298,7 @@ describe("renderClassifying and renderClassificationResult pure functions", () =
     it("renderClassificationResult writes label and confidence to classification element", async () => {
         // Arrange
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
         const classification = document.createElement("span");
         const confirmBtn = document.createElement("button");
         const rejectBtn = document.createElement("button");
@@ -326,7 +326,7 @@ describe("renderClassifying and renderClassificationResult pure functions", () =
         // Arrange — the generated ClassifyResponse type permits a string-encoded
         // double; renderClassificationResult must coerce it for display arithmetic.
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
         const classification = document.createElement("span");
         const dom = {
             status: document.getElementById("status") as HTMLElement,
@@ -345,7 +345,7 @@ describe("renderClassifying and renderClassificationResult pure functions", () =
     it("renderClassificationResult works when optional DOM elements are absent", async () => {
         // Arrange
         installOffice({ context: { mailbox: { item: null, addHandlerAsync: vi.fn() } } });
-        const mod = await import("./taskpane");
+        const mod = await import("../../src/taskpane/taskpane");
         const dom = {
             status: document.getElementById("status") as HTMLElement,
             subject: document.getElementById("selected-subject") as HTMLElement,

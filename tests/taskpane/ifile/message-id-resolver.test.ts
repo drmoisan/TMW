@@ -5,7 +5,10 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { resolveMessageRestId, MOBILE_HOST_NAME } from "./message-id-resolver";
+import {
+    resolveMessageRestId,
+    MOBILE_HOST_NAME,
+} from "../../../src/taskpane/ifile/message-id-resolver";
 
 describe("resolveMessageRestId", () => {
     it("returns itemId unchanged on mobile and does not call convert", () => {

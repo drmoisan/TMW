@@ -6,8 +6,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { orderSearchResults } from "./search-result-ordering";
-import type { FolderResult } from "./folder-result";
+import { orderSearchResults } from "../../../src/taskpane/ifile/search-result-ordering";
+import type { FolderResult } from "../../../src/taskpane/ifile/folder-result";
 
 function leaf(name: string, path: string): FolderResult {
     return { folderId: `id-${path}`, displayName: name, path, source: "search" };

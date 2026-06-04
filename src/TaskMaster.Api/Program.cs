@@ -55,6 +55,31 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddClassifierServices();
 
+// Development-only CORS policy for Outlook Mobile testing via Dev Tunnel.
+// Set MobileDev:AllowedOrigin in user secrets to the taskmaster-ios tunnel URL, e.g.:
+//   dotnet user-secrets set "MobileDev:AllowedOrigin" "https://taskmaster-ios.<cluster>.devtunnels.ms"
+//       --id b3c44e17-fca8-45e2-a550-80f2d481007e
+// The policy is a no-op when the setting is absent so the app starts without it.
+var mobileCorsEnabled = false;
+if (builder.Environment.IsDevelopment())
+{
+    var mobileOrigin = builder.Configuration["MobileDev:AllowedOrigin"];
+    if (!string.IsNullOrWhiteSpace(mobileOrigin))
+    {
+        mobileCorsEnabled = true;
+        builder.Services.AddCors(options =>
+            options.AddPolicy(
+                "MobileDev",
+                policy =>
+                    policy
+                        .WithOrigins(mobileOrigin)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+            )
+        );
+    }
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -64,7 +89,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Middleware order: Correlation ID → Authentication → Authorization.
+// Middleware order: CORS → Correlation ID → Authentication → Authorization.
+if (mobileCorsEnabled)
+{
+    app.UseCors("MobileDev");
+}
+
 app.UseMiddleware<CorrelationIdMiddleware>();
 
 if (!isDocumentEmission)

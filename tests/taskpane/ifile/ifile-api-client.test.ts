@@ -5,7 +5,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { IFileApiClient } from "./ifile-api-client";
+import { IFileApiClient } from "../../../src/taskpane/ifile/ifile-api-client";
 
 describe("IFileApiClient", () => {
     afterEach(() => {
