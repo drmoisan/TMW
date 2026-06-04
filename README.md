@@ -83,61 +83,136 @@ troubleshooting, is in [`docs/quality-gates.md`](docs/quality-gates.md).
 ## Loading the mobile add-in for testing
 
 Outlook Mobile (iOS) loads the add-in from a publicly reachable HTTPS endpoint
-with a trusted (non-self-signed) certificate. The procedure below serves the
-production bundle from `dist/` through a Microsoft Dev Tunnel and sideloads it
-via Outlook on the web, which then syncs the add-in to the iOS client.
+with a trusted (non-self-signed) certificate. iFile requires the .NET API
+backend to be reachable from the device as well as the static bundle. Three
+layers must be running simultaneously: the .NET API, the static bundle server,
+and two Dev Tunnels (one per layer).
 
 ### Prerequisites
 
 - The base prerequisites under [Prerequisites](#prerequisites) (Node.js 20.x,
   npm 10.x, PowerShell 7+).
+- .NET 10 SDK (`dotnet --version` should report `10.x`).
 - The Microsoft Dev Tunnels CLI on `PATH`
-  (`winget install Microsoft.devtunnel`). `npm run mobile:start` also resolves the
-  WinGet Links shim and Packages path if `devtunnel` is not on `PATH`.
-- A Microsoft 365 account that can install custom add-ins in Outlook on the web,
-  signed in on the iPhone's Outlook app. Use `npm run signin` to register the
-  dev account with `office-addin-dev-settings` when needed.
+  (`winget install Microsoft.devtunnel`). `npm run mobile:start` also resolves
+  the WinGet Links shim and Packages path if `devtunnel` is not on `PATH`.
+- An Azure AD app registration with the required delegated permissions
+  (`Mail.ReadWrite`, `Files.ReadWrite`, `Mail.ReadBasic`). Record its
+  `TenantId`, `ClientId`, and the `api://<ClientId>` Application ID URI.
+- A Microsoft 365 account that can install custom add-ins in Outlook on the
+  web, signed in on the iPhone's Outlook app. Use `npm run signin` to register
+  the dev account with `office-addin-dev-settings` when needed.
 
 ### One-time tunnel setup
 
-`npm run mobile:start` hosts a tunnel named `taskmaster-ios`; create it once and grant
-anonymous access to port 3000:
+Two named tunnels are required: `taskmaster-ios` for the static bundle (port
+3000) and `taskmaster-api` for the .NET API (port 7287). Create each once:
 
 ```powershell
 devtunnel user login
+
+# Static bundle tunnel
 devtunnel create taskmaster-ios
 devtunnel port create taskmaster-ios -p 3000
 devtunnel access create taskmaster-ios -p 3000 --anonymous
+
+# API tunnel
+devtunnel create taskmaster-api --allow-anonymous
+devtunnel port create taskmaster-api -p 7287 --protocol https
 ```
 
-The tunnel's public URL is stable for the tunnel id. Record it with
-`devtunnel show taskmaster-ios`; it has the form
-`https://<id>-3000.<cluster>.devtunnels.ms/`.
+Record both tunnel URLs — they are stable for their tunnel ids:
 
-### Build and host
+```powershell
+devtunnel show taskmaster-ios   # e.g. https://taskmaster-ios.<cluster>.devtunnels.ms/
+devtunnel show taskmaster-api   # e.g. https://taskmaster-api.<cluster>.devtunnels.ms
+```
 
-1. Set `urlProd` in [`webpack.config.js`](webpack.config.js) to the tunnel URL
-   (include the trailing slash). The production build rewrites the bundled
-   `dist/manifest.xml` URLs from `https://localhost:3000/` to this value. Revert
-   `urlProd` to the repository placeholder after testing; the transient tunnel
-   URL is not committed.
-2. Build the production bundle:
+### One-time API configuration (user secrets)
 
-   ```powershell
-   npm run build
-   ```
+The .NET API authenticates with Azure AD and enforces CORS for the mobile
+origin. Configure both via `dotnet user-secrets`. If the `--project` flag
+produces a `DotNetMuxer` error in your terminal, use `--id` with the project's
+`UserSecretsId` instead (see below).
 
-3. Start the static server and tunnel host:
+```powershell
+# Set these once for the session, then reuse them below.
+$tenantId  = "<your-tenant-id>"   # Azure AD app registration tenant id
+$clientId  = "<your-client-id>"   # Azure AD app registration client id
+$cluster = (devtunnel show taskmaster-ios |
+  Select-String -Pattern '\.([a-z0-9]+)\.devtunnels\.ms' |
+  Select-Object -First 1).Matches.Groups[1].Value
+$secretsId = "b3c44e17-fca8-45e2-a550-80f2d481007e"   # project UserSecretsId (from TaskMaster.Api.csproj)
 
-   ```powershell
-   npm run mobile:start
-   ```
+# Azure AD
+dotnet user-secrets set "AzureAd:Instance"  "https://login.microsoftonline.com/" --id $secretsId
+dotnet user-secrets set "AzureAd:TenantId"  "$tenantId"                           --id $secretsId
+dotnet user-secrets set "AzureAd:ClientId"  "$clientId"                           --id $secretsId
+dotnet user-secrets set "AzureAd:Audience"  "api://$clientId"                     --id $secretsId
 
-   `npm run mobile:start` serves `dist/` through `http-server` on port 3000 and
-   hosts the `taskmaster-ios` Dev Tunnel. It does not edit `webpack.config.js` and
-   does not run the build; complete steps 1 and 2 first. The process ids, tunnel
-   id, and port are recorded to a state file so `npm run mobile:stop` can stop the
-   same processes.
+# CORS — set to the taskmaster-ios tunnel URL (no trailing slash)
+dotnet user-secrets set "MobileDev:AllowedOrigin" "https://taskmaster-ios.$cluster.devtunnels.ms" --id $secretsId
+```
+
+Secrets are stored outside the repository at
+`%APPDATA%\Microsoft\UserSecrets\b3c44e17-fca8-45e2-a550-80f2d481007e\secrets.json`
+and are never committed. Verify with:
+
+```powershell
+dotnet user-secrets list --id $secretsId
+```
+
+### Build
+
+Supply both tunnel URLs as environment variables before building. The webpack
+`DefinePlugin` injects `API_BASE_URL` into the bundle and rewrites static asset
+URLs to `ADDIN_URL_PROD`; no source file edits are required or committed.
+
+```powershell
+$cluster = (devtunnel show taskmaster-ios |
+  Select-String -Pattern '\.([a-z0-9]+)\.devtunnels\.ms' |
+  Select-Object -First 1).Matches.Groups[1].Value
+
+$env:API_BASE_URL    = "https://taskmaster-api.$cluster.devtunnels.ms"
+$env:ADDIN_URL_PROD  = "https://taskmaster-ios.$cluster.devtunnels.ms/"
+npm run build
+```
+
+The build must complete before starting the servers. Rebuild whenever the
+tunnel URLs change or the source changes.
+
+### Start all three layers
+
+Open three separate terminals and start each layer. All three must be running
+before opening the add-in on the device.
+
+**Terminal 1 — .NET API backend:**
+
+```powershell
+dotnet run --project src\TaskMaster.Api --launch-profile https
+```
+
+Listens on `https://localhost:7287`. User secrets are loaded automatically
+when `ASPNETCORE_ENVIRONMENT` is `Development` (set in `launchSettings.json`).
+
+**Terminal 2 — Static bundle server and iOS tunnel:**
+
+```powershell
+npm run mobile:start
+```
+
+Serves `dist/` through `http-server` on port 3000 and hosts the
+`taskmaster-ios` Dev Tunnel in the background. Process ids and state are
+recorded so `npm run mobile:stop` can stop the same processes.
+
+**Terminal 3 — API tunnel:**
+
+```powershell
+devtunnel host taskmaster-api
+```
+
+Forwards traffic from the `taskmaster-api` tunnel URL to the local API on port
+7287.
 
 ### Sideload and launch
 
@@ -171,11 +246,16 @@ Notes:
 
 ### Stop and clean up
 
-After testing, stop the background processes and revert the `urlProd` edit:
+Stop the static server and iOS tunnel:
 
 ```powershell
 npm run mobile:stop
 ```
+
+Stop the API tunnel by pressing `Ctrl+C` in Terminal 3. Stop the .NET API by
+pressing `Ctrl+C` in Terminal 1. The `$env:API_BASE_URL` and
+`$env:ADDIN_URL_PROD` environment variables are session-scoped and do not
+persist after the terminal closes.
 
 ## Outlook Mobile iOS validation
 
