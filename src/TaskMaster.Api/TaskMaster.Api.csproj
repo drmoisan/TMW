@@ -3,8 +3,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Version>1.0.0</Version>
-      <UserSecretsId>b3c44e17-fca8-45e2-a550-80f2d481007e</UserSecretsId>
-  </PropertyGroup>
+        <UserSecretsId>b3c44e17-fca8-45e2-a550-80f2d481007e</UserSecretsId>
+    </PropertyGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="TaskMaster.Api.Tests" />

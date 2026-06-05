@@ -41,13 +41,18 @@ builder.Services.AddAuthorization();
 
 if (!isDocumentEmission)
 {
-    // Wire bearer token validation via Microsoft.Identity.Web.
+    // Wire bearer token validation via Microsoft.Identity.Web, then enable
+    // on-behalf-of token acquisition for downstream APIs and register Microsoft
+    // Graph. AddInMemoryTokenCaches() registers the IMsalTokenCacheProvider that
+    // TokenAcquisitionAspNetCore depends on; without it, build-time DI validation
+    // (default in Development) cannot construct ITokenAcquisition or
+    // IAuthorizationHeaderProvider.
     builder
         .Services.AddAuthentication()
-        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-    // Register Microsoft Graph with OBO token acquisition.
-    builder.Services.AddMicrosoftGraph();
+        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi()
+        .AddMicrosoftGraph()
+        .AddInMemoryTokenCaches();
 }
 
 // Register Application and Infrastructure layers.
@@ -70,11 +75,7 @@ if (builder.Environment.IsDevelopment())
         builder.Services.AddCors(options =>
             options.AddPolicy(
                 "MobileDev",
-                policy =>
-                    policy
-                        .WithOrigins(mobileOrigin)
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
+                policy => policy.WithOrigins(mobileOrigin).AllowAnyHeader().AllowAnyMethod()
             )
         );
     }

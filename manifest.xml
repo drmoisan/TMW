@@ -20,6 +20,11 @@
         <!-- Deploy-configurable: replace with the production HTTPS domain at deploy time
              so the iFile Office Dialog (same-origin requirement) loads from production. -->
         <AppDomain>https://www.contoso.com/</AppDomain>
+        <!-- Dev Tunnel hosts (session-scoped): the add-in page host and the API host. Both are
+             required because the add-in loads pages from the page host and issues cross-origin
+             fetch calls to the API host. Replace with the production domain at deploy time. -->
+        <AppDomain>https://taskmaster-ios-3000.use.devtunnels.ms/</AppDomain>
+        <AppDomain>https://taskmaster-api-7287.use.devtunnels.ms/</AppDomain>
     </AppDomains>
     <Hosts>
         <Host Name="Mailbox" />
@@ -259,6 +264,17 @@
                     />
                 </bt:LongStrings>
             </Resources>
+            <WebApplicationInfo>
+                <Id>2921bc0b-4518-4547-b8ca-f937713688ec</Id>
+                <Resource>api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec</Resource>
+                <Scopes>
+                    <Scope>openid</Scope>
+                    <Scope>profile</Scope>
+                    <Scope>Mail.ReadBasic</Scope>
+                    <Scope>Mail.ReadWrite</Scope>
+                    <Scope>Files.ReadWrite</Scope>
+                </Scopes>
+            </WebApplicationInfo>
         </VersionOverrides>
     </VersionOverrides>
 </OfficeApp>

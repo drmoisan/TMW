@@ -28,8 +28,14 @@
     "accentColor": "#230201",
     "validDomains": [
         "localhost",
-        "https://www.contoso.com"
+        "https://www.contoso.com",
+        "taskmaster-ios-3000.use.devtunnels.ms",
+        "taskmaster-api-7287.use.devtunnels.ms"
     ],
+    "webApplicationInfo": {
+        "id": "2921bc0b-4518-4547-b8ca-f937713688ec",
+        "resource": "api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec"
+    },
     "authorization": {
         "permissions": {
             "resourceSpecific": [

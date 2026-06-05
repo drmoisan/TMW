@@ -9,3 +9,4 @@
 - [No required checks configured on main](project_no_required_checks_configured.md) — gh pr checks --required returns empty on TMW (2026-06-01); S9 must derive ci_gate from the full PR Pipeline run.
 - [Refresh product UI instructions](feedback_refresh_product_ui_instructions.md) — for instructions naming third-party UI paths (Outlook/M365), verify against latest docs via research; don't trust training data.
 - [Autonomous execution, no manual steps](feedback_autonomous_execution_no_manual_steps.md) — workflows must be fully agentic; unautomatable steps need an early-declared exception + human runbook, scope change, or halt.
+- [CI-green is not device-working](feedback_ci_green_is_not_device_working.md) — for device-rendered Office features, cover the host-bootstrap wiring seam and execute the on-device HI exception before claiming the feature works; CI-green ≠ done.

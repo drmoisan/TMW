@@ -1,38 +1,45 @@
-# Final QA — Coverage Delta / Threshold Verification (Issue #43)
+# Final QA — Coverage Delta / Threshold Verification (Issue #43, cycle 2)
 
-Timestamp: 2026-06-01T00-00
+Timestamp: 2026-06-04T20-29
 
-Uniform gates (both languages): line >= 85%, branch >= 75%, no regression on changed lines.
+Uniform gates: line >= 85%, branch >= 75%, no regression on changed lines. C# is not modified this
+cycle (Phase 6 is verification-only), so no .NET coverage delta applies.
 
-## TypeScript
+## TypeScript — headline (All files)
 
-| Metric | Baseline (Phase 0) | Post-change (P8-T5) | New/changed iFile code |
+| Metric | Baseline (P0-T6) | Post-change (P8-T5) |
+|---|---|---|
+| Line | 96.25% | 96.48% |
+| Branch | 95.02% | 95.47% |
+
+Headline line and branch both increased; both exceed the 85% / 75% gates.
+
+## TypeScript — modified / new files (changed-line coverage)
+
+| File | Baseline line / branch | Post-change line / branch | Status |
 |---|---|---|---|
-| Line | 98.01% (All files) | 97.16% (All files) | 96.74% (src/taskpane/ifile aggregate) |
-| Branch | 93.87% (All files) | 94.59% (All files) | 94.94% (src/taskpane/ifile aggregate) |
+| src/taskpane/ifile/ifile.ts | 85.48% / 94.11% | 86.95% / 93.75% | PASS (>= 85% / >= 75%) |
+| src/taskpane/ifile/inline-host.ts | 100% / 100% | 100% / 100% | PASS |
+| src/taskpane/ifile/naa-token-acquirer.ts | n/a (new file) | 98.14% / 100% | PASS (>= 85% / >= 75%) |
 
-- Result: PASS. The post-change All-files line (97.16%) and branch (94.59%) exceed the 85%/75%
-  gates. The small All-files line decrease vs. baseline reflects the larger surface (the iFile
-  modules) and the excluded host-bootstrap entry; every changed iFile module is at or above the
-  gates (the only sub-100% pure file, folder-path-builder.ts, is 88.88% line / 83.33% branch).
-- No regression on changed lines: the changed/new lines are the iFile modules, all newly covered.
+- ifile.ts: the only uncovered lines (174-182) are the `typeof Office !== "undefined"`
+  Office.onReady host-registration guard, not reachable in jsdom. The new stage-message routing and
+  the NAA-acquirer wiring are covered by the host-shell and bootstrap-seam tests. Line coverage rose
+  from 85.48% to 86.95% (no regression on changed lines).
+- inline-host.ts: unchanged at 100% / 100% after the parameterized connection-message change.
+- naa-token-acquirer.ts (new): 98.14% line / 100% branch. The single uncovered line (83) is the real
+  MSAL `createNestablePublicClientApplication` default-constructor lambda — the thinnest host-only
+  wiring. The config-building default, the support-check default, the interaction-required default,
+  the silent path, the popup fallback, the non-interaction re-throw, and the unsupported-environment
+  branch are all covered.
 
-## .NET
+## No production file excluded from coverage
 
-| Metric | Baseline (Phase 0) | Post-change (P8-T9) | New/changed iFile code |
-|---|---|---|---|
-| Line | per-run figures (full-solution instrumentation): Api 27.46%, Application 22.70%, Infrastructure 68.92% | per-run figures comparable | 98.5% union over the iFile production code (255/259 lines) |
-| Branch | per-run figures as above | per-run figures comparable | >= 75% on the exercised iFile classes (handler/filter/resolver/mapper at/near 100%; adapters covered by WireMock suites) |
+vitest.config.ts excludes only non-production paths. naa-token-acquirer.ts, ifile.ts, and
+inline-host.ts are all in the coverage denominator. No production file is coverage-excluded.
 
-- Result: PASS for the changed code. The meaningful new-code figure is the union across the three
-  test runs (each run instruments the whole solution, so a single per-project cobertura under-counts
-  sibling code). The iFile production code union line coverage is 98.5%, above the 85% gate.
-- No regression on changed lines: the new iFile lines are newly covered by the Phase 2/3/6 suites;
-  the only pre-existing production file touched, UserSettings.cs (added optional
-  ArchiveRootDriveItemId), remains covered by the existing UserSettings tests and the new mapping
-  integration tests.
+## Outcome
 
-## Overall
-
-Outcome: PASS. All required coverage values are numeric (no placeholders); both languages meet the
-uniform line >= 85% / branch >= 75% gates on the changed code with no regression on changed lines.
+PASS. All required coverage values are numeric (no placeholders). The headline and every
+changed/new iFile production file meet line >= 85% and branch >= 75% with no regression on changed
+lines. The NAA adapter and the stage-message routing are covered.

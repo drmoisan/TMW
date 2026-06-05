@@ -17,9 +17,11 @@ user.
 
 ## Cue
 
-Perform these steps after `entra-admin-consent.runbook.md` is complete (the Graph scopes are
-consented) and after the iFile build is hosted at a reachable HTTPS endpoint. The trigger is: the
-iFile branch (PR #44) is ready for sign-off and the nine manual acceptance criteria in
+Perform these steps after `entra-admin-consent.runbook.md` (HI-1, Graph scopes consented) and
+`entra-app-sso-config.runbook.md` (HI-3, the Entra app configured for NAA + OBO: SPA redirect,
+Application ID URI, exposed scope, token version, client secret) are both complete, and after the
+iFile build is hosted at a reachable HTTPS endpoint. The trigger is: the iFile branch (PR #44) is
+ready for sign-off and the nine manual acceptance criteria in
 `../evidence/other/manual-verification.md` are still marked `PENDING-DEVICE`.
 
 ## Prerequisites
@@ -34,8 +36,58 @@ iFile branch (PR #44) is ready for sign-off and the nine manual acceptance crite
   access to **Outlook on the web** (and/or new Outlook for Windows) for the desktop checks.
 - A test message in the mailbox that has at least one non-inline file attachment, plus a second
   message with no attachments.
+- The Entra app registration configured for NAA + OBO per `entra-app-sso-config.runbook.md` (HI-3)
+  and admin consent granted per `entra-admin-consent.runbook.md` (HI-1). The NAA SPA redirect host
+  and the Application ID URI host must match the Dev Tunnel host used for the build.
+
+## Client token path (NAA)
+
+The active client-side token mechanism is **NAA (nested app authentication)**, not the legacy
+`Office.auth.getAccessToken` SSO path. At runtime the host shell gates on
+`isSetSupported("NestedAppAuth", "1.1")` and, when supported, acquires the token through MSAL.js
+via `createNestablePublicClientApplication` + `acquireTokenSilent`, falling back to
+`acquireTokenPopup` on an interaction-required error
+(`src/taskpane/ifile/naa-token-acquirer.ts`). When NAA is not supported in the environment, the
+shell renders a visible sign-in-stage error rather than failing silently.
+
+Requirement — the Entra Application ID URI and the NAA SPA redirect host MUST match the active Dev
+Tunnel host used for the build. For the page host `taskmaster-ios-3000.use.devtunnels.ms`, the
+Application ID URI is
+`api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec` and the SPA
+redirect is `brk-multihub://taskmaster-ios-3000.use.devtunnels.ms`. If the build uses a different
+tunnel host, these MUST be updated to match (see `entra-app-sso-config.runbook.md`, HI-3) or NAA
+token acquisition will fail.
 
 ## Step-by-step Instructions
+
+### 0. Build the bundle with a reachable backend URL (mobile build)
+
+A physical iOS device cannot reach `https://localhost:3000`; that host resolves to the device
+itself, so `GET /api/ifile/folders` never reaches the backend. A mobile build MUST inject a
+reachable Dev-Tunnel or deployed backend host as `API_BASE_URL` and set the mobile-build flag
+before building. The runtime guard `assertReachableApiBaseUrl`
+(`src/taskpane/ifile/api-base-url.ts`, wired in `webpack.config.js` and consumed in
+`src/taskpane/ifile/ifile.ts`) fails fast and renders a visible error if a mobile build is left
+pointed at localhost.
+
+1. Start the backend Dev Tunnel (or confirm the deployed backend host) and note its HTTPS URL,
+   for example `https://taskmaster-api.<cluster>.devtunnels.ms`. Do not commit this URL; it is a
+   per-environment value supplied at build time.
+2. Set the build-time variables, then build (PowerShell):
+
+   ```powershell
+   $env:API_BASE_URL = "https://taskmaster-api.<cluster>.devtunnels.ms"
+   $env:IFILE_MOBILE_BUILD = "1"
+   npm run build
+   ```
+
+   `API_BASE_URL` is injected as `__API_BASE_URL__`; `IFILE_MOBILE_BUILD=1` is injected as
+   `__IS_MOBILE_BUILD__ = true`. A mobile build that omits `API_BASE_URL` (leaving the localhost
+   default) is rejected at runtime by the guard, which is the intended fail-fast behavior.
+3. Host the built bundle over HTTPS at the domain configured in the manifest, then proceed to
+   deploy/sideload below. After sideloading, confirm on the device that typing a known folder name
+   in the iFile search returns matching folders (not an empty or error state); an error row means
+   the injected `API_BASE_URL` is not reachable from the device.
 
 ### 1. Deploy or sideload the add-in
 
@@ -99,6 +151,17 @@ and an **Observed result** plus a **Pass** mark replacing each `PENDING-DEVICE` 
 
 If any step fails, capture the observed behavior in the dossier as the Observed result with a Fail
 mark; that becomes a blocking finding for PR #44.
+
+## Declared Exception (HI-2)
+
+HI-2 remains the single remaining declared human-interaction exception for this feature. No CI
+mechanism can confirm on-device rendering or the live device folder-load, so the final on-device
+visual/end-to-end confirmation — including the build-with-reachable-URL step in Section 0 above and
+the live folder-search check — is performed manually per this runbook. HI-2 **gates feature DONE
+but not cycle exit**: the code-and-test changes for the backend-URL guard and the load-failure
+resilience are fully automatable and CI-verified, and the remediation cycle exits on a green
+toolchain plus zero blocking re-audit findings. Feature DONE is reached only after this on-device
+confirmation is completed and recorded in `../evidence/other/manual-verification.md`.
 
 ## Source and Citation
 

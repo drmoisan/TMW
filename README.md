@@ -121,11 +121,15 @@ devtunnel create taskmaster-api --allow-anonymous
 devtunnel port create taskmaster-api -p 7287 --protocol https
 ```
 
-Record both tunnel URLs — they are stable for their tunnel ids:
+Record both tunnel URLs — they are stable for their tunnel ids. Each forwarded
+port is exposed at a host of the form `https://<id>-<port>.<cluster>.devtunnels.ms`,
+where `<id>` is the service-assigned tunnel id and `<port>` is the forwarded port.
+The host is not `taskmaster-ios.<cluster>.devtunnels.ms`; it includes the
+`-<port>` segment. Copy the printed port-forwarding URL exactly:
 
 ```powershell
-devtunnel show taskmaster-ios   # e.g. https://taskmaster-ios.<cluster>.devtunnels.ms/
-devtunnel show taskmaster-api   # e.g. https://taskmaster-api.<cluster>.devtunnels.ms
+devtunnel show taskmaster-ios   # copy the port-3000 URL, e.g. https://<id>-3000.<cluster>.devtunnels.ms
+devtunnel show taskmaster-api   # copy the port-7287 URL, e.g. https://<id>-7287.<cluster>.devtunnels.ms
 ```
 
 ### One-time API configuration (user secrets)
@@ -135,14 +139,30 @@ origin. Configure both via `dotnet user-secrets`. If the `--project` flag
 produces a `DotNetMuxer` error in your terminal, use `--id` with the project's
 `UserSecretsId` instead (see below).
 
+Set these once for the session, then reuse them below.
+
 ```powershell
-# Set these once for the session, then reuse them below.
 $tenantId  = "<your-tenant-id>"   # Azure AD app registration tenant id
+```
+
+```powershell
 $clientId  = "<your-client-id>"   # Azure AD app registration client id
-$cluster = (devtunnel show taskmaster-ios |
-  Select-String -Pattern '\.([a-z0-9]+)\.devtunnels\.ms' |
-  Select-Object -First 1).Matches.Groups[1].Value
+```
+
+```powershell
 $secretsId = "b3c44e17-fca8-45e2-a550-80f2d481007e"   # project UserSecretsId (from TaskMaster.Api.csproj)
+```
+
+```powershell
+# Build the iOS tunnel origin from the Tunnel ID. `devtunnel show` prints no URL;
+# the Tunnel ID is "<name>.<cluster>" and the port-3000 host that serves the
+# bundle is "<name>-3000.<cluster>.devtunnels.ms" (note the -3000 segment).
+$iosId = (devtunnel show taskmaster-ios |
+  Select-String -Pattern 'Tunnel ID\s*:\s*(\S+)').Matches.Groups[1].Value
+if (-not $iosId) { throw "Could not read the taskmaster-ios Tunnel ID from 'devtunnel show'." }
+$iosCluster = ($iosId -split '\.')[-1]
+$iosName    = $iosId.Substring(0, $iosId.Length - $iosCluster.Length - 1)
+$iosOrigin  = "https://$iosName-3000.$iosCluster.devtunnels.ms"
 
 # Azure AD
 dotnet user-secrets set "AzureAd:Instance"  "https://login.microsoftonline.com/" --id $secretsId
@@ -150,8 +170,8 @@ dotnet user-secrets set "AzureAd:TenantId"  "$tenantId"                         
 dotnet user-secrets set "AzureAd:ClientId"  "$clientId"                           --id $secretsId
 dotnet user-secrets set "AzureAd:Audience"  "api://$clientId"                     --id $secretsId
 
-# CORS — set to the taskmaster-ios tunnel URL (no trailing slash)
-dotnet user-secrets set "MobileDev:AllowedOrigin" "https://taskmaster-ios.$cluster.devtunnels.ms" --id $secretsId
+# CORS — the iOS tunnel origin (no trailing slash)
+dotnet user-secrets set "MobileDev:AllowedOrigin" "$iosOrigin" --id $secretsId
 ```
 
 Secrets are stored outside the repository at
@@ -169,12 +189,24 @@ Supply both tunnel URLs as environment variables before building. The webpack
 URLs to `ADDIN_URL_PROD`; no source file edits are required or committed.
 
 ```powershell
-$cluster = (devtunnel show taskmaster-ios |
-  Select-String -Pattern '\.([a-z0-9]+)\.devtunnels\.ms' |
-  Select-Object -First 1).Matches.Groups[1].Value
+# `devtunnel show` prints no URL. Build each from its Tunnel ID ("<name>.<cluster>");
+# the per-port host is "<name>-<port>.<cluster>.devtunnels.ms" (note the -<port>
+# segment). ADDIN_URL_PROD needs a trailing slash; API_BASE_URL does not.
+function Get-DevTunnelPortUrl {
+  param([Parameter(Mandatory)][string]$TunnelName, [Parameter(Mandatory)][int]$Port)
+  $id = (devtunnel show $TunnelName |
+    Select-String -Pattern 'Tunnel ID\s*:\s*(\S+)').Matches.Groups[1].Value
+  if (-not $id) { throw "Could not read the $TunnelName Tunnel ID from 'devtunnel show'." }
+  $cluster = ($id -split '\.')[-1]
+  $name    = $id.Substring(0, $id.Length - $cluster.Length - 1)
+  "https://$name-$Port.$cluster.devtunnels.ms"
+}
 
-$env:API_BASE_URL    = "https://taskmaster-api.$cluster.devtunnels.ms"
-$env:ADDIN_URL_PROD  = "https://taskmaster-ios.$cluster.devtunnels.ms/"
+$iosUrl = Get-DevTunnelPortUrl -TunnelName taskmaster-ios -Port 3000
+$apiUrl = Get-DevTunnelPortUrl -TunnelName taskmaster-api -Port 7287
+
+$env:API_BASE_URL    = $apiUrl
+$env:ADDIN_URL_PROD  = "$iosUrl/"
 npm run build
 ```
 

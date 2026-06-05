@@ -56,11 +56,20 @@ module.exports = async (env, options) => {
     },
     plugins: [
       // Inject the API base URL at build time. Desktop dev builds use the default
-      // (localhost:3000 / webpack dev-server). Mobile builds supply the Dev Tunnel URL via
-      // the API_BASE_URL env var, e.g.: $env:API_BASE_URL = "https://taskmaster-api.<cluster>.devtunnels.ms"
+      // (localhost:3000 / webpack dev-server). A MOBILE BUILD MUST set API_BASE_URL to a
+      // reachable Dev-Tunnel/deployed host AND set the mobile-build flag IFILE_MOBILE_BUILD=1,
+      // e.g.: $env:API_BASE_URL = "https://taskmaster-api.<cluster>.devtunnels.ms"; $env:IFILE_MOBILE_BUILD = "1".
+      // The localhost default remains only for non-mobile desktop dev; a mobile build pointed at
+      // localhost is rejected at runtime by assertReachableApiBaseUrl (src/taskpane/ifile/api-base-url.ts),
+      // because localhost resolves to the device itself and the backend is unreachable. The actual
+      // Dev-Tunnel URL is supplied at build time per the on-device verification runbook (HI-2); it is
+      // never hardcoded here.
       new webpack.DefinePlugin({
         __API_BASE_URL__: JSON.stringify(
           process.env.API_BASE_URL ?? "https://localhost:3000"
+        ),
+        __IS_MOBILE_BUILD__: JSON.stringify(
+          process.env.IFILE_MOBILE_BUILD === "1" || process.env.IFILE_MOBILE_BUILD === "true"
         ),
       }),
       new HtmlWebpackPlugin({
