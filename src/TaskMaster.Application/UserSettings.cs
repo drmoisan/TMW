@@ -15,9 +15,15 @@ namespace TaskMaster.Application;
 /// This value is set by <see cref="IUserSettingsRepository.SaveAsync"/> and must not be
 /// supplied by callers.
 /// </param>
+/// <param name="ArchiveRootDriveItemId">
+/// The OneDrive drive-item id chosen by the user as the Archive root for the iFile
+/// feature (OD-6). <c>null</c> until the user completes the first-use select-or-create
+/// step; persisted and reused on subsequent filings without re-prompting (AC-22, AC-23).
+/// </param>
 public sealed record UserSettings(
     string UserId,
     bool NotificationsEnabled,
     bool TriageEnabled,
-    DateTimeOffset LastModifiedAt
+    DateTimeOffset LastModifiedAt,
+    string? ArchiveRootDriveItemId = null
 );

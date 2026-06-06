@@ -17,6 +17,14 @@
     <SupportUrl DefaultValue="https://taskmaster.local" />
     <AppDomains>
         <AppDomain>https://localhost:3000/</AppDomain>
+        <!-- Deploy-configurable: replace with the production HTTPS domain at deploy time
+             so the iFile Office Dialog (same-origin requirement) loads from production. -->
+        <AppDomain>https://www.contoso.com/</AppDomain>
+        <!-- Dev Tunnel hosts (session-scoped): the add-in page host and the API host. Both are
+             required because the add-in loads pages from the page host and issues cross-origin
+             fetch calls to the API host. Replace with the production domain at deploy time. -->
+        <AppDomain>https://taskmaster-ios-3000.use.devtunnels.ms/</AppDomain>
+        <AppDomain>https://taskmaster-api-7287.use.devtunnels.ms/</AppDomain>
     </AppDomains>
     <Hosts>
         <Host Name="Mailbox" />
@@ -34,7 +42,7 @@
             </DesktopSettings>
         </Form>
     </FormSettings>
-    <Permissions>ReadItem</Permissions>
+    <Permissions>ReadWriteMailbox</Permissions>
     <Rule xsi:type="RuleCollection" Mode="Or">
         <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
     </Rule>
@@ -60,6 +68,21 @@
                             <OfficeTab id="TabDefault">
                                 <Group id="msgReadGroup">
                                     <Label resid="GroupLabel" />
+                                    <Control xsi:type="Button" id="msgReadIFileButton">
+                                        <Label resid="IFileButton.Label" />
+                                        <Supertip>
+                                            <Title resid="IFileButton.Label" />
+                                            <Description resid="IFileButton.Tooltip" />
+                                        </Supertip>
+                                        <Icon>
+                                            <bt:Image size="16" resid="Icon.16x16" />
+                                            <bt:Image size="32" resid="Icon.32x32" />
+                                            <bt:Image size="80" resid="Icon.80x80" />
+                                        </Icon>
+                                        <Action xsi:type="ShowTaskpane">
+                                            <SourceLocation resid="IFile.Url" />
+                                        </Action>
+                                    </Control>
                                     <Control xsi:type="Button" id="msgReadOpenPaneButton">
                                         <Label resid="TaskpaneButton.Label" />
                                         <Supertip>
@@ -83,6 +106,47 @@
                         <ExtensionPoint xsi:type="MobileMessageReadCommandSurface">
                             <Group id="mobileMsgReadGroup">
                                 <Label resid="GroupLabel" />
+                                <Control xsi:type="MobileButton" id="mobileMsgReadIFileButton">
+                                    <Label resid="IFileButton.Label" />
+                                    <Icon xsi:type="bt:MobileIconList">
+                                        <bt:Image size="25" scale="1" resid="Icon.Mobile.25x25" />
+                                        <bt:Image
+                                            size="25"
+                                            scale="2"
+                                            resid="Icon.Mobile.25x25@2x"
+                                        />
+                                        <bt:Image
+                                            size="25"
+                                            scale="3"
+                                            resid="Icon.Mobile.25x25@3x"
+                                        />
+                                        <bt:Image size="32" scale="1" resid="Icon.Mobile.32x32" />
+                                        <bt:Image
+                                            size="32"
+                                            scale="2"
+                                            resid="Icon.Mobile.32x32@2x"
+                                        />
+                                        <bt:Image
+                                            size="32"
+                                            scale="3"
+                                            resid="Icon.Mobile.32x32@3x"
+                                        />
+                                        <bt:Image size="48" scale="1" resid="Icon.Mobile.48x48" />
+                                        <bt:Image
+                                            size="48"
+                                            scale="2"
+                                            resid="Icon.Mobile.48x48@2x"
+                                        />
+                                        <bt:Image
+                                            size="48"
+                                            scale="3"
+                                            resid="Icon.Mobile.48x48@3x"
+                                        />
+                                    </Icon>
+                                    <Action xsi:type="ShowTaskpane">
+                                        <SourceLocation resid="IFile.Url" />
+                                    </Action>
+                                </Control>
                                 <Control xsi:type="MobileButton" id="mobileMsgReadOpenPaneButton">
                                     <Label resid="TaskpaneButton.Label" />
                                     <Icon xsi:type="bt:MobileIconList">
@@ -182,18 +246,35 @@
                 </bt:Images>
                 <bt:Urls>
                     <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html" />
+                    <bt:Url id="IFile.Url" DefaultValue="https://localhost:3000/ifile.html" />
                 </bt:Urls>
                 <bt:ShortStrings>
                     <bt:String id="GroupLabel" DefaultValue="TaskMaster" />
                     <bt:String id="TaskpaneButton.Label" DefaultValue="Open TaskMaster" />
+                    <bt:String id="IFileButton.Label" DefaultValue="iFile" />
                 </bt:ShortStrings>
                 <bt:LongStrings>
                     <bt:String
                         id="TaskpaneButton.Tooltip"
                         DefaultValue="Open the TaskMaster pane to view selected-message context."
                     />
+                    <bt:String
+                        id="IFileButton.Tooltip"
+                        DefaultValue="File the opened message to a folder and mirror its attachments to OneDrive."
+                    />
                 </bt:LongStrings>
             </Resources>
+            <WebApplicationInfo>
+                <Id>3592bf52-46f6-4eb0-835c-4f961058de97</Id>
+                <Resource>api://taskmaster-ios-3000.use.devtunnels.ms/3592bf52-46f6-4eb0-835c-4f961058de97</Resource>
+                <Scopes>
+                    <Scope>openid</Scope>
+                    <Scope>profile</Scope>
+                    <Scope>Mail.ReadBasic</Scope>
+                    <Scope>Mail.ReadWrite</Scope>
+                    <Scope>Files.ReadWrite</Scope>
+                </Scopes>
+            </WebApplicationInfo>
         </VersionOverrides>
     </VersionOverrides>
 </OfficeApp>

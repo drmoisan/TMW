@@ -32,6 +32,9 @@
         <!-- Pin transitive dependency to fix high-severity vulnerability GHSA-7j59-v9qr-6fq9 in 1.21.1. -->
         <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="1.22.2" />
 
+        <!-- Logging abstractions for the iFile filing-command telemetry (Issue #43). -->
+        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
+
         <!-- Property-based testing. -->
         <PackageVersion Include="CsCheck" Version="4.6.2" />
 

@@ -19,9 +19,17 @@ regex = '''(?i)(office[_-]?addin[_-]?(?:shared[_-]?)?(?:key|token))\s*[=:]\s*['"
 tags = ["secret", "office-addin"]
 
 [allowlist]
-description = "Allowlist for documentation and test fixtures"
+description = "Allowlist for documentation, test fixtures, and the published dotnet UserSecretsId"
 paths = [
   '''(?i)docs/.*\.md''',
   '''(?i)\.gitleaks\.toml''',
   '''(?i)docs/features/.*'''
+]
+# The value below is the dotnet UserSecretsId, a non-secret project identifier that names
+# where user-secrets are stored on disk. It is committed by design in
+# src/TaskMaster.Api/TaskMaster.Api.csproj and is documented in the repo-root README. It is
+# not a credential. This regex allowlists only that specific published GUID, so generic-api-key
+# and all other default and custom rules continue to scan every other value in the repository.
+regexes = [
+  '''b3c44e17-fca8-45e2-a550-80f2d481007e'''
 ]

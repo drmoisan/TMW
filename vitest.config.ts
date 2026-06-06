@@ -6,8 +6,8 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test-support/vitest-setup.ts"],
-    include: ["**/*.test.ts"],
-    exclude: ["node_modules", "dist", "lib"],
+    include: ["tests/**/*.test.ts"],
+    exclude: ["node_modules", "dist", "lib", "tests/e2e/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "json-summary"],
@@ -23,9 +23,6 @@ export default defineConfig({
         "eslint.config.mjs",
         ".dependency-cruiser.cjs",
         "webpack.config.js",
-        // Auto-generated, type-only API client (openapi-typescript output). It
-        // contains no executable runtime code, so coverage metrics do not apply.
-        "src/api-client/v1.ts",
       ],
       thresholds: {
         lines: 85,

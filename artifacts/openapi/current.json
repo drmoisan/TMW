@@ -104,6 +104,61 @@
           }
         }
       }
+    },
+    "/api/ifile/folders": {
+      "get": {
+        "tags": [
+          "TaskMaster.Api"
+        ],
+        "description": "Returns the flat list of mailbox leaf folders for the iFile search container. The client loads this once per container open and filters in-memory per keystroke.",
+        "operationId": "IFileFolders",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ifile/file": {
+      "post": {
+        "tags": [
+          "TaskMaster.Api"
+        ],
+        "description": "Files the opened message: resolves/creates the mirrored OneDrive folder, uploads non-inline file attachments, then moves the message (attachments-first, move-last). Returns 422 when the message id or destination folder id is missing.",
+        "operationId": "IFileFile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileMessageEndpointRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileMessageEndpointResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -178,6 +233,85 @@
           },
           "confirmed": {
             "type": "boolean"
+          }
+        }
+      },
+      "FileMessageEndpointRequest": {
+        "required": [
+          "messageRestId",
+          "destinationFolderId",
+          "archiveRootDriveItemId"
+        ],
+        "type": "object",
+        "properties": {
+          "messageRestId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "destinationFolderId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "archiveRootDriveItemId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "FileMessageEndpointResponse": {
+        "required": [
+          "outcome",
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string"
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "FolderListItem": {
+        "required": [
+          "folderId",
+          "displayName",
+          "path"
+        ],
+        "type": "object",
+        "properties": {
+          "folderId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        }
+      },
+      "FolderListResponse": {
+        "required": [
+          "folders"
+        ],
+        "type": "object",
+        "properties": {
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderListItem"
+            }
           }
         }
       },

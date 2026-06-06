@@ -1,7 +1,9 @@
 using System.Reflection;
+using System.Security.Claims;
 using Microsoft.Identity.Web;
 using TaskMaster.Api;
 using TaskMaster.Application;
+using TaskMaster.Application.IFile;
 using TaskMaster.Classifier;
 using TaskMaster.Infrastructure;
 
@@ -39,19 +41,45 @@ builder.Services.AddAuthorization();
 
 if (!isDocumentEmission)
 {
-    // Wire bearer token validation via Microsoft.Identity.Web.
+    // Wire bearer token validation via Microsoft.Identity.Web, then enable
+    // on-behalf-of token acquisition for downstream APIs and register Microsoft
+    // Graph. AddInMemoryTokenCaches() registers the IMsalTokenCacheProvider that
+    // TokenAcquisitionAspNetCore depends on; without it, build-time DI validation
+    // (default in Development) cannot construct ITokenAcquisition or
+    // IAuthorizationHeaderProvider.
     builder
         .Services.AddAuthentication()
-        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-    // Register Microsoft Graph with OBO token acquisition.
-    builder.Services.AddMicrosoftGraph();
+        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi()
+        .AddMicrosoftGraph()
+        .AddInMemoryTokenCaches();
 }
 
 // Register Application and Infrastructure layers.
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddClassifierServices();
+
+// Development-only CORS policy for Outlook Mobile testing via Dev Tunnel.
+// Set MobileDev:AllowedOrigin in user secrets to the taskmaster-ios tunnel URL, e.g.:
+//   dotnet user-secrets set "MobileDev:AllowedOrigin" "https://taskmaster-ios.<cluster>.devtunnels.ms"
+//       --id b3c44e17-fca8-45e2-a550-80f2d481007e
+// The policy is a no-op when the setting is absent so the app starts without it.
+var mobileCorsEnabled = false;
+if (builder.Environment.IsDevelopment())
+{
+    var mobileOrigin = builder.Configuration["MobileDev:AllowedOrigin"];
+    if (!string.IsNullOrWhiteSpace(mobileOrigin))
+    {
+        mobileCorsEnabled = true;
+        builder.Services.AddCors(options =>
+            options.AddPolicy(
+                "MobileDev",
+                policy => policy.WithOrigins(mobileOrigin).AllowAnyHeader().AllowAnyMethod()
+            )
+        );
+    }
+}
 
 var app = builder.Build();
 
@@ -62,7 +90,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Middleware order: Correlation ID → Authentication → Authorization.
+// Middleware order: CORS → Correlation ID → Authentication → Authorization.
+if (mobileCorsEnabled)
+{
+    app.UseCors("MobileDev");
+}
+
 app.UseMiddleware<CorrelationIdMiddleware>();
 
 if (!isDocumentEmission)
@@ -128,6 +161,70 @@ app.MapPost(
             + "Returns 204 No Content on success."
     )
     .Produces(StatusCodes.Status204NoContent)
+    .RequireAuthorization();
+
+app.MapGet(
+        "/api/ifile/folders",
+        async (IFolderTreeReader reader, CancellationToken ct) =>
+        {
+            var folders = await reader.GetFoldersAsync(ct).ConfigureAwait(false);
+            var leaves = folders
+                .Where(f => f.ChildFolderCount == 0)
+                .Select(f => new FolderListItem(f.Id, f.DisplayName, f.Path))
+                .ToList();
+            return Results.Ok(new FolderListResponse(leaves));
+        }
+    )
+    .WithName("IFileFolders")
+    .WithDescription(
+        "Returns the flat list of mailbox leaf folders for the iFile search container. "
+            + "The client loads this once per container open and filters in-memory per keystroke."
+    )
+    .Produces<FolderListResponse>(StatusCodes.Status200OK)
+    .RequireAuthorization();
+
+app.MapPost(
+        "/api/ifile/file",
+        async (
+            FileMessageEndpointRequest req,
+            ICommandBus bus,
+            ClaimsPrincipal user,
+            CancellationToken ct
+        ) =>
+        {
+            if (
+                string.IsNullOrWhiteSpace(req.MessageRestId)
+                || string.IsNullOrWhiteSpace(req.DestinationFolderId)
+            )
+            {
+                return Results.UnprocessableEntity();
+            }
+
+            var userId =
+                user.FindFirstValue("oid")
+                ?? user.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? "unknown";
+            var command = new FileMessageCommand(
+                req.MessageRestId,
+                req.DestinationFolderId,
+                req.ArchiveRootDriveItemId,
+                userId
+            );
+            await bus.DispatchAsync(command, ct).ConfigureAwait(false);
+            var result = await command.ResultSink.Task.ConfigureAwait(false);
+            return Results.Ok(
+                new FileMessageEndpointResponse(IFileOutcome.ToWire(result.Outcome), result.Error)
+            );
+        }
+    )
+    .WithName("IFileFile")
+    .WithDescription(
+        "Files the opened message: resolves/creates the mirrored OneDrive folder, uploads "
+            + "non-inline file attachments, then moves the message (attachments-first, move-last). "
+            + "Returns 422 when the message id or destination folder id is missing."
+    )
+    .Produces<FileMessageEndpointResponse>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status422UnprocessableEntity)
     .RequireAuthorization();
 
 await app.RunAsync().ConfigureAwait(false);

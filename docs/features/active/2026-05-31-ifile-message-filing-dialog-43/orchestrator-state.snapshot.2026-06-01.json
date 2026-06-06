@@ -1,0 +1,167 @@
+{
+  "objective": "iFile message-filing feature for mobile and desktop. Add an 'iFile' command that is the first button available when an email is opened. Clicking it opens a dialog container with a search textbox. While the textbox is blank, the result list contains no search results. As the user types, folder-tree leaf matches (wildcard-capable) are prepended to the list. The dialog container must be built to also receive classifier results and recent choices as future input sources (those sources are deferred / not yet built). Selecting a result moves the message to that Outlook folder and saves any attachments to a OneDrive directory; the root 'Archive' Outlook folder maps to a OneDrive 'Archive' folder, and target subfolders are created on OneDrive to mirror the Outlook folder structure.",
+  "change_budget_estimate": "Large path / full-feature. Cross-cutting: manifest (button + dialog runtime, desktop + mobile form factors), Office.js dialog command wiring, host-neutral folder-tree wildcard search/match logic, Graph mail-folder enumeration + message move adapter, OneDrive (Graph drive) attachment-mirroring adapter, dialog UI page (HTML/CSS/TS). 4+ production surfaces. Requires research, spec, user-story, atomic planning, atomic execution, feature review.",
+  "path_selected": "large",
+  "promotion-type": "feature",
+  "short-name": "ifile-message-filing-dialog",
+  "work-mode": "full-feature",
+  "issue-num": 43,
+  "feature-folder": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43",
+  "branch": "feature/ifile-message-filing-dialog-43",
+  "base_branch": "main",
+  "completed_steps": [
+    "S0_startup_checks",
+    "S1_change_budget_estimation",
+    "S2_promotion",
+    "S3_research_complete",
+    "S4_spec_and_user_story_complete",
+    "S4a_decisions_resolved_spec_updated",
+    "S5_atomic_planning_complete",
+    "S5_plan_validated",
+    "S5_plan_revised_per_preflight",
+    "S5_plan_revised_api_seam_phase3",
+    "S5_plan_renumbered_numeric_phases",
+    "S5_plan_revalidated",
+    "S6_executor_preflight_all_clear",
+    "S7_atomic_execution_complete",
+    "S7a_pre_review_commit",
+    "S8_feature_review_complete",
+    "S8a_audit_artifacts_validated",
+    "S8_create_pr",
+    "S9_ci_green"
+  ],
+  "next_step": "blocked_on_manual_device_tenant_verification",
+  "human_interaction": {
+    "requirements": [
+      {
+        "id": "HI-1",
+        "description": "Grant tenant admin consent for the Microsoft Graph delegated scopes Mail.ReadWrite, Files.ReadWrite, Mail.ReadBasic (no scripted Global Admin credential available in CI).",
+        "discovered_at_stage": "S3_research",
+        "response": "exception",
+        "runbook_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/runbooks/entra-admin-consent.runbook.md"
+      },
+      {
+        "id": "HI-2",
+        "description": "Visually verify iFile rendering and end-to-end filing on real Outlook desktop and iOS clients (AC-2,3,11,12,13,20,21,24); no programmatic on-device rendering-assertion path exists.",
+        "discovered_at_stage": "S3_research",
+        "response": "exception",
+        "runbook_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/runbooks/outlook-on-device-verification.runbook.md"
+      }
+    ],
+    "note": "Declared retroactively under the autonomous-execution mandate (issue #45). Automatable items (Graph permission declarations, manifest-domain substitution) are scope-change/build steps, not exceptions."
+  },
+  "pr_number": 44,
+  "pr_url": "https://github.com/drmoisan/TMW/pull/44",
+  "pr_author_receipt": "artifacts/pr_body_43.receipt.json",
+  "pr_body_path": "artifacts/pr_body_43.md",
+  "step9_status": "passed",
+  "ci_gate": {
+    "head_sha": "0357d88d13b1efdc0ee9d29999623fe2bf61bd72",
+    "pr_pipeline_run_id": "26757488291",
+    "pr_pipeline_run_url": "https://github.com/drmoisan/TMW/actions/runs/26757488291",
+    "conclusion": "success",
+    "verified_at": "2026-06-01T13:31:57Z",
+    "checks": "15 checks: 14 pass, 1 skipping (stage-e2e-smoke); 0 fail/pending. Branch protection reports no --required list for this branch, so the full PR Pipeline check set was parsed via Invoke-CiGateParser.ps1.",
+    "note": "All 7 toolchain stages + tier-classification + secret-scan green on PR head."
+  },
+  "last_verified_ci_sha": "0357d88d13b1efdc0ee9d29999623fe2bf61bd72",
+  "done_status": "NOT_DONE — PR Creation Gate condition 6 (CI green) and conditions 1,3,4,5 are satisfied; condition 2 (all AC pass) is NOT satisfiable in this environment. 9 ACs (AC-2,3,11,12,13,19,20,21,24) require on-device + tenant verification (R-1..R-3) and R-4 production-domain deploy config. These are the documented pre-merge checklist; orchestrator does not write DONE until they are confirmed.",
+  "step6_status": "preflight_all_clear",
+  "step7_status": "complete",
+  "step8_status": "complete",
+  "blocking_findings_count": 0,
+  "blocking_findings_resolved": true,
+  "audit_artifacts": {
+    "policy_audit": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/policy-audit.2026-06-01T08-29.md",
+    "code_review": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/code-review.2026-06-01T08-29.md",
+    "feature_audit": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/feature-audit.2026-06-01T08-29.md",
+    "remediation_inputs": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/remediation-inputs.2026-06-01T08-29.md",
+    "all_validated": true
+  },
+  "feature_review_outcome": {
+    "blocking": 0,
+    "minor": 2,
+    "info": 3,
+    "ac": "22 PASS (CI dimensions), AC-19 PARTIAL (AAD consent PENDING-TENANT), AC-20 UNVERIFIED (manual-only), 0 FAIL",
+    "pr_readiness": "Conditional Go: CI-verifiable scope complete, green, zero blocking findings; 9 ACs (AC-2,3,11,12,13,19,20,21,24) require manual device/tenant verification (R-1..R-3); R-4 production-domain config is deploy-time; R-5 optional."
+  },
+  "pre_review_commit": "0357d88d13b1efdc0ee9d29999623fe2bf61bd72",
+  "head_sha": "0357d88d13b1efdc0ee9d29999623fe2bf61bd72",
+  "merge_base_sha": "ff6aa007fefcd24ff18b96240525d7c9bafd7d18",
+  "base_branch": "main",
+  "pre_review_commit_note": "Staged feature files only (142). Excluded unrelated pre-existing working-tree changes: .mcp.json and .claude/agent-memory/ (orchestrator memory).",
+  "pr_context_artifacts": ["artifacts/pr_context.summary.txt", "artifacts/pr_context.appendix.txt"],
+  "execution_summary": {
+    "tasks": "91/91 complete (P0-P8)",
+    "ts_toolchain": "format/lint/typecheck/depcruise EXIT 0; 100 tests pass; line 97.16% branch 94.59%",
+    "dotnet_toolchain": "csharpier check + build (0 warn/0 err) EXIT 0; arch 10/10; Application 43 + Infrastructure 21 + Api 28 tests pass; iFile union line 98.5%; tier-classification EXIT 0",
+    "ac_status": "spec.md 15/24 CI-verified+checked; 9 manual device/host AC (AC-2,3,11,12,13,19,20,21,24) recorded PENDING-DEVICE in evidence/other/manual-verification.md; AAD scopes PENDING-TENANT",
+    "suppressions_to_review": "single-line ESLint disables in wildcard-matcher.ts + 2 property tests (with -- reason); #pragma warning disable CA2000 in .NET GraphTestClient (ownership-transfer justification)",
+    "in_scope_decisions": "OpenAPI source-generated by .NET build then regenerated into v1.ts via generate:api (no hand edits); added pinned Microsoft.Extensions.Logging.Abstractions 10.0.7; additive UserSettings.ArchiveRootDriveItemId + schema; ifile.ts host-bootstrap excluded from TS coverage"
+  },
+  "plan_phase_task_count": "9 phases (P0-P8), 91 atomic tasks",
+  "preflight": {
+    "iterations": 4,
+    "final_status": "clear",
+    "iteration_1": "changes_requested — 11 .NET toolchain deltas (csharp.md alignment)",
+    "iteration_2": "clear, then superseded — at execution-entry executor surfaced missing API-host/OpenAPI seam (no code changed)",
+    "iteration_3": "changes_requested — added API seam as Phase 2A; validator REJECTED non-numeric Phase 2A/P2A-T# heading+id format",
+    "iteration_4": "clear — seam renumbered to Phase 3 with subsequent phases 4-8; validator passed; preconditions P4-T7/P6-T2 -> P3-T3 confirmed; build order Phase2->3->4 valid"
+  },
+  "acceptance_criteria_count_updated": 24,
+  "plan_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/plan.2026-05-31T20-58.md",
+  "plan_validated": true,
+  "plan_phase_task_count": "8 phases (P0-P7), 71 atomic tasks",
+  "step5_status": "complete",
+  "spec_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/spec.md",
+  "user_story_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/user-story.md",
+  "feature_document_path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43/feature-document.md",
+  "acceptance_criteria_count": 20,
+  "pending_user_decision": null,
+  "resolved_decisions": {
+    "decided_by": "user (dan@danmoisan.org) 2026-06-01",
+    "OD-7": "Server-side order is attachments-first, move-last: (1) resolve/create mirrored OneDrive folder, (2) upload attachments, (3) move message. Any earlier failure leaves the message in place and reports a clear error; retries are safe.",
+    "OD-10": "Tier T2 for the filing command + Graph adapter (a misfile is recoverable, not silent data loss). Host-neutral pure modules (wildcard matcher, path mapping, result composition) still require >=1 property-based test per pure function.",
+    "OD-4": "Save all non-inline file attachments; skip inline body-embedded content.",
+    "OD-5": "Archive root in the mailbox is identified by the mail folder displayName 'Archive' under the mailbox root, NOT the Graph well-known 'archive' mailbox.",
+    "OD-6": "CHANGED FROM DEFAULT: the OneDrive Archive root is not auto-named. On first use (no stored mapping) the user picks an existing OneDrive folder OR creates a new one to serve as the Archive root. The Outlook-Archive -> OneDrive-folder mapping then PERSISTS in user settings and is reused without re-prompting. Subfolders beneath the mapped root are still create-if-missing to mirror the Outlook structure.",
+    "OD-8": "NAA primary token acquisition; fall back to backend on-behalf-of via getAccessTokenAsync SSO. All privileged operations stay server-side.",
+    "OD-9": "Deterministic search ordering: exact/prefix matches first, then alphabetical by full folder path. Search results are prepended ahead of future classifier/recent sources."
+  },
+  "research_findings_path": "artifacts/research/2026-05-31-ifile-message-filing-dialog-research-43.md",
+  "research_key_findings": {
+    "hard_constraint_mobile_dialog": "Office Dialog API (displayDialogAsync) is NOT supported on Outlook mobile (iOS/Android). On desktop the iFile UI opens as a real dialog; on mobile the same search UI must render inline in the full-screen task pane. messageChild requires Mailbox 1.9.",
+    "hard_constraint_attachment_content": "getAttachmentContentAsync requires Mailbox 1.8 (not on mobile); item.attachments metadata (Mailbox 1.1) is available everywhere. Fetch attachment content server-side via Graph.",
+    "hard_constraint_convert_id": "On Outlook iOS item.itemId is already REST-formatted and convertToRestId is unsupported; branch on platform.",
+    "architecture_split": "Per No-COM rule 8, folder enumeration + message move (Graph POST /me/messages/{id}/move) + attachment fetch + OneDrive mirroring (Graph drive API) execute SERVER-SIDE in a new TaskMaster.Application command + TaskMaster.Infrastructure adapter, behind the existing OBO/NAA token flow. Client posts message REST id + destination folder id.",
+    "pure_modules": "Host-neutral testable TypeScript: wildcard matcher (glob * and ?, case-insensitive, NFC, escape \\* \\?, empty=>no results, match leaf name and full path), multi-source result-list composition (classifier+recent+search ordering; empty sources allowed), Outlook->OneDrive path mapping under Archive root.",
+    "manifest_scope_changes": "manifest.json add MailboxItem.ReadWrite.User; manifest.xml ReadItem->ReadWriteMailbox; AAD delegated scopes add Mail.ReadWrite, Files.ReadWrite, Mail.ReadBasic; extend validDomains/AppDomains for prod host.",
+    "command_action": "Use ShowTaskpane action pointing at the iFile page as the first control in the message-read group/surface (ExecuteFunction not documented on MobileMessageReadCommandSurface). iFile must be the first controls[] entry (desktop) and first <Control> (mobile)."
+  },
+  "step5_status": "pending",
+  "step6_status": "pending",
+  "step7_status": "pending",
+  "step8_status": "pending",
+  "step9_status": "pending",
+  "step10_status": "pending",
+  "remediation_pass": 0,
+  "blocking_findings_resolved": false,
+  "blocking_findings_count": null,
+  "delegation_receipts": {
+    "promotion": {
+      "potential_entry": {"ok": true, "tool": "new_potential_entry", "workspace_root": "C:\\Users\\DanMoisan\\repos\\TMW", "summary": "Created a new potential entry for 'ifile-message-filing-dialog'.", "artifacts": ["C:/Users/DanMoisan/repos/TMW/docs/features/potential/2026-05-31-ifile-message-filing-dialog.md"]},
+      "issue": {"ok": true, "tool": "potential_to_issue", "workspace_root": "C:\\Users\\DanMoisan\\repos\\TMW", "summary": "Promoted 'docs/features/potential/2026-05-31-ifile-message-filing-dialog.md' as a feature workflow in full-feature mode.", "issue_number": 43, "issue_url": "https://github.com/drmoisan/TMW/issues/43", "note": "MCP receipt omitted issue number; resolved via gh issue list (Feature: ifile-message-filing-dialog created 2026-06-01T00:57:49Z)."},
+      "feature_folder": {"ok": true, "tool": "new_active_feature_folder", "workspace_root": "C:\\Users\\DanMoisan\\repos\\TMW", "summary": "Created a new active feature feature folder for 'ifile-message-filing-dialog'.", "path": "docs/features/active/2026-05-31-ifile-message-filing-dialog-43"}
+    }
+  },
+  "artifact_errors": [],
+  "blocked_reason": null,
+  "rollback_history": [
+    {
+      "at": "2026-06-01T00:56Z",
+      "action": "Overwrote orchestrator-state.json: replaced completed Issue #35 outlook-mobile-ios-parity checkpoint (PR #38, next_step=complete) with a new objective: iFile message-filing dialog feature (mobile + desktop) on the large/full-feature path.",
+      "reason": "User initiated a new orchestration objective via /orchestrate; prior objective was reported complete and merged."
+    }
+  ],
+  "last_updated": "2026-06-01T00:56Z"
+}

@@ -55,6 +55,31 @@ module.exports = {
         path: "^src/commands/",
       },
     },
+    {
+      name: "ifile-pure-modules-no-host-deps",
+      severity: "error",
+      comment:
+        "The iFile pure host-neutral modules (wildcard-matcher, result-list-composer, " +
+        "search-result-ordering, folder-path-builder, folder-search, folder-result) must " +
+        "remain free of Office.js, the Microsoft Graph SDK, the generated API client, and " +
+        "MSAL (@azure/msal-browser). Office.js / API-client / MSAL imports belong only in the " +
+        "iFile host-wiring modules (dialog-host, inline-host, ifile-api-client) and the " +
+        "host-bound NAA auth adapter (naa-token-acquirer), which is the ONLY module permitted " +
+        "to import @azure/msal-browser.",
+      from: {
+        path: "^src/taskpane/ifile/(wildcard-matcher|result-list-composer|search-result-ordering|folder-path-builder|folder-search|folder-result|message-id-resolver|host-presentation|archive-root-picker|ifile-controller)\\.ts$",
+        pathNot: "\\.test\\.ts$",
+      },
+      to: {
+        path: [
+          "^src/api-client/",
+          "node_modules/@types/office-js",
+          "node_modules/@microsoft/microsoft-graph-client",
+          "node_modules/@azure/msal-browser",
+        ],
+        dependencyTypesNot: ["type-only"],
+      },
+    },
   ],
   options: {
     doNotFollow: {

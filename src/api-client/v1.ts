@@ -72,6 +72,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ifile/folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Returns the flat list of mailbox leaf folders for the iFile search container. The client loads this once per container open and filters in-memory per keystroke. */
+        get: operations["IFileFolders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ifile/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Files the opened message: resolves/creates the mirrored OneDrive folder, uploads non-inline file attachments, then moves the message (attachments-first, move-last). Returns 422 when the message id or destination folder id is missing. */
+        post: operations["IFileFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -90,6 +124,23 @@ export interface components {
             messageId: null | string;
             label: null | string;
             confirmed: boolean;
+        };
+        FileMessageEndpointRequest: {
+            messageRestId: null | string;
+            destinationFolderId: null | string;
+            archiveRootDriveItemId: null | string;
+        };
+        FileMessageEndpointResponse: {
+            outcome: string;
+            error: null | string;
+        };
+        FolderListItem: {
+            folderId: string;
+            displayName: string;
+            path: string;
+        };
+        FolderListResponse: {
+            folders: components["schemas"]["FolderListItem"][];
         };
         HealthResponse: {
             status: string;
@@ -192,6 +243,57 @@ export interface operations {
         responses: {
             /** @description No Content */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IFileFolders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FolderListResponse"];
+                };
+            };
+        };
+    };
+    IFileFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FileMessageEndpointRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileMessageEndpointResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
