@@ -20,6 +20,8 @@ import { mountInline, renderLoadError, type InlineHostDom } from "./inline-host"
 import { postSelectionToParent } from "./dialog-host";
 import { assertReachableApiBaseUrl } from "./api-base-url";
 import { createNaaTokenAcquirer } from "./naa-token-acquirer";
+import { formatErrorDetail } from "./sign-in-error-detail";
+import { formatBuildStamp } from "./build-stamp";
 
 // Injected by webpack DefinePlugin at build time. __API_BASE_URL__ default: https://localhost:3000
 // (desktop dev server). __IS_MOBILE_BUILD__ is true only when IFILE_MOBILE_BUILD is set. A mobile
@@ -27,6 +29,10 @@ import { createNaaTokenAcquirer } from "./naa-token-acquirer";
 // verification runbook, HI-2); a localhost URL in a mobile build is rejected by the guard below.
 declare const __API_BASE_URL__: string;
 declare const __IS_MOBILE_BUILD__: boolean;
+// On-screen build identifier (issue #43). Injected by webpack DefinePlugin; an ISO timestamp by
+// default, or the reproducible BUILD_ID override. Rendered early in runBootstrap so the developer
+// can confirm on-device which build is loaded, regardless of sign-in success or failure.
+declare const __BUILD_ID__: string;
 
 /** Acquires the bearer token used for backend calls. Injected so bootstrap stays Office-free. */
 export type TokenAcquirer = () => Promise<string>;
@@ -65,6 +71,14 @@ export interface BootstrapDeps {
     readonly acquireToken: TokenAcquirer;
     readonly loadLeaves: LeafLoader;
     readonly onSelect: (folder: FolderResult) => void;
+    /**
+     * When true, the underlying error detail is appended to the visible sign-in-failure row so the
+     * real failure (for example an `AADSTS` code or the NAA-unsupported rejection) is readable on a
+     * device with no attachable console. The host shell sets this from `__IS_MOBILE_BUILD__`; the
+     * seam itself never reads the build-time global, keeping its host-neutral tests independent of
+     * webpack DefinePlugin injection.
+     */
+    readonly showErrorDetail: boolean;
 }
 
 /**
@@ -80,12 +94,16 @@ export async function bootstrap(deps: BootstrapDeps): Promise<void> {
     let token: string;
     try {
         token = await deps.acquireToken();
-    } catch {
+    } catch (error: unknown) {
         // Token acquisition failed (e.g. SSO denied on device). Bind the handler so the box is
         // responsive, then surface the error. The controller below would re-fetch on open, but
         // without a token the load cannot succeed; render the error state directly.
-        renderLoadError(deps.dom, SIGN_IN_FAILURE_MESSAGE);
+        const signInMessage = deps.showErrorDetail
+            ? `${SIGN_IN_FAILURE_MESSAGE} — ${formatErrorDetail(error)}`
+            : SIGN_IN_FAILURE_MESSAGE;
+        renderLoadError(deps.dom, signInMessage);
         deps.dom.searchInput.addEventListener("input", () => undefined);
+        console.error("iFile bootstrap: sign-in (token acquisition) failed", error);
         return;
     }
 
@@ -119,6 +137,13 @@ export async function runBootstrap(
     const hostName = Office.context.mailbox.diagnostics.hostName;
     const presentation = selectPresentation(hostName);
 
+    // Populate the on-screen build stamp early — before token acquisition — so it is visible even
+    // when sign-in fails. A missing element is tolerated (the stamp is unobtrusive, not required).
+    const buildStamp = document.getElementById("ifile-build-stamp");
+    if (buildStamp instanceof HTMLElement) {
+        buildStamp.textContent = formatBuildStamp(__BUILD_ID__);
+    }
+
     const searchInput = document.getElementById("ifile-search");
     const resultsList = document.getElementById("ifile-results");
     if (!(searchInput instanceof HTMLInputElement) || !(resultsList instanceof HTMLElement)) {
@@ -136,7 +161,10 @@ export async function runBootstrap(
     } catch (error: unknown) {
         // A mobile build pointed at localhost cannot reach the backend. Surface this visibly and
         // keep the box responsive rather than failing silently.
-        renderLoadError(dom, CONFIGURATION_FAILURE_MESSAGE);
+        const configMessage = __IS_MOBILE_BUILD__
+            ? `${CONFIGURATION_FAILURE_MESSAGE} — ${formatErrorDetail(error)}`
+            : CONFIGURATION_FAILURE_MESSAGE;
+        renderLoadError(dom, configMessage);
         dom.searchInput.addEventListener("input", () => undefined);
         console.error("iFile bootstrap: unreachable API base URL", error);
         return;
@@ -156,6 +184,7 @@ export async function runBootstrap(
         dom,
         presentation,
         acquireToken,
+        showErrorDetail: __IS_MOBILE_BUILD__,
         loadLeaves: (token) => client.loadLeafFolders(token),
         onSelect: (folder) => {
             // In the dialog presentation the selection is posted to the parent; the inline

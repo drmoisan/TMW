@@ -27,6 +27,17 @@ module.exports = async (env, options) => {
     },
     output: {
       clean: true,
+      // Content-hash only the iFile and taskpane entry chunks so a rebuilt JS bundle gets a new
+      // URL the iOS Outlook web-view cache cannot match. commands.js MUST stay unhashed: both
+      // manifest.json (CommandsRuntime code.script at https://localhost:3000/commands.js) and
+      // manifest.xml reference commands.js by fixed name, so hashing it would break the manifest.
+      // polyfill.js is a shared runtime chunk injected into the HTML pages; keeping it stable
+      // avoids any manifest/runtime surprise.
+      filename: (pathData) =>
+        pathData.chunk &&
+        (pathData.chunk.name === "ifile" || pathData.chunk.name === "taskpane")
+          ? "[name].[contenthash].js"
+          : "[name].js",
     },
     resolve: {
       extensions: [".ts", ".html", ".js"],
@@ -71,6 +82,10 @@ module.exports = async (env, options) => {
         __IS_MOBILE_BUILD__: JSON.stringify(
           process.env.IFILE_MOBILE_BUILD === "1" || process.env.IFILE_MOBILE_BUILD === "true"
         ),
+        // On-screen build stamp so the developer can confirm on-device which build is loaded.
+        // This file is build tooling, not runtime code under the determinism rules, so new Date()
+        // here is acceptable; BUILD_ID overrides it with a reproducible value when set.
+        __BUILD_ID__: JSON.stringify(process.env.BUILD_ID ?? new Date().toISOString()),
       }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",

@@ -221,7 +221,7 @@ before opening the add-in on the device.
 **Terminal 1 — .NET API backend:**
 
 ```powershell
-dotnet run --project src\TaskMaster.Api --launch-profile https
+Start-Process pwsh -ArgumentList '-NoExit', '-Command', 'dotnet run --project src\TaskMaster.Api --launch-profile https'
 ```
 
 Listens on `https://localhost:7287`. User secrets are loaded automatically
@@ -230,7 +230,7 @@ when `ASPNETCORE_ENVIRONMENT` is `Development` (set in `launchSettings.json`).
 **Terminal 2 — Static bundle server and iOS tunnel:**
 
 ```powershell
-npm run mobile:start
+Start-Process pwsh -ArgumentList '-NoExit', '-Command', 'npm run mobile:start'
 ```
 
 Serves `dist/` through `http-server` on port 3000 and hosts the
@@ -240,11 +240,21 @@ recorded so `npm run mobile:stop` can stop the same processes.
 **Terminal 3 — API tunnel:**
 
 ```powershell
-devtunnel host taskmaster-api
+Start-Process pwsh -ArgumentList '-NoExit', '-Command', 'devtunnel host taskmaster-api'
 ```
 
 Forwards traffic from the `taskmaster-api` tunnel URL to the local API on port
 7287.
+
+
+**Combined Launch Commands:**
+
+```powershell
+Start-Process pwsh -ArgumentList '-NoExit', '-Command', 'dotnet run --project src\TaskMaster.Api --launch-profile https'
+Start-Process pwsh -ArgumentList '-NoExit', '-Command', 'npm run mobile:start'
+Start-Process pwsh -ArgumentList '-NoExit', '-Command', 'devtunnel host taskmaster-api'
+echo "Complete"
+```
 
 ### Sideload and launch
 

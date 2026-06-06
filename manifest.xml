@@ -265,8 +265,8 @@
                 </bt:LongStrings>
             </Resources>
             <WebApplicationInfo>
-                <Id>2921bc0b-4518-4547-b8ca-f937713688ec</Id>
-                <Resource>api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec</Resource>
+                <Id>3592bf52-46f6-4eb0-835c-4f961058de97</Id>
+                <Resource>api://taskmaster-ios-3000.use.devtunnels.ms/3592bf52-46f6-4eb0-835c-4f961058de97</Resource>
                 <Scopes>
                     <Scope>openid</Scope>
                     <Scope>profile</Scope>

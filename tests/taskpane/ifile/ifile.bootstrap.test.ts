@@ -39,6 +39,7 @@ describe("ifile bootstrap — resilient wiring", () => {
             acquireToken: () => Promise.reject(new Error("token denied")),
             loadLeaves: () => Promise.resolve(fixture),
             onSelect: vi.fn(),
+            showErrorDetail: false,
         });
 
         // Assert — a visible error row exists and the box is still responsive.
@@ -59,6 +60,7 @@ describe("ifile bootstrap — resilient wiring", () => {
             acquireToken: () => Promise.resolve("token-123"),
             loadLeaves: () => Promise.reject(new Error("load failed")),
             onSelect: vi.fn(),
+            showErrorDetail: false,
         });
 
         // Assert
@@ -68,8 +70,8 @@ describe("ifile bootstrap — resilient wiring", () => {
         expect(() => dom.searchInput.dispatchEvent(new Event("input"))).not.toThrow();
     });
 
-    it("renders the distinct sign-in message when token acquisition fails", async () => {
-        // Arrange — token acquisition rejects; the sign-in stage failed.
+    it("renders the bare sign-in message when token acquisition fails and showErrorDetail is false", async () => {
+        // Arrange — token acquisition rejects; the sign-in stage failed; detail suppressed (desktop).
         const dom = makeDom();
 
         // Act
@@ -79,12 +81,40 @@ describe("ifile bootstrap — resilient wiring", () => {
             acquireToken: () => Promise.reject(new Error("token denied")),
             loadLeaves: () => Promise.resolve(fixture),
             onSelect: vi.fn(),
+            showErrorDetail: false,
         });
 
-        // Assert — the error row carries the sign-in-stage message, not the connection message.
+        // Assert — the error row carries the bare sign-in-stage message, not the connection message,
+        // and no error detail is appended.
         const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
         expect(errorRow?.textContent).toBe(SIGN_IN_FAILURE_MESSAGE);
         expect(errorRow?.textContent).not.toBe(CONNECTION_FAILURE_MESSAGE);
+    });
+
+    it("appends the formatted error detail to the sign-in message when showErrorDetail is true", async () => {
+        // Arrange — token acquisition rejects on a mobile build (showErrorDetail true), so the
+        // underlying detail must be visible on the device error row.
+        const dom = makeDom();
+
+        // Act
+        await bootstrap({
+            dom,
+            presentation: "inline",
+            acquireToken: () =>
+                Promise.reject(new Error("This environment does not support NestedAppAuth (NAA) 1.1.")),
+            loadLeaves: () => Promise.resolve(fixture),
+            onSelect: vi.fn(),
+            showErrorDetail: true,
+        });
+
+        // Assert — the row still leads with the stage message and now contains the formatted detail.
+        const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
+        const text = errorRow?.textContent ?? "";
+        expect(text.startsWith(SIGN_IN_FAILURE_MESSAGE)).toBe(true);
+        expect(text).toContain(
+            "Error: This environment does not support NestedAppAuth (NAA) 1.1."
+        );
+        expect(text).not.toBe(SIGN_IN_FAILURE_MESSAGE);
     });
 
     it("renders the distinct connection message when the one-time load fails", async () => {
@@ -98,6 +128,7 @@ describe("ifile bootstrap — resilient wiring", () => {
             acquireToken: () => Promise.resolve("token-123"),
             loadLeaves: () => Promise.reject(new Error("load failed")),
             onSelect: vi.fn(),
+            showErrorDetail: false,
         });
 
         // Assert — the error row carries the connection-stage message, not the sign-in message.
@@ -121,6 +152,7 @@ describe("ifile bootstrap — resilient wiring", () => {
             acquireToken: () => Promise.resolve("token-123"),
             loadLeaves,
             onSelect: vi.fn(),
+            showErrorDetail: false,
         });
         dom.searchInput.value = "acme";
         dom.searchInput.dispatchEvent(new Event("input"));

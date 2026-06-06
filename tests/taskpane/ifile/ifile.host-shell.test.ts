@@ -10,6 +10,7 @@ import {
     CONFIGURATION_FAILURE_MESSAGE,
     SIGN_IN_FAILURE_MESSAGE,
 } from "../../../src/taskpane/ifile/ifile";
+import { formatBuildStamp } from "../../../src/taskpane/ifile/build-stamp";
 
 interface FakeOffice {
     auth: { getAccessToken: () => Promise<string> };
@@ -37,6 +38,24 @@ function installDom(): { searchInput: HTMLInputElement; resultsList: HTMLElement
     const searchInput = document.getElementById("ifile-search") as HTMLInputElement;
     const resultsList = document.getElementById("ifile-results") as HTMLElement;
     return { searchInput, resultsList };
+}
+
+/**
+ * Installs the host DOM including the optional `ifile-build-stamp` element so the build-stamp
+ * wiring in `runBootstrap` has a target to populate.
+ */
+function installDomWithBuildStamp(): {
+    searchInput: HTMLInputElement;
+    resultsList: HTMLElement;
+    buildStamp: HTMLElement;
+} {
+    document.body.innerHTML =
+        '<input id="ifile-search" /><div id="ifile-results"></div>' +
+        '<div id="ifile-build-stamp"></div>';
+    const searchInput = document.getElementById("ifile-search") as HTMLInputElement;
+    const resultsList = document.getElementById("ifile-results") as HTMLElement;
+    const buildStamp = document.getElementById("ifile-build-stamp") as HTMLElement;
+    return { searchInput, resultsList, buildStamp };
 }
 
 /** An injected NAA-acquirer factory whose acquirer resolves the given token (NAA-supported). */
@@ -94,8 +113,9 @@ describe("ifile runBootstrap host shell", () => {
         expect(() => dom.searchInput.dispatchEvent(new Event("input"))).not.toThrow();
     });
 
-    it("renders the distinct configuration message when the build URL guard rejects", async () => {
+    it("renders the configuration message with the appended error detail when the build URL guard rejects on mobile", async () => {
         // Arrange — a mobile build pointed at localhost trips the reachability/configuration guard.
+        // On a mobile build (__IS_MOBILE_BUILD__ true) the underlying detail is folded into the row.
         const dom = installDom();
         installOffice("Outlook", () => Promise.resolve("t"));
         vi.stubGlobal("__API_BASE_URL__", "https://localhost:3000");
@@ -105,9 +125,13 @@ describe("ifile runBootstrap host shell", () => {
         // Act
         await runBootstrap();
 
-        // Assert — the error row carries the configuration-stage message, not the generic message.
+        // Assert — the row leads with the configuration-stage message and contains the guard detail
+        // (the unreachable-loopback Error message), so the failure is readable on a device.
         const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
-        expect(errorRow?.textContent).toBe(CONFIGURATION_FAILURE_MESSAGE);
+        const text = errorRow?.textContent ?? "";
+        expect(text.startsWith(CONFIGURATION_FAILURE_MESSAGE)).toBe(true);
+        expect(text).toContain("loopback host");
+        expect(text).not.toBe(CONFIGURATION_FAILURE_MESSAGE);
     });
 
     it("loads folders and renders results on input for a reachable desktop build", async () => {
@@ -230,5 +254,69 @@ describe("ifile runBootstrap host shell", () => {
         expect(fetchMock).not.toHaveBeenCalled();
         dom.searchInput.value = "x";
         expect(() => dom.searchInput.dispatchEvent(new Event("input"))).not.toThrow();
+    });
+
+    it("appends the sign-in detail on a mobile build when NAA is unsupported", async () => {
+        // Arrange — a mobile build (__IS_MOBILE_BUILD__ true) wires showErrorDetail through the
+        // bootstrap seam, so the NAA-unsupported rejection detail must be visible on the device.
+        const dom = installDom();
+        installOffice("Outlook", () => Promise.resolve("unused"));
+        vi.stubGlobal("__API_BASE_URL__", "https://tunnel.example.dev");
+        vi.stubGlobal("__IS_MOBILE_BUILD__", true);
+        vi.spyOn(console, "error").mockImplementation(() => undefined);
+        const fetchMock = vi.fn();
+        vi.stubGlobal("fetch", fetchMock);
+
+        // Act
+        await runBootstrap(unsupportedAcquirer());
+
+        // Assert — the row leads with the sign-in-stage message and contains the NAA-unsupported
+        // detail; no backend call was made.
+        const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
+        const text = errorRow?.textContent ?? "";
+        expect(text.startsWith(SIGN_IN_FAILURE_MESSAGE)).toBe(true);
+        expect(text).toContain("does not support NestedAppAuth");
+        expect(text).not.toBe(SIGN_IN_FAILURE_MESSAGE);
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("populates the build-stamp element early, even when sign-in fails", async () => {
+        // Arrange — the stamp element is present; the injected acquirer rejects (sign-in fails) so
+        // the stamp must still be populated because the wiring runs before token acquisition.
+        const dom = installDomWithBuildStamp();
+        installOffice("Outlook", () => Promise.resolve("unused"));
+        vi.stubGlobal("__API_BASE_URL__", "https://localhost:3000");
+        vi.stubGlobal("__IS_MOBILE_BUILD__", false);
+        vi.stubGlobal("__BUILD_ID__", "2026-06-05T12:00:00.000Z");
+        vi.spyOn(console, "error").mockImplementation(() => undefined);
+        vi.stubGlobal("fetch", vi.fn());
+
+        // Act — sign-in fails, but the stamp is wired earlier in runBootstrap.
+        await runBootstrap(unsupportedAcquirer());
+
+        // Assert — the stamp carries the formatted build label.
+        expect(dom.buildStamp.textContent).toBe(formatBuildStamp("2026-06-05T12:00:00.000Z"));
+    });
+
+    it("does not throw when the build-stamp element is absent", async () => {
+        // Arrange — the default DOM has no #ifile-build-stamp element; runBootstrap must tolerate it.
+        installDom();
+        installOffice("Outlook", () => Promise.resolve("token-xyz"));
+        vi.stubGlobal("__API_BASE_URL__", "https://localhost:3000");
+        vi.stubGlobal("__IS_MOBILE_BUILD__", false);
+        vi.stubGlobal("__BUILD_ID__", "2026-06-05T12:00:00.000Z");
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: true,
+                status: 200,
+                statusText: "OK",
+                json: () => Promise.resolve({ folders: [] }),
+            })
+        );
+
+        // Act / Assert — the missing stamp element does not cause a throw and the shell completes.
+        await expect(runBootstrap(supportedAcquirer("token-xyz"))).resolves.toBeUndefined();
+        expect(document.getElementById("ifile-build-stamp")).toBeNull();
     });
 });

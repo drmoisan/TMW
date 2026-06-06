@@ -17,7 +17,7 @@ so they are recorded here for a human operator.
 ## Cue
 
 Perform these steps once, against the existing "Graph Mail Calendar PoC" app registration
-(client ID `2921bc0b-4518-4547-b8ca-f937713688ec`, tenant ID
+(client ID `3592bf52-46f6-4eb0-835c-4f961058de97`, tenant ID
 `d80d0ee6-3e37-43d7-9974-0ae662873253`), before on-device verification of iFile (PR #44) and
 before the NAA token path or backend OBO exchange is exercised against a real mailbox. The trigger
 is: the iFile branch is ready for on-device sign-off and the Entra app has not yet been configured
@@ -63,7 +63,7 @@ Location: App registrations > [app] > Expose an API > Set (Application ID URI).
 Value:
 
 ```
-api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec
+api://taskmaster-ios-3000.use.devtunnels.ms/3592bf52-46f6-4eb0-835c-4f961058de97
 ```
 
 Format: `api://<fully-qualified-add-in-host-domain>/<client-id>`. The domain MUST match the domain
@@ -88,7 +88,7 @@ Location: App registrations > [app] > Expose an API > Add a scope.
 | State | Enabled |
 
 Resulting full scope URI:
-`api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec/access_as_user`.
+`api://taskmaster-ios-3000.use.devtunnels.ms/3592bf52-46f6-4eb0-835c-4f961058de97/access_as_user`.
 
 Admin required: App Registration owner or tenant admin. This step is a manual portal action (the
 `az ad app` CLI has no clean single-command equivalent for the full scope definition).
@@ -166,7 +166,7 @@ client flow).
 The secret MUST NEVER be committed to the repository. Inject it via:
 
 ```powershell
-dotnet user-secrets set "AzureAd:ClientSecret" "<value>"
+dotnet user-secrets set "AzureAd:ClientSecret" "<value>" --id b3c44e17-fca8-45e2-a550-80f2d481007e
 ```
 
 for development, or via a secrets-management system (Azure Key Vault, environment variable, or
@@ -182,7 +182,7 @@ You have completed this correctly when all of the following hold:
 1. The SPA redirect `brk-multihub://taskmaster-ios-3000.use.devtunnels.ms` appears under
    Authentication > Single-page application.
 2. The Application ID URI is set to
-   `api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec` and matches
+   `api://taskmaster-ios-3000.use.devtunnels.ms/3592bf52-46f6-4eb0-835c-4f961058de97` and matches
    the manifest `webApplicationInfo.resource` / `<WebApplicationInfo><Resource>`.
 3. The `access_as_user` scope is Enabled and the Office umbrella client
    `ea5a67f6-b6f3-4338-b240-c655ddc3cc8e` is pre-authorized for it.

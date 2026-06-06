@@ -53,7 +53,7 @@ shell renders a visible sign-in-stage error rather than failing silently.
 Requirement — the Entra Application ID URI and the NAA SPA redirect host MUST match the active Dev
 Tunnel host used for the build. For the page host `taskmaster-ios-3000.use.devtunnels.ms`, the
 Application ID URI is
-`api://taskmaster-ios-3000.use.devtunnels.ms/2921bc0b-4518-4547-b8ca-f937713688ec` and the SPA
+`api://taskmaster-ios-3000.use.devtunnels.ms/3592bf52-46f6-4eb0-835c-4f961058de97` and the SPA
 redirect is `brk-multihub://taskmaster-ios-3000.use.devtunnels.ms`. If the build uses a different
 tunnel host, these MUST be updated to match (see `entra-app-sso-config.runbook.md`, HI-3) or NAA
 token acquisition will fail.
