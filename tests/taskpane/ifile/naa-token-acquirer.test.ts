@@ -55,6 +55,29 @@ describe("createNaaTokenAcquirer — NAA token path", () => {
         expect(instance.acquireTokenPopup).not.toHaveBeenCalled();
     });
 
+    it("passes the API On-Behalf-Of scope through to acquireTokenSilent and the popup fallback", async () => {
+        // Arrange — silent acquisition rejects interaction-required so both the silent request and
+        // the popup fallback are exercised, letting the test assert the scopes on each call.
+        const apiScope = "api://3592bf52-46f6-4eb0-835c-4f961058de97/access_as_user";
+        const instance: FakeMsalInstance = {
+            acquireTokenSilent: vi.fn(() => Promise.reject(new FakeInteractionRequiredAuthError())),
+            acquireTokenPopup: vi.fn(() => Promise.resolve({ accessToken: "popup-token" })),
+        };
+        const acquirer = await createNaaTokenAcquirer({
+            isNaaSupported: () => true,
+            createInstance: () => Promise.resolve(instance),
+            isInteractionRequired: (e) => e instanceof FakeInteractionRequiredAuthError,
+        });
+
+        // Act
+        await acquirer();
+
+        // Assert — the client requests the API's own exposed scope (audience = the API), not Graph
+        // scopes, so the backend can validate the token and run the OBO exchange.
+        expect(instance.acquireTokenSilent).toHaveBeenCalledWith({ scopes: [apiScope] });
+        expect(instance.acquireTokenPopup).toHaveBeenCalledWith({ scopes: [apiScope] });
+    });
+
     it("falls back to acquireTokenPopup on an interaction-required error", async () => {
         // Arrange — silent acquisition rejects with an interaction-required-shaped error.
         const instance: FakeMsalInstance = {

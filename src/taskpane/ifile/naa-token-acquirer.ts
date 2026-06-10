@@ -36,8 +36,16 @@ const CLIENT_ID = "3592bf52-46f6-4eb0-835c-4f961058de97";
  */
 const AUTHORITY = "https://login.microsoftonline.com/common";
 
-/** Delegated Graph scopes requested at runtime for the iFile flows (research section 3.4). */
-const TOKEN_SCOPES = ["Mail.ReadBasic", "Mail.ReadWrite", "Files.ReadWrite"];
+/**
+ * Scope requested at runtime. iFile uses the On-Behalf-Of pattern: the client requests the
+ * backend API's own exposed scope so MSAL returns a token whose audience is the API
+ * (api://3592bf52-46f6-4eb0-835c-4f961058de97). The API validates that token, then exchanges it
+ * via OBO for a Microsoft Graph token to perform the Mail/Files operations. Requesting Graph
+ * scopes here would instead yield a Graph-audience token that the API cannot validate (IDX10511).
+ * The Graph delegated permissions (Mail/Files) now live on the API app registration and are used
+ * by the server-side OBO flow, not requested by the client.
+ */
+const TOKEN_SCOPES = ["api://3592bf52-46f6-4eb0-835c-4f961058de97/access_as_user"];
 
 /**
  * Maximum number of MSAL log messages retained in the capture buffer. The NAA broker bridge surfaces
