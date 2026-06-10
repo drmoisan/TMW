@@ -114,8 +114,10 @@ export async function bootstrap(deps: BootstrapDeps): Promise<void> {
 
     // mountInline binds the input handler before the load settles and renders a visible error
     // state if the one-time load fails; it never throws out of a failed load. The connection-stage
-    // message is passed so a folder-fetch failure is distinct from a sign-in failure.
-    await mountInline(controller, deps.dom, CONNECTION_FAILURE_MESSAGE);
+    // message is passed so a folder-fetch failure is distinct from a sign-in failure, and
+    // showErrorDetail is forwarded so mobile builds surface the underlying error detail (mirroring
+    // the sign-in failure path above).
+    await mountInline(controller, deps.dom, CONNECTION_FAILURE_MESSAGE, deps.showErrorDetail);
 }
 
 /** Builds the primary {@link TokenAcquirer}. Injected so the host shell is testable without MSAL. */

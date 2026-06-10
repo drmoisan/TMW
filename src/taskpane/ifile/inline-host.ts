@@ -7,10 +7,14 @@
  * composition are identical to the desktop dialog presentation.
  */
 
-/* global HTMLInputElement, HTMLElement */
+/* global HTMLInputElement, HTMLElement, console */
 
 import type { FolderResult } from "./folder-result";
 import { IFileController } from "./ifile-controller";
+// Importing the standalone error-detail formatter does not create a circular dependency: this
+// module imports from `./sign-in-error-detail` (a pure leaf module), not from `./ifile.ts`, which
+// imports from this module.
+import { formatErrorDetail } from "./sign-in-error-detail";
 
 /** The DOM elements the inline host renders the controller into. */
 export interface InlineHostDom {
@@ -78,11 +82,20 @@ export const LOAD_FAILURE_MESSAGE =
  * `loadFailureMessage` is injected (default {@link LOAD_FAILURE_MESSAGE}) so the caller — the
  * Office-bound shell — can supply the connection-stage message without `inline-host.ts` importing
  * from `ifile.ts`, avoiding a circular dependency.
+ *
+ * `appendErrorDetail` is a host-neutral seam (default `false`) controlling whether the underlying
+ * caught error detail is appended to the visible failure row via {@link formatErrorDetail}. It is
+ * gated because a physical device running Outlook mobile has no attachable console, so the real
+ * failure detail must be folded into the visible row there; on desktop the bare message suffices.
+ * The host shell passes the mobile-build flag, so this module stays host-neutral and its direct
+ * callers (and existing tests) are unaffected by the default-off behavior. The failure is always
+ * logged via `console.error` regardless of this flag.
  */
 export async function mountInline(
     controller: IFileController,
     dom: InlineHostDom,
-    loadFailureMessage: string = LOAD_FAILURE_MESSAGE
+    loadFailureMessage: string = LOAD_FAILURE_MESSAGE,
+    appendErrorDetail = false
 ): Promise<void> {
     const update = (): void => {
         const results = controller.search(dom.searchInput.value);
@@ -100,7 +113,15 @@ export async function mountInline(
         await controller.open();
         // Re-render with the now-loaded leaves for the current input value.
         update();
-    } catch {
-        renderLoadError(dom, loadFailureMessage);
+    } catch (error: unknown) {
+        // The one-time folder load failed. Log the underlying error so the failure is recorded
+        // (mirroring the sign-in failure path), then render a visible error row. When detail
+        // surfacing is enabled (mobile builds), append the formatted detail so the real failure is
+        // readable on a device with no attachable console; otherwise render the bare message.
+        console.error("iFile inline host: one-time folder load failed", error);
+        const message = appendErrorDetail
+            ? `${loadFailureMessage} — ${formatErrorDetail(error)}`
+            : loadFailureMessage;
+        renderLoadError(dom, message);
     }
 }

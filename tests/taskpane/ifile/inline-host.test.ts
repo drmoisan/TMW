@@ -3,7 +3,7 @@
  * mountInline drive the shared controller and render rows without Office.js dialog calls.
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
     mountInline,
     renderLoadError,
@@ -54,6 +54,10 @@ describe("inline-host renderResults", () => {
 });
 
 describe("inline-host mountInline", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it("loads the folder list once and renders results on input", async () => {
         // Arrange
         const dom = makeDom();
@@ -74,6 +78,7 @@ describe("inline-host mountInline", () => {
 
     it("keeps the box responsive and shows a visible error state when the one-time load fails", async () => {
         // Arrange — a loader that rejects simulates a failed one-time folder load on device.
+        vi.spyOn(console, "error").mockImplementation(() => undefined);
         const dom = makeDom();
         const loader = vi.fn(() => Promise.reject(new Error("load failed")));
         const controller = new IFileController({ loadLeaves: loader, onSelect: vi.fn() });
@@ -95,6 +100,7 @@ describe("inline-host mountInline", () => {
 
     it("renders an error row that is distinct from a normal result row", async () => {
         // Arrange
+        vi.spyOn(console, "error").mockImplementation(() => undefined);
         const dom = makeDom();
         const controller = new IFileController({
             loadLeaves: () => Promise.reject(new Error("load failed")),
@@ -113,6 +119,7 @@ describe("inline-host mountInline", () => {
 
     it("renders the injected connection-stage message when the one-time load fails", async () => {
         // Arrange — a rejecting loader and an explicit connection-stage message from the caller.
+        vi.spyOn(console, "error").mockImplementation(() => undefined);
         const dom = makeDom();
         const connectionMessage = "iFile could not load your folders. Check your connection, then try again.";
         const controller = new IFileController({
@@ -132,6 +139,74 @@ describe("inline-host mountInline", () => {
         dom.searchInput.value = "acme";
         dom.searchInput.dispatchEvent(new Event("input"));
         expect(searchSpy).toHaveBeenCalledWith("acme");
+    });
+
+    it("appends the formatted error detail and logs when appendErrorDetail is true", async () => {
+        // Arrange — a rejecting loader on a mobile build (appendErrorDetail true) so the underlying
+        // failure detail must be folded into the visible row, and the failure must be logged.
+        const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        const dom = makeDom();
+        const connectionMessage = "iFile could not load your folders. Check your connection, then try again.";
+        const controller = new IFileController({
+            loadLeaves: () => Promise.reject(new Error("backend unreachable")),
+            onSelect: vi.fn(),
+        });
+
+        // Act — pass the connection-stage message and enable detail surfacing.
+        await mountInline(controller, dom, connectionMessage, true);
+
+        // Assert (a) the row leads with the stage message and contains the formatted detail.
+        const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
+        const text = errorRow?.textContent ?? "";
+        expect(text.startsWith(connectionMessage)).toBe(true);
+        expect(text).toContain(" — ");
+        expect(text).toContain("Error: backend unreachable");
+        expect(text).not.toBe(connectionMessage);
+
+        // Assert (b) the failure was logged.
+        expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it("renders the bare message and still logs when appendErrorDetail is false", async () => {
+        // Arrange — a rejecting loader with detail surfacing disabled (desktop / default).
+        const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        const dom = makeDom();
+        const connectionMessage = "iFile could not load your folders. Check your connection, then try again.";
+        const controller = new IFileController({
+            loadLeaves: () => Promise.reject(new Error("backend unreachable")),
+            onSelect: vi.fn(),
+        });
+
+        // Act — appendErrorDetail explicitly false.
+        await mountInline(controller, dom, connectionMessage, false);
+
+        // Assert (a) the row is the bare message with no appended detail separator.
+        const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
+        expect(errorRow?.textContent).toBe(connectionMessage);
+        expect(errorRow?.textContent).not.toContain(" — ");
+
+        // Assert (b) the failure is still logged even when detail is not surfaced.
+        expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it("renders the bare message when appendErrorDetail is omitted (default off)", async () => {
+        // Arrange — a rejecting loader and no appendErrorDetail argument; the default must be off.
+        const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        const dom = makeDom();
+        const connectionMessage = "iFile could not load your folders. Check your connection, then try again.";
+        const controller = new IFileController({
+            loadLeaves: () => Promise.reject(new Error("backend unreachable")),
+            onSelect: vi.fn(),
+        });
+
+        // Act — omit the fourth argument.
+        await mountInline(controller, dom, connectionMessage);
+
+        // Assert — bare message, no detail, and the failure is logged.
+        const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
+        expect(errorRow?.textContent).toBe(connectionMessage);
+        expect(errorRow?.textContent).not.toContain(" — ");
+        expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     it("renders results on input when the load succeeds with an injected message (no regression)", async () => {

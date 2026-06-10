@@ -6,7 +6,7 @@
  * binds the input handler and surfaces a visible error state rather than leaving the box inert.
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
     bootstrap,
     SIGN_IN_FAILURE_MESSAGE,
@@ -28,6 +28,15 @@ function makeDom(): { searchInput: HTMLInputElement; resultsList: HTMLDivElement
 }
 
 describe("ifile bootstrap — resilient wiring", () => {
+    beforeEach(() => {
+        // bootstrap and mountInline log failures via console.error; suppress and observe the spy.
+        vi.spyOn(console, "error").mockImplementation(() => undefined);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it("binds the input handler and surfaces a visible error when token acquisition fails", async () => {
         // Arrange — token acquisition rejects (SSO failure on device).
         const dom = makeDom();
@@ -135,6 +144,29 @@ describe("ifile bootstrap — resilient wiring", () => {
         const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
         expect(errorRow?.textContent).toBe(CONNECTION_FAILURE_MESSAGE);
         expect(errorRow?.textContent).not.toBe(SIGN_IN_FAILURE_MESSAGE);
+    });
+
+    it("appends the formatted error detail to the connection message when showErrorDetail is true", async () => {
+        // Arrange — token resolves but the folder load rejects on a mobile build (showErrorDetail
+        // true), so the underlying detail must be visible on the connection-stage error row.
+        const dom = makeDom();
+
+        // Act
+        await bootstrap({
+            dom,
+            presentation: "inline",
+            acquireToken: () => Promise.resolve("token-123"),
+            loadLeaves: () => Promise.reject(new Error("backend unreachable")),
+            onSelect: vi.fn(),
+            showErrorDetail: true,
+        });
+
+        // Assert — the row leads with the connection-stage message and now contains the detail.
+        const errorRow = dom.resultsList.querySelector("[data-ifile-error]");
+        const text = errorRow?.textContent ?? "";
+        expect(text.startsWith(CONNECTION_FAILURE_MESSAGE)).toBe(true);
+        expect(text).toContain("Error: backend unreachable");
+        expect(text).not.toBe(CONNECTION_FAILURE_MESSAGE);
     });
 
     it("renders results on input when token and load both succeed (positive path)", async () => {
